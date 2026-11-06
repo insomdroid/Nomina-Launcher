@@ -32,8 +32,6 @@ data class CurrentWeather(
     /** Reverse-geocoded locality ("Espoo"); null when no geocoder backend or no name resolves. */
     val city: String?,
     val fetchedAt: Long,
-    /** [city] came from the BigDataCloud fallback — dropped the moment the user turns it off. */
-    val cityFromNetwork: Boolean = false,
 )
 
 /** How old a reading may get while every refresh fails before it is dropped: morning weather is
@@ -62,29 +60,12 @@ class WeatherRepository @Inject constructor(
         context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
             context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
-    /** The network-place-name setting the current [weather] was resolved with. */
-    @Volatile private var resolvedWithNetworkPlaceNames = false
-
     /** The UI language ([Locale.getDefault] tag) the current [weather]'s place name was resolved in.
      *  An Android 13+ app-language switch recreates the activity but not this singleton: the
      *  30-minute freshness gate must not keep "London" on a screen that is now Finnish. */
     @Volatile private var resolvedLanguage: String? = null
 
-    /** The user's CURRENT consent to the BigDataCloud fallback. A fetch already running reads this,
-     *  not the value it started with, right before the request and again before publishing: a
-     *  consent withdrawn meanwhile must stop it. */
-    @Volatile private var networkConsent = false
-
-    /** [networkPlaceNames]: the user allowed the BigDataCloud place-name fallback. A changed setting
-     *  re-fetches at once; turning it off also drops a network-sourced name right away, whether or
-     *  not the new weather query succeeds. */
-    fun refresh(networkPlaceNames: Boolean) {
-        networkConsent = networkPlaceNames
-        if (!networkPlaceNames) {
-            _weather.value?.takeIf { it.cityFromNetwork }?.let {
-                _weather.value = it.copy(city = null, cityFromNetwork = false)
-            }
-        }
+    fun refresh() {
         if (!hasPermission()) {
             _weather.value = null
             return
@@ -98,27 +79,22 @@ class WeatherRepository @Inject constructor(
         val language = locale.toLanguageTag()
         if (cached != null &&
             System.currentTimeMillis() - cached.fetchedAt < REFRESH_INTERVAL_MS &&
-            networkPlaceNames == resolvedWithNetworkPlaceNames &&
             language == resolvedLanguage
         ) return
         if (!fetching.compareAndSet(false, true)) return
         scope.launch(Dispatchers.IO) {
             try {
                 val location = lastKnownLocation() ?: return@launch
-                // Rounded for the network query — ~1 km is all weather needs, and the exact fix
-                // never leaves the device. The LOCAL geocoder gets the exact fix (rounding cost
-                // real municipalities near borders); see cityName().
+                // The weather API needs only approximate coordinates; the local Geocoder receives
+                // the exact fix so municipal boundaries are not affected by rounding.
                 val exactLat = location.latitude
                 val exactLon = location.longitude
                 val lat = Math.round(exactLat * 100) / 100.0
                 val lon = Math.round(exactLon * 100) / 100.0
                 runCatching { fetch(lat, lon) }.getOrNull()?.let {
-                    val consent = networkConsent
-                    val place = resolveCity(exactLat, exactLon, lat, lon, consent, locale)
-                        ?.takeIf { p -> !p.fromNetwork || networkConsent }
-                    resolvedWithNetworkPlaceNames = consent
+                    val place = resolveCity(exactLat, exactLon, lat, lon, locale)
                     resolvedLanguage = language
-                    _weather.value = it.copy(city = place?.name, cityFromNetwork = place?.fromNetwork == true)
+                    _weather.value = it.copy(city = place?.name)
                 }
             } finally {
                 fetching.set(false)
@@ -179,13 +155,10 @@ class WeatherRepository @Inject constructor(
     private val placeNames = PlaceNameCache(CITY_CACHE_MAX_AGE_MS)
 
     private fun resolveCity(
-        exactLat: Double, exactLon: Double, roundedLat: Double, roundedLon: Double, networkPlaceNames: Boolean,
-        locale: Locale,
+        exactLat: Double, exactLon: Double, roundedLat: Double, roundedLon: Double, locale: Locale,
     ): PlaceName? = placeNames.resolve(
         areaKey = placeAreaKey(roundedLat, roundedLon, locale.toLanguageTag()),
         local = { cityName(exactLat, exactLon, locale) },
-        // Re-checked right before the request: the local geocoder may have taken a while.
-        network = if (networkPlaceNames) ({ if (networkConsent) networkCityName(roundedLat, roundedLon, locale) else null }) else null,
     )
 
     /** Locality via the platform Geocoder — works worldwide on devices with a geocoder backend
@@ -212,34 +185,6 @@ class WeatherRepository @Inject constructor(
         } catch (e: Exception) {
             Log.w(TAG, "Reverse geocoding failed: ${e.javaClass.simpleName}")
             null
-        }
-    }
-
-    /** Network reverse-geocode fallback for devices whose platform Geocoder has no usable backend
-     *  (the Samsung A40 symptom): BigDataCloud's keyless client API. Client-side calls with the
-     *  device's own current fix are exactly its permitted use. Sends only the SAME 2-decimal
-     *  rounded coordinates the weather query already sends — the exact fix never leaves the device.
-     *  Reached only when the user turned the setting on, at most once per 30-min weather refresh,
-     *  and only when the local geocoder failed. */
-    private fun networkCityName(roundedLat: Double, roundedLon: Double, locale: Locale): String? {
-        val url = URL(
-            "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=%.2f&longitude=%.2f&localityLanguage=%s"
-                .format(Locale.US, roundedLat, roundedLon, locale.language),
-        )
-        val connection = url.openConnection() as HttpURLConnection
-        return try {
-            connection.setRequestProperty("User-Agent", userAgent)
-            connection.connectTimeout = 10_000
-            connection.readTimeout = 10_000
-            val body = connection.inputStream.bufferedReader().use { it.readText() }
-            PlaceNameFallback.parseCity(body).also {
-                if (it == null) Log.d(TAG, "Network reverse geocoding found no usable name")
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Network reverse geocoding failed: ${e.javaClass.simpleName}")
-            null
-        } finally {
-            connection.disconnect()
         }
     }
 

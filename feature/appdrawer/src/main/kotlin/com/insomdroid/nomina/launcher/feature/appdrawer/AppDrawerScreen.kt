@@ -78,6 +78,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -619,7 +621,6 @@ private fun AppDrawerContent(
             }
             // One grid shape for every page — the Personal page (the idle drawer as before), the
             // Work page and the search results — so they all measure the same icon size.
-            val scrubberScope = rememberCoroutineScope()
             @Composable
             fun DrawerGrid(state: LazyGridState, bottomPadding: Dp, content: LazyGridScope.() -> Unit) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -646,20 +647,38 @@ private fun AppDrawerContent(
                                 .fillMaxHeight()
                                 .width(24.dp)
                                 .pointerInput(state, itemCount, scrubberTrackHeight) {
-                                    detectDragGestures(
-                                        onDragStart = { position ->
-                                            val index = (position.y / size.height.coerceAtLeast(1) * maxScroll)
-                                                .toInt().coerceIn(0, maxScroll)
-                                            scrubberScope.launch { state.scrollToItem(index) }
-                                        },
-                                        onDrag = { change, _ ->
-                                            change.consume()
-                                            val index = (change.position.y / size.height.coerceAtLeast(1) * maxScroll)
-                                                .toInt().coerceIn(0, maxScroll)
-                                            scrubberScope.launch { state.scrollToItem(index) }
-                                        },
-                                    )
+                                    coroutineScope {
+                                        // Keep only the latest finger position while one scroll
+                                        // request is being processed. A drag can emit many events
+                                        // per frame; launching scrollToItem for each one creates
+                                        // competing scroll mutations and a backlog of stale targets.
+                                        val targets = Channel<Int>(Channel.CONFLATED)
+                                        val scrollWorker = launch {
+                                            for (target in targets) {
+                                                state.scrollToItem(target)
+                                            }
+                                        }
+                                        try {
+                                            detectDragGestures(
+                                                onDragStart = { position ->
+                                                    val index = (position.y / size.height.coerceAtLeast(1) * maxScroll)
+                                                        .toInt().coerceIn(0, maxScroll)
+                                                    targets.trySend(index)
+                                                },
+                                                onDrag = { change, _ ->
+                                                    change.consume()
+                                                    val index = (change.position.y / size.height.coerceAtLeast(1) * maxScroll)
+                                                        .toInt().coerceIn(0, maxScroll)
+                                                    targets.trySend(index)
+                                                },
+                                            )
+                                        } finally {
+                                            targets.close()
+                                            scrollWorker.cancel()
+                                        }
+                                    }
                                 },
+
                             contentAlignment = Alignment.TopCenter,
                         ) {
                             Box(

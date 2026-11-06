@@ -438,8 +438,8 @@ class WidgetPinSizingTest {
     /** The top inset uses the larger of the native status bar and a display cutout. */
     @Test fun aTopCutoutAndTheStatusBarAreNotAddedTwice() {
         val settings = LauncherSettings(homeRows = 6)
-        val statusBar = HomeWindow(320f, 470f, statusBarDp = 24f)
-        val cutout = HomeWindow(320f, 470f, statusBarDp = 24f, cutoutDp = 40f, cutoutTopDp = 40f)
+        val statusBar = HomeWindow(320f, 470f, statusBarDp = 24f, navigationBarDp = 48f)
+        val cutout = HomeWindow(320f, 470f, statusBarDp = 24f, navigationBarDp = 48f, cutoutDp = 40f, cutoutTopDp = 40f)
 
         assertThat(lostToBars(settings, statusBar)).isWithin(0.01f).of(24f + 48f)
         assertThat(lostToBars(settings, cutout)).isWithin(0.01f).of(40f + 48f)

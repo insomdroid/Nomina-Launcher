@@ -214,7 +214,7 @@ fun SettingsScreen(
                         var x = spacing / 2f
                         while (x < size.width) {
                             drawCircle(
-                                color = palette.faint.copy(alpha = if (isSystemInDarkTheme()) 0.16f else 0.12f),
+                                color = palette.faint.copy(alpha = 0.13f),
                                 radius = radius,
                                 center = Offset(x, y),
                             )

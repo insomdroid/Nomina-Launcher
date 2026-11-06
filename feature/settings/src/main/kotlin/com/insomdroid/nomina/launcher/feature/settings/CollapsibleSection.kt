@@ -6,12 +6,14 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -21,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.drawCircle
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -33,10 +37,8 @@ import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 
 /**
- * A settings section that folds under its title (a Telegram request): the title row is a button
- * with a chevron that turns, and [content] shows only while the section is open. Which sections are
- * folded is the host's state ([collapsed], flipped through [onToggle]), kept in the settings so the
- * page opens the way it was left.
+ * A settings section that folds under its title. The expanded state remains owned by the settings
+ * model, so the page opens the way it was left.
  */
 @Composable
 internal fun CollapsibleSection(
@@ -47,20 +49,38 @@ internal fun CollapsibleSection(
 ) {
     val p = LocalExpressivePalette.current
     val state = stringResource(if (collapsed) R.string.settings_section_collapsed else R.string.settings_section_expanded)
-    // The old title's rhythm (26 dp above, 12 below) minus the row's own touch padding.
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 2.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .padding(top = 20.dp, bottom = 2.dp)
+            .clip(RoundedCornerShape(8.dp))
             .clickable(role = Role.Button) { onToggle(!collapsed) }
             .semantics { stateDescription = state }
             .padding(vertical = 10.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Canvas(modifier = Modifier.size(14.dp)) {
+            val dotRadius = 0.85.dp.toPx()
+            for (row in 0..2) {
+                for (column in 0..2) {
+                    drawCircle(
+                        color = p.dim,
+                        radius = dotRadius,
+                        center = Offset(
+                            x = (2.5f + column * 4.5f).dp.toPx(),
+                            y = (2.5f + row * 4.5f).dp.toPx(),
+                        ),
+                    )
+                }
+            }
+        }
         Text(
-            text = title, color = p.text, fontSize = 20.sp, fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.2).sp, modifier = Modifier.weight(1f),
+            text = title.uppercase(),
+            color = p.text,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.1.sp,
+            modifier = Modifier.weight(1f).padding(start = 10.dp),
         )
         val turn by animateFloatAsState(targetValue = if (collapsed) 0f else 180f, label = "chevron")
         Icon(

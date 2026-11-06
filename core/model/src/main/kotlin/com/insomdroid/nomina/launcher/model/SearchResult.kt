@@ -2,7 +2,7 @@ package com.insomdroid.nomina.model
 
 /**
  * One match from a search source. Kept free of Android `Intent` plumbing so it stays comparable and
- * JVM-testable; the UI builds the actual Intent from [Setting.action] / [Contact.lookupUri] / number.
+ * JVM-testable; the UI builds the actual Intent from [Setting.action].
  */
 sealed interface SearchResult {
     val id: String
@@ -16,25 +16,14 @@ sealed interface SearchResult {
         override val id: String get() = "setting:$key"
     }
 
-    data class Contact(
-        val name: String,
-        val lookupUri: String,
-        val number: String?,
-        val photoUri: String?,
-        val contactId: Long,
-    ) : SearchResult {
-        override val id: String get() = "contact:$contactId"
-    }
-
     data class Calculation(val expression: String, val result: String) : SearchResult {
         override val id: String get() = "calc"
     }
 }
 
-/** Search results grouped into the sections the drawer renders (top→bottom: calc, apps, settings, contacts). */
+/** Search results grouped into the sections the drawer renders (top→bottom: calc, apps, settings). */
 data class SearchResults(
     val calc: SearchResult.Calculation? = null,
     val apps: List<AppItem> = emptyList(),
     val settings: List<SearchResult.Setting> = emptyList(),
-    val contacts: List<SearchResult.Contact> = emptyList(),
 )

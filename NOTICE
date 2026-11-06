@@ -1,3 +1,21 @@
+Nomina
+Independent derivative project based on ARK-launcher.
+
+Base project:
+    ARK-launcher
+    https://github.com/jrs8205/ARK-launcher
+    Copyright 2026 ARK-launcher contributors
+    Licensed under the Apache License, Version 2.0.
+
+Nomina is maintained as a separate repository and is not affiliated with,
+sponsored by, or endorsed by the ARK-launcher authors. The original upstream
+LICENSE and NOTICE attributions are retained. Changes made in this repository
+are separate from the upstream project.
+
+------------------------------------------------------------------------------
+Original ARK-launcher notices retained from the upstream NOTICE file
+------------------------------------------------------------------------------
+
 ARK-launcher
 Copyright 2026 ARK-launcher contributors
 

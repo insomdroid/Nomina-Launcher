@@ -7,8 +7,6 @@
     <string name="settings_gestures">Gestes</string>
     <string name="settings_show_weather">Météo dans le widget</string>
     <string name="settings_weather_app">Toucher la météo ouvre</string>
-    <string name="settings_network_place_names">Nom du lieu via Internet</string>
-    <string name="settings_network_place_names_desc">Si le téléphone ne trouve pas lui-même le nom de votre ville, celui-ci est recherché auprès de BigDataCloud. Ce service reçoit votre position approximative.</string>
     <string name="settings_swipe_up_drawer">Balayer vers le haut → applications</string>
     <string name="settings_swipe_down_notif">Balayer vers le bas → notifications</string>
     <string name="settings_folder_swipe_first_app">Balayer vers le haut sur un dossier → sa première appli</string>
@@ -145,15 +143,11 @@
     <string name="settings_font_casual">Décontractée</string>
     <string name="settings_font_cursive">Manuscrite</string>
     <string name="settings_search">Recherche</string>
-    <string name="settings_search_contacts">Rechercher dans les contacts</string>
     <string name="settings_left_edge">Bord gauche</string>
     <string name="settings_left_edge_none">Aucune</string>
     <string name="settings_left_edge_pick">Choisir une application</string>
     <string name="settings_close">Fermer</string>
     <string name="settings_lock_desktop">Verrouiller la disposition</string>
-    <string name="settings_hide_status_bar">Masquer la barre d\'état système (plein écran)</string>
-    <string name="settings_status_bar">Barre d\'état (heure, batterie, signal)</string>
-    <string name="settings_status_bar_scrim">Assombrissement du fond de la barre d\'état</string>
     <string name="settings_frequent_apps">Les plus utilisées en haut</string>
     <string name="settings_hide_home_apps">Masquer les applis présentes sur l\'écran d\'accueil</string>
     <string name="settings_hide_home_apps_desc">Les applis placées sur l\'écran d\'accueil, dans ses dossiers ou dans le dock quittent la liste. La recherche les trouve toujours.</string>
@@ -184,15 +178,6 @@
     <string name="settings_widget_inset">Aligner les bords des widgets sur les icônes</string>
     <string name="settings_widget_inset_desc">Les widgets gardent la même marge latérale que les icônes au lieu de remplir leurs cellules bord à bord. Les widgets ayant leur propre marge peuvent paraître plus petits.</string>
     <string name="settings_sounds">Sons</string>
-    <string name="settings_lock_sounds">Sons de verrouillage et de déverrouillage</string>
-    <string name="settings_lock_sounds_desc">Un son de votre choix est joué quand le téléphone se verrouille et se déverrouille, sauf en mode silencieux ou vibreur, en mode Ne pas déranger ou pendant un appel.</string>
-    <string name="settings_lock_sound">Son de verrouillage</string>
-    <string name="settings_unlock_sound">Son de déverrouillage</string>
-    <string name="settings_sound_none">Aucun son</string>
-    <string name="settings_sound_from_files">Choisir un fichier</string>
-    <string name="settings_sound_from_phone">Sons du téléphone</string>
-    <string name="settings_sound_play">Lire</string>
-    <string name="settings_sound_picked">Son choisi</string>
     <string name="settings_phone_sound_settings">Paramètres sonores du téléphone</string>
     <string name="settings_phone_sound_settings_desc">Désactivez-y le son de verrouillage de l\'écran du téléphone pour que les deux ne soient pas joués en même temps.</string>
 </resources>

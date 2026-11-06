@@ -30,16 +30,12 @@ public, so every claim here can be verified:
   local database.
 - **Settings and preferences** — grid size, gestures, icon pack choice, hidden
   apps, custom app labels and icons, most-used ordering and similar; stored locally.
-- **Pictures and sounds you pick** — a gallery picture you choose as an app's or
-  a folder's icon is cut to icon size and saved as a small image in the launcher's
-  own storage; replacing or clearing the icon deletes the image, and it is not
+- **Pictures you pick** — a gallery picture you choose as an app's or a folder's
+  icon is cut to icon size and saved as a small image in the launcher's own
+  storage; replacing or clearing the icon deletes the image, and it is not
   included in backups (an icon chosen from an icon pack is, as a reference only).
-  For a lock or unlock sound the launcher keeps only a reference to the file or
-  system sound you picked, plus Android's permission to read it; both stay on
-  this phone and are excluded from backups.
 - **Notification data** — if you grant notification access, notifications are
-  read to show dots/badges, status-bar icons and the optional notification and
-  people widgets, including their open, reply and dismiss actions. Message text
+  read to show dots/badges and the optional notification and people widgets, including their open, reply and dismiss actions. Message text
   is processed in memory and never stored persistently or transmitted by the
   launcher; replies are sent through the originating app. People you pin and
   identity links you create are saved in settings, including any matched contact
@@ -69,9 +65,9 @@ the GitHub releases page in your browser — the app itself performs no update
 checks or downloads.
 
 The weather request carries no account information, cookies or advertising
-identifiers. Like all internet traffic they necessarily reveal your IP address
-to the server; the requests identify themselves with a generic
-`Nomina/<version>` User-Agent that contains no device details.
+identifiers. Like all internet traffic it necessarily reveals your IP address
+to the server; it identifies itself with a generic `Nomina/<version>` User-Agent
+that contains no device details.
 
 ## Permissions
 
@@ -105,4 +101,4 @@ accounts and collects no personal data at all.
 
 Changes to this policy are made in the public repository, where the full
 history is visible. Questions and reports:
-<https://github.com/jrs8205/Nomina/issues>.
+<https://github.com/insomdroid/Nomina-Launcher/issues>.

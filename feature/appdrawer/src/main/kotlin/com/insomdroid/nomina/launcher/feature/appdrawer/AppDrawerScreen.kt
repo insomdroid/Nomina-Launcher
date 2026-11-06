@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -622,6 +623,7 @@ private fun AppDrawerContent(
             @Composable
             fun DrawerGrid(state: LazyGridState, bottomPadding: Dp, content: LazyGridScope.() -> Unit) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
+                    val scrubberTrackHeight = maxHeight
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(columns),
                         state = state,
@@ -636,14 +638,14 @@ private fun AppDrawerContent(
                     if (showScrubber && !searching && itemCount > 1) {
                         val maxScroll = (itemCount - 1).coerceAtLeast(1)
                         val progress = (state.firstVisibleItemIndex.toFloat() / maxScroll).coerceIn(0f, 1f)
-                        val thumbHeight = (maxHeight * (state.layoutInfo.visibleItemsInfo.size.toFloat() / itemCount))
-                            .coerceIn(22.dp, maxHeight)
+                        val thumbHeight = (scrubberTrackHeight * (state.layoutInfo.visibleItemsInfo.size.toFloat() / itemCount))
+                            .coerceIn(22.dp, scrubberTrackHeight)
                         Box(
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
                                 .fillMaxHeight()
                                 .width(24.dp)
-                                .pointerInput(state, itemCount, maxHeight) {
+                                .pointerInput(state, itemCount, scrubberTrackHeight) {
                                     detectDragGestures(
                                         onDragStart = { position ->
                                             val index = (position.y / size.height.coerceAtLeast(1) * maxScroll)
@@ -662,7 +664,7 @@ private fun AppDrawerContent(
                         ) {
                             Box(
                                 Modifier
-                                    .offset(y = (maxHeight - thumbHeight) * progress)
+                                    .offset(y = (scrubberTrackHeight - thumbHeight) * progress)
                                     .width(3.dp)
                                     .height(thumbHeight)
                                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), RoundedCornerShape(4.dp)),

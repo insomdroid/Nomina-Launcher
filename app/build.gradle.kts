@@ -1,0 +1,134 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+plugins {
+    id("arkikeskus.android.application")
+    id("arkikeskus.android.compose")
+    id("arkikeskus.android.hilt")
+    alias(libs.plugins.baselineprofile)
+}
+
+// Release signing is read from keystore.properties (gitignored, never committed). On a machine
+// without the key file the release build is simply left unsigned instead of failing.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) FileInputStream(keystorePropsFile).use { load(it) }
+}
+
+android {
+    namespace = "org.arkikeskus.launcher"
+    testOptions.unitTests.isIncludeAndroidResources = true
+
+    defaultConfig {
+        manifestPlaceholders["appLabel"] = "@string/app_name"
+        applicationId = "org.arkikeskus.launcher"
+        versionCode = 69
+        versionName = "1.0.2"
+    }
+
+    // F-Droid rejects the Play "Dependency metadata" signing block AGP adds by default.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
+    // F-Droid's build server has no NDK, so AGP packages the native libraries untouched there.
+    // Keep them untouched here too, whatever NDK this machine has, so the release build is
+    // byte-identical on both sides.
+    packaging {
+        jniLibs {
+            keepDebugSymbols += "**/*.so"
+        }
+    }
+
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            // Installed beside the release build on the test phones: a distinct app-list label keeps
+            // its own (separate) home screen from being taken for the release one.
+            manifestPlaceholders["appLabel"] = "ARK-launcher debug"
+        }
+        release {
+            isMinifyEnabled = true
+            // The git-revision file AGP embeds would tie reproducibility to the exact checkout.
+            vcsInfo {
+                include = false
+            }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+    }
+}
+
+// The bench builds the baseline-profile plugin adds (nonMinifiedRelease for the recording,
+// benchmarkRelease for the benchmarks) install as their own package: a connected run installs the
+// launcher under test and uninstalls it afterwards, and on the test phones that must never be the
+// release launcher the owner uses (2026-11-05). The profile rules name classes, not the package.
+androidComponents {
+    finalizeDsl { extension ->
+        for (name in listOf("nonMinifiedRelease", "benchmarkRelease")) {
+            extension.buildTypes.findByName(name)?.apply {
+                applicationIdSuffix = ".bench"
+                manifestPlaceholders["appLabel"] = "ARK-launcher bench"
+            }
+        }
+    }
+}
+
+// The baseline profile is recorded on request only (`ANDROID_SERIAL=<emulator> ./gradlew :app:generateBaselineProfile`).
+// Every other build, F-Droid's included, reads the committed rules under src/main/generated/baselineProfiles/,
+// so the release APK stays reproducible.
+baselineProfile {
+    automaticGenerationDuringBuild = false
+    saveInSrc = true
+    mergeIntoMain = true
+    // The startup profile also orders the startup classes first in the dex.
+    dexLayoutOptimization = true
+}
+
+dependencies {
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:data"))
+    implementation(project(":core:launcher"))
+    implementation(project(":core:model"))
+    implementation(project(":core:ui"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:appdrawer"))
+    implementation(project(":feature:settings"))
+    implementation(project(":feature:backup"))
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.coil.compose)
+    implementation(libs.kotlinx.coroutines.android)
+    // Writes the shipped baseline profile into ART's profile store on the first start after an install.
+    implementation(libs.androidx.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
+    testImplementation(libs.junit)
+    testImplementation(libs.google.truth)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.datastore.preferences)
+    testImplementation(libs.kotlinx.coroutines.test)
+}

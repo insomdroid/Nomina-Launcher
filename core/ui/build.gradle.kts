@@ -1,3 +1,5 @@
+import java.util.Base64
+
 plugins {
     id("arkikeskus.android.library")
     id("arkikeskus.android.compose")
@@ -7,8 +9,6 @@ android {
     namespace = "com.insomdroid.nomina.ui"
     testOptions.unitTests.isIncludeAndroidResources = true
 }
-
-import java.util.Base64
 
 val generatedLauncherFontResources = layout.buildDirectory.dir("generated/res/launcherFonts")
 val generateLauncherFonts = tasks.register("generateLauncherFonts") {

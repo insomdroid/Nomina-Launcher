@@ -22,6 +22,10 @@ android {
         applicationId = "com.insomdroid.nomina"
         versionCode = 69
         versionName = "1.0.2"
+
+        // Nomina ships an English-only UI. Drop unused translated resources pulled in by
+        // AndroidX/Compose libraries while keeping the app's own locale configuration intact.
+        resourceConfigurations += listOf("en")
     }
 
     dependenciesInfo {

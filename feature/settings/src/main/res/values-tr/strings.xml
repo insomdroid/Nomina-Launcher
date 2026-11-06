@@ -7,8 +7,6 @@
     <string name="settings_gestures">Hareketler</string>
     <string name="settings_show_weather">Widget\'ta hava durumu</string>
     <string name="settings_weather_app">Hava durumuna dokunma şunu açar</string>
-    <string name="settings_network_place_names">İnternetten yer adı</string>
-    <string name="settings_network_place_names_desc">Telefon bulunduğunuz yerin adını kendi başına belirleyemezse ad, BigDataCloud hizmetinden alınır. Bu hizmete yaklaşık konumunuz gönderilir.</string>
     <string name="settings_swipe_up_drawer">Yukarı kaydırma → uygulamalar</string>
     <string name="settings_swipe_down_notif">Aşağı kaydırma → bildirimler</string>
     <string name="settings_folder_swipe_first_app">Klasörde yukarı kaydırma → ilk uygulaması</string>
@@ -142,15 +140,11 @@
     <string name="settings_font_casual">Rahat</string>
     <string name="settings_font_cursive">El yazısı</string>
     <string name="settings_search">Arama</string>
-    <string name="settings_search_contacts">Kişilerde ara</string>
     <string name="settings_left_edge">Sol kenar</string>
     <string name="settings_left_edge_none">Yok</string>
     <string name="settings_left_edge_pick">Uygulama seçin</string>
     <string name="settings_close">Kapat</string>
     <string name="settings_lock_desktop">Ana ekran düzenini kilitle</string>
-    <string name="settings_hide_status_bar">Sistem durum çubuğunu gizle (tam ekran)</string>
-    <string name="settings_status_bar">Durum çubuğu (saat, pil, sinyal)</string>
-    <string name="settings_status_bar_scrim">Durum çubuğu arka plan koyuluğu</string>
     <string name="settings_frequent_apps">En çok kullanılanlar üstte</string>
     <string name="settings_hide_home_apps">Ana ekrandaki uygulamaları gizle</string>
     <string name="settings_hide_home_apps_desc">Ana ekrana, klasörlerine veya dock\'a yerleştirilen uygulamalar listeden çıkar. Arama yine de bulur.</string>
@@ -181,15 +175,6 @@
     <string name="settings_widget_inset">Widget kenarlarını simgelerle hizala</string>
     <string name="settings_widget_inset_desc">Widget\'lar hücrelerini kenardan kenara doldurmak yerine uygulama simgeleriyle aynı yan boşluğu alır. Kendi boşluğu olan widget\'lar daha küçük görünebilir.</string>
     <string name="settings_sounds">Sesler</string>
-    <string name="settings_lock_sounds">Kilitleme ve kilit açma sesleri</string>
-    <string name="settings_lock_sounds_desc">Seçtiğiniz bir ses telefon kilitlendiğinde ve kilidi açıldığında çalar; sessiz veya titreşim modunda, Rahatsız Etmeyin modunda ya da arama sırasında çalmaz.</string>
-    <string name="settings_lock_sound">Kilitleme sesi</string>
-    <string name="settings_unlock_sound">Kilit açma sesi</string>
-    <string name="settings_sound_none">Ses yok</string>
-    <string name="settings_sound_from_files">Dosya seç</string>
-    <string name="settings_sound_from_phone">Telefonun sesleri</string>
-    <string name="settings_sound_play">Oynat</string>
-    <string name="settings_sound_picked">Seçilen ses</string>
     <string name="settings_phone_sound_settings">Telefonun ses ayarları</string>
     <string name="settings_phone_sound_settings_desc">Orada telefonun kendi ekran kilidi sesini kapatın, böylece iki ses aynı anda çalmaz.</string>
 </resources>

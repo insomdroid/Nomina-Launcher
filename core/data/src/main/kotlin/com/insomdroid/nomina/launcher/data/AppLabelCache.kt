@@ -18,7 +18,6 @@ class RoomAppLabelStore(private val dao: AppLabelDao) : AppLabelStore {
     override suspend fun write(locale: String, labels: Map<String, String>) {
         dao.replaceAll(
             labels.map { (key, label) -> AppLabelEntity(key = key, label = label, locale = locale) },
-            locale,
         )
     }
 }

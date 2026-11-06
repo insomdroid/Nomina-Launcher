@@ -77,11 +77,10 @@ jobs:
           text = gradle.read_text(encoding="utf-8")
 
           text, packaging_count = re.subn(
-              r"\n    // F-Droid's build server.*?\\n    }\\n\\n(?=    signingConfigs)",
-              "\n,
+              r"(?ms)^    // F-Droid's build server.*?(?=^    signingConfigs)",
+              "",
               text,
               count=1,
-              flags=re.S,
           )
           if packaging_count != 1:
               raise SystemExit("Expected native-library packaging block not found; refusing an unsafe Gradle edit.")
@@ -97,13 +96,13 @@ jobs:
                       "proguard-rules.pro",
                   )
               }
-              release {"""
+
+          """
           text, debug_count = re.subn(
-              r"        debug \{.*?        release \{",
+              r"(?ms)^        debug \{.*?(?=^        release \{)",
               debug_block,
               text,
               count=1,
-              flags=re.S,
           )
           if debug_count != 1:
               raise SystemExit("Expected debug build type block not found; refusing an unsafe Gradle edit.")

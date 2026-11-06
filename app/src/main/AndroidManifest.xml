@@ -5,6 +5,9 @@
     <!-- Open the notification shade with a swipe-down gesture. -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
 
+    <!-- Read the active network transport for the Smartspace status line. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <!-- Optional: contact matching for the People widget; requested at runtime. -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 

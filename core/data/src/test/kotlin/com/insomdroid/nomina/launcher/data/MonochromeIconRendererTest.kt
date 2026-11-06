@@ -55,6 +55,22 @@ class MonochromeIconRendererTest {
     }
 
     @Test
+    fun rejectsNearlySolidRoundArtworkAsAnUnreliableGlyph() {
+        val pixels = IntArray(100)
+        for (y in 0 until 10) {
+            for (x in 0 until 10) {
+                val dx = x - 4.5f
+                val dy = y - 4.5f
+                if (dx * dx + dy * dy <= 25f) {
+                    pixels[y * 10 + x] = 0xFFFFFFFF.toInt()
+                }
+            }
+        }
+
+        assertThat(hasUsableTransparentGlyph(pixels, 10, 10)).isFalse()
+    }
+
+    @Test
     fun oversizedGlyphIsReducedProportionallyAndCentered() {
         val bounds = GlyphBounds(left = 0, top = 5, right = 99, bottom = 94)
 
@@ -67,7 +83,7 @@ class MonochromeIconRendererTest {
     }
 
     @Test
-    fun alreadySmallGlyphIsNotEnlarged() {
+    fun alreadyComfortablySizedGlyphIsNotResized() {
         val bounds = GlyphBounds(left = 20, top = 20, right = 79, bottom = 79)
 
         val destination = fitGlyphBounds(bounds, width = 100, height = 100)
@@ -76,6 +92,18 @@ class MonochromeIconRendererTest {
         assertThat(destination.height).isWithin(0.01f).of(60f)
         assertThat(destination.left).isWithin(0.01f).of(20f)
         assertThat(destination.top).isWithin(0.01f).of(20f)
+    }
+
+    @Test
+    fun verySmallGlyphIsEnlargedToTheMinimumVisualSize() {
+        val bounds = GlyphBounds(left = 45, top = 45, right = 54, bottom = 54)
+
+        val destination = fitGlyphBounds(bounds, width = 100, height = 100)
+
+        assertThat(destination.width).isWithin(0.01f).of(56f)
+        assertThat(destination.height).isWithin(0.01f).of(56f)
+        assertThat(destination.left).isWithin(0.01f).of(22f)
+        assertThat(destination.top).isWithin(0.01f).of(22f)
     }
 
     @Test

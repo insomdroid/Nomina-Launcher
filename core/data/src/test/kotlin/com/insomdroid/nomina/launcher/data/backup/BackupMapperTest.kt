@@ -123,17 +123,15 @@ class BackupMapperTest {
     }
 
     @Test
-    fun toEntities_keeps_a_notifications_builtin_row() {
+    fun toEntities_skips_retired_builtins_from_legacy_backups() {
         val items = listOf(
             BackupItem(1, -1, null, "", "", true, null, 0, 0, 0, spanX = 4, spanY = 1, builtinType = "notifications"),
+            BackupItem(2, -1, null, "", "", true, null, 0, 0, 1, spanX = 1, spanY = 1, builtinType = "battery"),
+            BackupItem(3, -1, null, "", "", true, null, 0, 0, 2, spanX = 4, spanY = 2, builtinType = "people"),
         )
         val mapping = toEntities(items)
-        assertThat(mapping.skipped).isEqualTo(0)
-        val e = mapping.entities.single()
-        assertThat(e.builtinType).isEqualTo("notifications")
-        assertThat(e.spanX).isEqualTo(4)
-        assertThat(e.spanY).isEqualTo(1)
-        assertThat(e.appWidgetId).isNull()
+        assertThat(mapping.entities).isEmpty()
+        assertThat(mapping.skipped).isEqualTo(3)
     }
 
     @Test
@@ -160,18 +158,6 @@ class BackupMapperTest {
         val mapping = toEntities(items, installedAppKeys = setOf("com.a/A"), installedPackages = setOf("com.a"))
         assertThat(mapping.entities.map { it.id }).containsExactly(5L)
         assertThat(mapping.skipped).isEqualTo(4)
-    }
-
-    @Test
-    fun toEntities_keeps_a_battery_builtin_row() {
-        val items = listOf(
-            BackupItem(1, -1, null, "", "", true, null, 0, 0, 0, spanX = 1, spanY = 1, builtinType = "battery"),
-        )
-        val mapping = toEntities(items)
-        assertThat(mapping.skipped).isEqualTo(0)
-        val e = mapping.entities.single()
-        assertThat(e.builtinType).isEqualTo("battery")
-        assertThat(e.spanX).isEqualTo(1)
     }
 
     @Test
@@ -411,10 +397,11 @@ class BackupMapperTest {
         val items = listOf(
             BackupItem(1, -1, null, "", "", true, null, 0, 0, 0, builtinType = "evil"),
             BackupItem(2, -1, null, "", "", true, null, 0, 1, 0, widgetProvider = "no-slash"),
-            BackupItem(3, -1, null, "", "", true, null, 0, 2, 0, spanX = 2, builtinType = "notifications"),
+            BackupItem(3, -1, null, "", "", true, null, 0, 2, 0, spanX = 2, builtinType = "smartspace"),
         )
         val mapping = toEntities(items, installedPackages = setOf("no-slash"))
         assertThat(mapping.entities.map { it.id }).containsExactly(3L)
+        assertThat(mapping.entities.single().builtinType).isEqualTo("smartspace")
         assertThat(mapping.skipped).isEqualTo(2)
     }
 

@@ -18,12 +18,11 @@ import com.insomdroid.nomina.model.IconEpochs
 import com.insomdroid.nomina.model.drawerSurface
 import javax.inject.Inject
 
-/** ARK's own status bar is on, with its scrim at [scrimOpacity]; the system bar is hidden on home; the app
- *  drawer paints [drawerSurface] over what is behind it (a see-through drawer leaves the wallpaper behind the bars). */
+/** The app drawer's surface and wallpaper determine the native system-bar glyph contrast. */
 data class StatusBarSettings(
     val ownBarShown: Boolean = false,
     val systemBarHidden: Boolean = false,
-    val scrimOpacity: Float = 0.6f,
+    val scrimOpacity: Float = 0f,
     /** What the drawer paints and how much of it shows: its lightness, weighted by the opacity, decides the glyphs. */
     val drawerSurface: DrawerSurface = DrawerSurface(tint = null, paint = null, opacity = 1f),
     /** The user's own picture behind the drawer, or null without one: with a picture it is what a see-through drawer
@@ -60,13 +59,10 @@ class LauncherShellViewModel @Inject constructor(
 
     val iconEpochs: StateFlow<IconEpochs> = launcherAppsSource.iconEpochs
 
-    /** The status-bar settings the system bars' glyph colour depends on (see SystemBarContrast). */
+    /** The drawer surface used to keep native system-bar glyphs readable (see SystemBarContrast). */
     val statusBars: StateFlow<StatusBarSettings> = settingsRepository.settings
         .combine(drawerWallpaper.current) { it, picture ->
             StatusBarSettings(
-                ownBarShown = it.showStatusBar,
-                systemBarHidden = it.hideSystemStatusBar,
-                scrimOpacity = it.statusBarScrimOpacity,
                 drawerSurface = drawerSurface(it.drawerBackgroundColor, it.drawerBackgroundOpacity, picture != null, it.drawerPictureDim),
                 drawerPicture = picture,
             )

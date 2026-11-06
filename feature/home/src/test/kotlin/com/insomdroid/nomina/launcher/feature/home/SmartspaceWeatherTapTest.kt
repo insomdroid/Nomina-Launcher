@@ -62,7 +62,7 @@ class SmartspaceWeatherTapTest {
         compose.waitForIdle()
     }
 
-    private fun weatherLine() = compose.onNode(hasText("12°", substring = true))
+    private fun weatherLine() = compose.onNode(hasText("Clear", substring = true))
 
     @Test fun theSpaciousWeatherRowOpensTheChosenApp() {
         show(state(weatherApp), height = 280)

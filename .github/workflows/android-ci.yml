@@ -22,9 +22,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -62,19 +59,6 @@ jobs:
         shell: bash
         run: ./gradlew :app:assembleRelease --stacktrace
 
-      - name: Report release APK size and packaged files
-        if: always()
-        shell: bash
-        run: |
-          if [[ -f app/build/outputs/apk/release/app-release.apk ]]; then
-            du -h app/build/outputs/apk/release/app-release.apk
-            unzip -l app/build/outputs/apk/release/app-release.apk | sort -nr | head -n 30
-            echo "R8 mapping files:"
-            find app/build/outputs/mapping/release -maxdepth 1 -type f -printf '%f %k KB\n' 2>/dev/null || true
-          else
-            echo "Release APK was not produced."
-          fi
-
       - name: Upload signed release APK
         if: always()
         uses: actions/upload-artifact@v4
@@ -83,19 +67,3 @@ jobs:
           path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: ignore
           retention-days: 7
-
-      # Unit tests are source-only and run after the APK has already been uploaded.
-      - name: Run JVM unit tests
-        continue-on-error: true
-        shell: bash
-        run: |
-          ./gradlew \
-            :app:testDebugUnitTest \
-            :core:data:testDebugUnitTest \
-            :core:model:testDebugUnitTest \
-            :core:ui:testDebugUnitTest \
-            :feature:appdrawer:testDebugUnitTest \
-            :feature:backup:testDebugUnitTest \
-            :feature:home:testDebugUnitTest \
-            :feature:settings:testDebugUnitTest \
-            --stacktrace

@@ -21,20 +21,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -46,19 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.ParentDataModifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,10 +66,8 @@ import com.insomdroid.nomina.data.smartspace.CalendarEvent
 import com.insomdroid.nomina.data.smartspace.CalendarRepository
 import com.insomdroid.nomina.data.smartspace.CurrentWeather
 import com.insomdroid.nomina.data.smartspace.NextEventPicker
-import com.insomdroid.nomina.data.smartspace.WeatherCodes
 import com.insomdroid.nomina.data.smartspace.WeatherRepository
 import com.insomdroid.nomina.model.AppItem
-import kotlin.math.roundToInt
 import java.util.Date
 import javax.inject.Inject
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
@@ -176,9 +156,8 @@ internal data class SmartspaceState(
 )
 
 /**
- * The built-in smartspace widget: a large clock (12/24 h from the SYSTEM setting), the localized
- * date, and the ongoing-or-next calendar event within 7 days. Taps open the system clock app, the
- * calendar's day view, and the event itself. The v2 weather slot goes beside the date row.
+ * The built-in smartspace widget: three compact information rows for local date/time, the next
+ * agenda item and weather condition, then battery and network status.
  */
 @Composable
 fun SmartspaceWidget(
@@ -286,7 +265,7 @@ internal fun SmartspaceContent(
     val weatherText = when {
         !state.showWeather -> null
         !state.hasLocationPermission -> "Location needed"
-        state.weather != null -> "${WeatherCodes.emoji(state.weather.weatherCode)} ${weatherCondition(state.weather.weatherCode)}"
+        state.weather != null -> weatherCondition(state.weather.weatherCode)
         else -> "Weather unavailable"
     }
     val weatherAction: (() -> Unit)? = when {
@@ -300,7 +279,7 @@ internal fun SmartspaceContent(
     val noIndication = remember { MutableInteractionSource() }
     val technicalStyle = TextStyle(
         fontFamily = launcherTechnicalFontFamily(),
-        fontSize = 13.sp,
+        fontSize = 10.sp,
         color = ink,
     )
 
@@ -320,7 +299,7 @@ internal fun SmartspaceContent(
             Text(
                 text = dateTimeText,
                 color = ink,
-                style = themedTextStyle(technicalStyle.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium)),
+                style = themedTextStyle(technicalStyle.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium)),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -469,123 +448,28 @@ private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
     return status
 }
 
-/** WCAG 2.5.5 target size: a tappable line grows to at least this height when the footprint has room. */
-internal val TOUCH_TARGET = 44.dp
-
-/**
- * The clock and the lines under it, stacked and centred like a Column, with the lines' heights
- * budgeted from the room the footprint leaves after the clock: every line keeps at least its
- * natural height (a two-line event stays two lines), and the room left after that raises the
- * shortest lines first, all of them to the same level at most [TOUCH_TARGET] tall. Natural heights
- * that do not fit are cut to the room left, top down, so the card never draws past its footprint.
- * The first child is the clock, always at its natural height; a line's [lineGap] is the space
- * above it, outside its hit area and outside the budget.
- */
-@Composable
-private fun BudgetedLines(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
-    Layout(content = content, modifier = modifier) { measurables, constraints ->
-        val width = constraints.maxWidth
-        val childConstraints = Constraints(minWidth = constraints.minWidth, maxWidth = width)
-        val clock = measurables.first().measure(childConstraints)
-        val lines = measurables.drop(1)
-        val gaps = lines.map { ((it.parentData as? LineGap)?.gap ?: 0.dp).roundToPx() }
-        val natural = lines.map { it.minIntrinsicHeight(width) }
-        val room = if (constraints.hasBoundedHeight) constraints.maxHeight - clock.height - gaps.sum() else 0
-        val heights = if (constraints.hasBoundedHeight && natural.sum() > room) {
-            // More content than footprint (a tight footprint with a huge font): the lines are cut to
-            // the room left, top down, so nothing draws over the grid row below the widget.
-            var left = room
-            natural.map { h -> h.coerceAtMost(left.coerceAtLeast(0)).also { left -= it } }
-        } else {
-            budgetedLineHeights(natural, room, TOUCH_TARGET.roundToPx())
-        }
-        val placeables = lines.mapIndexed { i, line ->
-            line.measure(childConstraints.copy(minHeight = heights[i], maxHeight = heights[i]))
-        }
-        val layoutWidth = (placeables + clock).maxOf { it.width }.coerceIn(constraints.minWidth, constraints.maxWidth)
-        val layoutHeight = (clock.height + gaps.sum() + heights.sum()).coerceIn(constraints.minHeight, constraints.maxHeight)
-        layout(layoutWidth, layoutHeight) {
-            var y = 0
-            clock.placeRelative((layoutWidth - clock.width) / 2, y)
-            y += clock.height
-            placeables.forEachIndexed { i, p ->
-                y += gaps[i]
-                p.placeRelative((layoutWidth - p.width) / 2, y)
-                y += p.height
-            }
-        }
-    }
-}
-
-/**
- * The heights of lines with [natural] content heights sharing [room] px: each at least natural,
- * the leftover raising the shortest lines first to one common level, capped at [target].
- */
-internal fun budgetedLineHeights(natural: List<Int>, room: Int, target: Int): List<Int> {
-    if (natural.isEmpty()) return natural
-    val sorted = natural.sorted()
-    var level = 0
-    var above = sorted.sum() // the natural heights of the lines still taller than the level
-    for (k in 1..sorted.size) {
-        above -= sorted[k - 1]
-        val candidate = (room - above) / k
-        if (candidate < sorted[k - 1]) break
-        level = candidate
-    }
-    level = level.coerceAtMost(target)
-    return natural.map { maxOf(it, level) }
-}
-
-/** The space above a line in [BudgetedLines]: outside its hit area and outside the budget. */
-private fun Modifier.lineGap(gap: Dp): Modifier = this.then(LineGap(gap))
-
-private data class LineGap(val gap: Dp) : ParentDataModifier {
-    override fun Density.modifyParentData(parentData: Any?): Any = this@LineGap
-}
-
-/**
- * A tappable line of the widget. Its hit area is at least [minHeight] tall (or, with [fillHeight],
- * as tall as its parent lets it be) with the content centred ([alignment]) in it and, with
- * [fillWidth], as wide as the card, so a small label is as easy to hit as a button. Without
- * [onTap] it is plain content with no click action. [ripple] keeps the default indication (the
- * short layout on its surface); the wallpaper layouts pass their shared no-indication
- * [interactionSource] instead.
- */
+/** A compact tappable text row; without [onTap] it remains plain text. */
 @Composable
 private fun TapTarget(
     onTap: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    minHeight: Dp = 0.dp,
     fillWidth: Boolean = true,
-    fillHeight: Boolean = false,
     alignment: Alignment = Alignment.Center,
-    ripple: Boolean = false,
     interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit,
 ) {
     Box(
         modifier = modifier
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
-            .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
-            .heightIn(min = minHeight)
             .then(
-                when {
-                    onTap == null -> Modifier
-                    ripple -> Modifier.clickable(onClick = onTap)
-                    else -> Modifier.clickable(interactionSource = interactionSource, indication = null, onClick = onTap)
-                },
+                if (onTap == null) Modifier
+                else Modifier.clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onTap,
+                ),
             ),
         contentAlignment = alignment,
     ) { content() }
 }
 
-/** The separator between the merged middle-row parts (compact mode). */
-@Composable
-private fun MiddleDot(scale: Float, shadow: Shadow) {
-    Text(
-        text = "·",
-        color = widgetContentColor().copy(alpha = 0.8f),
-        style = themedTextStyle(TextStyle(fontSize = (15 * scale).sp, shadow = shadow)),
-        modifier = Modifier.padding(horizontal = (5 * scale).dp),
-    )
-}

@@ -75,15 +75,11 @@ private val AURORA_AMBER = Color(0xFFB5530F)
 /**
  * First-run intro shown once on a fresh install, over the whole home screen: welcome +
  * set-as-default, the core gestures, and a centralized permission step. [onFinish] fires on
- * "Valmis" and on "Ohita" (either way it is never shown again); [onContactsGranted] lets the
- * caller flip the contact-search setting on when READ_CONTACTS is granted here, and
- * [onPhoneGranted] lets it restart the telephony callbacks so the signal label appears right away.
+ * "Valmis" and on "Ohita" (either way it is never shown again).
  */
 @Composable
 fun OnboardingFlow(
     onFinish: () -> Unit,
-    onContactsGranted: () -> Unit,
-    onPhoneGranted: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var page by rememberSaveable { mutableIntStateOf(0) }
@@ -126,7 +122,7 @@ fun OnboardingFlow(
                 when (p) {
                     0 -> WelcomePage()
                     1 -> GesturesPage()
-                    else -> PermissionsPage(onContactsGranted, onPhoneGranted)
+                    else -> PermissionsPage()
                 }
             }
             Row(
@@ -308,18 +304,16 @@ private fun granted(context: Context, permission: String): Boolean =
     context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
 @Composable
-private fun PermissionsPage(onContactsGranted: () -> Unit, onPhoneGranted: () -> Unit) {
+private fun PermissionsPage() {
     val context = LocalContext.current
     var notifAccess by remember { mutableStateOf(hasNotificationAccess(context)) }
     var calendar by remember { mutableStateOf(granted(context, Manifest.permission.READ_CALENDAR)) }
     var contacts by remember { mutableStateOf(granted(context, Manifest.permission.READ_CONTACTS)) }
-    var phone by remember { mutableStateOf(granted(context, Manifest.permission.READ_PHONE_STATE)) }
     var location by remember { mutableStateOf(granted(context, Manifest.permission.ACCESS_COARSE_LOCATION)) }
     fun refresh() {
         notifAccess = hasNotificationAccess(context)
         calendar = granted(context, Manifest.permission.READ_CALENDAR)
         contacts = granted(context, Manifest.permission.READ_CONTACTS)
-        phone = granted(context, Manifest.permission.READ_PHONE_STATE)
         location = granted(context, Manifest.permission.ACCESS_COARSE_LOCATION)
     }
     LifecycleResumeEffect(Unit) {
@@ -342,8 +336,6 @@ private fun PermissionsPage(onContactsGranted: () -> Unit, onPhoneGranted: () ->
     val permissionsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { result ->
-        if (result[Manifest.permission.READ_CONTACTS] == true) onContactsGranted()
-        if (result[Manifest.permission.READ_PHONE_STATE] == true) onPhoneGranted()
         refresh()
         if (openNotifAfterChain) {
             openNotifAfterChain = false
@@ -386,26 +378,19 @@ private fun PermissionsPage(onContactsGranted: () -> Unit, onPhoneGranted: () ->
             onClick = { permissionsLauncher.launch(arrayOf(Manifest.permission.READ_CONTACTS)) },
         )
         PermissionRow(
-            title = stringResource(R.string.onboarding_perm_phone),
-            description = stringResource(R.string.onboarding_perm_phone_desc),
-            granted = phone,
-            onClick = { permissionsLauncher.launch(arrayOf(Manifest.permission.READ_PHONE_STATE)) },
-        )
-        PermissionRow(
             title = stringResource(R.string.onboarding_perm_location),
             description = stringResource(R.string.onboarding_perm_location_desc),
             granted = location,
             onClick = { permissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)) },
         )
         Spacer(Modifier.height(20.dp))
-        if (!(calendar && contacts && phone && location && notifAccess)) {
+        if (!(calendar && contacts && location && notifAccess)) {
             Button(
                 onClick = {
                     openNotifAfterChain = true
                     val perms = arrayOf(
                         Manifest.permission.READ_CALENDAR,
                         Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.READ_PHONE_STATE,
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                     )
                     permissionsLauncher.launch(perms)

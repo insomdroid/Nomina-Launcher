@@ -38,14 +38,14 @@ class WindowThemesTest {
     }
 
     @Test fun theSettingsWindowStaysOpaque() {
-        assertThat(windowIsTranslucent(R.style.Theme_ArkikeskusLauncher)).isFalse()
+        assertThat(windowIsTranslucent(R.style.Theme_Nomina)).isFalse()
     }
 
     @Test fun theHomeWindowIsTranslucentForTheDrawerBlur() {
-        assertThat(windowIsTranslucent(R.style.Theme_ArkikeskusLauncher_Home)).isTrue()
+        assertThat(windowIsTranslucent(R.style.Theme_Nomina_Home)).isTrue()
     }
 
     @Test fun theSplashHandsOffToTheHomeTheme() {
-        assertThat(postSplashTheme(R.style.Theme_ArkikeskusLauncher_Starting)).isEqualTo(R.style.Theme_ArkikeskusLauncher_Home)
+        assertThat(postSplashTheme(R.style.Theme_Nomina_Starting)).isEqualTo(R.style.Theme_Nomina_Home)
     }
 }

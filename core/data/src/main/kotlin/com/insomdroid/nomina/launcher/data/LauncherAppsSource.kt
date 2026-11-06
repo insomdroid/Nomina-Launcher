@@ -459,11 +459,8 @@ class LauncherAppsSource @Inject constructor(
             glyph = glyph,
             tint = fg,
             resources = context.resources,
-        )
-        if (rendered != null) {
-            return AdaptiveIconDrawable(ColorDrawable(bg), rendered)
-        }
-        return MonochromeIconRenderer.renderGrayscaleFallback(icon, context.resources)
+        ) ?: return null
+        return AdaptiveIconDrawable(ColorDrawable(bg), rendered)
     }
 
     /** Neutral monochrome surfaces that follow the system light/dark appearance. */

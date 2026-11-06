@@ -8,7 +8,7 @@ import com.insomdroid.nomina.model.LauncherSettings
 import org.junit.Test
 
 /**
- * The launcher's font (a Telegram request after 0.9.9): six families Android ships, one per settings
+ * The launcher's font (a Telegram request after 0.9.9): bundled and system families, one per settings
  * key, the default sans for anything unknown; and the theme's typography takes the family in every
  * style, so a text that names no family inherits it.
  */
@@ -17,11 +17,12 @@ class LauncherFontsTest {
     @Test fun everyKeyHasItsOwnFamilyAndUnknownIsTheDefault() {
         val families = LauncherSettings.FONTS.map { launcherFontFamily(it) }
         assertThat(families.toSet()).hasSize(LauncherSettings.FONTS.size)
-        assertThat(launcherFontFamily(LauncherSettings.FONT_DEFAULT)).isEqualTo(FontFamily.Default)
+        assertThat(launcherFontFamily(LauncherSettings.FONT_DEFAULT)).isNotEqualTo(FontFamily.Default)
+        assertThat(launcherFontFamily(LauncherSettings.FONT_GEIST_MONO)).isNotEqualTo(FontFamily.Default)
         assertThat(launcherFontFamily(LauncherSettings.FONT_SERIF)).isEqualTo(FontFamily.Serif)
         assertThat(launcherFontFamily(LauncherSettings.FONT_MONOSPACE)).isEqualTo(FontFamily.Monospace)
         assertThat(launcherFontFamily(LauncherSettings.FONT_CURSIVE)).isEqualTo(FontFamily.Cursive)
-        assertThat(launcherFontFamily("comic")).isEqualTo(FontFamily.Default)
+        assertThat(launcherFontFamily("comic")).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
     }
 
     @Test fun theTypographyTakesTheFamilyInEveryStyle() {

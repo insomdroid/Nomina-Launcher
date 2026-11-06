@@ -63,10 +63,11 @@ internal object MonochromeIconRenderer {
             )
 
             if (!hasUsableTransparentGlyph(sourcePixels, ICON_RENDER_SIZE, ICON_RENDER_SIZE)) {
-                return null
+                return renderGrayscaleFallback(glyph, resources)
             }
 
-            val bounds = alphaBounds(sourcePixels, ICON_RENDER_SIZE, ICON_RENDER_SIZE) ?: return null
+            val bounds = alphaBounds(sourcePixels, ICON_RENDER_SIZE, ICON_RENDER_SIZE)
+                ?: return renderGrayscaleFallback(glyph, resources)
             val destination = fitGlyphBounds(bounds, ICON_RENDER_SIZE, ICON_RENDER_SIZE)
             val output = Bitmap.createBitmap(
                 ICON_RENDER_SIZE,

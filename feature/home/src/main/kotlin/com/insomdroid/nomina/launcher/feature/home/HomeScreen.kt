@@ -8,6 +8,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -66,11 +74,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import android.provider.MediaStore
+import android.net.Uri
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -564,6 +575,7 @@ fun HomeScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             val lockNeedsServiceMsg = stringResource(R.string.double_tap_lock_needs_service)
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             Workspace(
                 pageCount = uiState.pageCount,
                 columns = settings.homeColumns,
@@ -650,14 +662,22 @@ fun HomeScreen(
                 drawerOpen = drawerOpen,
                 chrome = workspaceChrome(settings, uiState.pageCount, LocalDensity.current.fontScale, uiState.dockEntries.size),
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .homeWorkspacePadding(dockShown = settings.dockEnabled),
+                    .fillMaxSize()
+                    .homeWorkspacePadding(dockShown = true),
             )
+            if (settings.dockEnabled && settings.dockExpanded) {
+                Box(Modifier.fillMaxSize().clickable { viewModel.setDockExpanded(false) })
+            }
+            }
 
             // Show the dock whenever it's enabled — even with no favorites yet — so a fresh install
             // can be populated by dragging apps onto it (there is no "add to dock" menu item).
             if (settings.dockEnabled) {
+                AnimatedVisibility(
+                    visible = settings.dockExpanded,
+                    enter = slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(220)) + fadeIn(tween(180)),
+                    exit = slideOutVertically(targetOffsetY = { it / 2 }, animationSpec = tween(180)) + fadeOut(tween(140)),
+                ) {
                 Dock(
                     entries = uiState.dockEntries,
                     badges = badges,
@@ -684,6 +704,60 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp),
                 )
+                }
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(LauncherIcons.ExpandMore),
+                        contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
+                        modifier = Modifier.size(24.dp).graphicsLayer { rotationZ = if (settings.dockExpanded) 180f else 0f }
+                            .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
+                        tint = Color.White,
+                    )
+                }
+            }
+            // Permanent mini dock: camera, drawer search and the system's selected browser.
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
+                color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
+                shape = RoundedCornerShape(24.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(android.R.drawable.ic_menu_camera),
+                        contentDescription = "Camera",
+                        modifier = Modifier.size(22.dp).clickable {
+                            val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CAMERA)
+                            runCatching { context.startActivity(intent) }.onFailure {
+                                runCatching { context.startActivity(Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)) }
+                            }
+                        },
+                        tint = Color.White,
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = "Search apps",
+                        modifier = Modifier.size(22.dp).clickable { onOpenDrawer() },
+                        tint = Color.White,
+                    )
+                    Icon(
+                        painter = painterResource(android.R.drawable.ic_menu_view),
+                        contentDescription = "Browser",
+                        modifier = Modifier.size(22.dp).clickable {
+                            val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
+                            runCatching { context.startActivity(intent) }.onFailure {
+                                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }
+                            }
+                        },
+                        tint = Color.White,
+                    )
+                }
             }
         }
 

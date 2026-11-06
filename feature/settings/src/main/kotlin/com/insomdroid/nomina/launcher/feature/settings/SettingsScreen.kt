@@ -605,9 +605,6 @@ fun SettingsScreen(
                     FeedbackRows(onOpen = { openLink(context, it) })
                 }
 
-                // Support the work: a quiet section at the very end (SupportSection.kt), the browser opens the page.
-                SupportSection(onOpen = { openSupportLink(context, it) })
-
                 // The installed build, last of all, so a glance here answers "which version is this"
                 // without the system's app info — and compares with the newest release above.
                 val installedVersion = remember(context) { installedVersionLabel(context) }
@@ -987,7 +984,7 @@ private fun lockServiceEnabled(context: android.content.Context): Boolean {
     return enabled.split(':').any { android.content.ComponentName.unflattenFromString(it) == target }
 }
 
-private const val RELEASES_URL = "https://github.com/jrs8205/Nomina/releases"
+private const val RELEASES_URL = "https://github.com/insomdroid/Nomina-Launcher/releases"
 
 internal fun openLink(context: android.content.Context, url: String) {
     val opened = runCatching {

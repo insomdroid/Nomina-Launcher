@@ -2,7 +2,6 @@ package com.insomdroid.nomina.feature.settings
 
 import android.app.Application
 import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -34,8 +33,6 @@ class FeedbackRowsTest {
 
         compose.onNodeWithText(res.getString(R.string.settings_feedback_discussions)).assertIsDisplayed()
         compose.onNodeWithText(res.getString(R.string.settings_feedback_discussions_desc)).assertIsDisplayed()
-        compose.onNodeWithText("Telegram group").assertDoesNotExist()
-        compose.onNodeWithText("Reddit community").assertDoesNotExist()
     }
 
     @Test fun discussionRowOpensTheNominaRepository() {

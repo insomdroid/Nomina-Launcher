@@ -1,10 +1,8 @@
 package com.insomdroid.nomina.feature.home
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
-import android.content.ContextWrapper
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,15 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.mandatorySystemGestures
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.items
@@ -40,7 +35,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.SideEffect
@@ -68,7 +62,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -78,10 +71,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
@@ -125,19 +114,12 @@ internal val WORKSPACE_VERTICAL_PADDING = 12.dp
 /** The space around the dock in the home column. */
 internal val DOCK_OUTER_PADDING = 14.dp
 
-/** The themed status bar's least height with the system bar hidden (the cutout's band, when deeper). */
-internal val STATUS_ZONE_MIN = 24.dp
-
 /**
- * The workspace's place in the home column: the themed status bar above takes the system bar's inset
- * when it is shown, otherwise the workspace does. No horizontal padding: the grid spans the full width
- * so a "full width" widget (spanX = columns at cellX 0) reaches both screen edges with no side gap.
+ * The workspace keeps the system status-bar inset at the top and the navigation-bar inset at the
+ * bottom when the dock is disabled. No horizontal padding: full-width widgets reach both edges.
  */
-internal fun Modifier.homeWorkspacePadding(showStatusBar: Boolean, dockShown: Boolean): Modifier =
-    then(if (showStatusBar) Modifier else Modifier.statusBarsPadding())
-        // Without the dock the workspace is the last thing in the column: it keeps itself above the
-        // navigation bar (the dock does that for both when it is shown), so the bottom row of icons
-        // never sits on the bar.
+internal fun Modifier.homeWorkspacePadding(dockShown: Boolean): Modifier =
+    statusBarsPadding()
         .then(if (dockShown) Modifier else Modifier.navigationBarsPadding())
         .padding(vertical = WORKSPACE_VERTICAL_PADDING)
 
@@ -174,48 +156,11 @@ fun HomeScreen(
     // The system (and the startup benchmarks) learn when home is really up: its rows loaded.
     HomeDrawnReporter(loaded = uiState.loaded)
     val settings = uiState.settings
-    // True briefly after a heads-up notification, while the system transiently shows its own status bar
-    // over ours; used to blank the themed bar so they don't overlap.
-    val headsUpActive by viewModel.headsUpActive.collectAsStateWithLifecycle()
     // First-run intro (fresh installs only) — covers the whole home surface until finished/skipped.
     val showOnboarding by viewModel.showOnboarding.collectAsStateWithLifecycle()
     val leftSwipeAvailable by viewModel.leftSwipeAvailable.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val windowHeightPx = LocalWindowInfo.current.containerSize.height
-
-    // Optionally hide the system status bar while the launcher is foreground (immersive home). No root
-    // needed; the bar returns for any other app. Re-applied on every ON_RESUME so returning from another
-    // app re-hides it. A swipe from the top still transiently reveals it (Android safety behaviour).
-    val view = LocalView.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(settings.hideSystemStatusBar, lifecycleOwner, view) {
-        val window = generateSequence(view.context) { (it as? ContextWrapper)?.baseContext }
-            .filterIsInstance<Activity>().firstOrNull()?.window
-        fun apply() {
-            val controller = window?.insetsController ?: return
-            if (settings.hideSystemStatusBar) {
-                controller.systemBarsBehavior =
-                    android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                controller.hide(android.view.WindowInsets.Type.statusBars())
-            } else {
-                controller.show(android.view.WindowInsets.Type.statusBars())
-            }
-        }
-        apply()
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) apply()
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
-    // READ_PHONE_STATE granted outside onboarding (Settings ▸ Luvat, system app info) has no callback
-    // into SignalMonitor — re-check on every resume so the 4G/5G generation label appears when the
-    // user comes back home. No-op when the grant state hasn't changed.
-    LifecycleResumeEffect(Unit) {
-        viewModel.refreshPhonePermission()
-        onPauseOrDispose { }
-    }
 
     // First-run onboarding: when we are NOT the default home, surface the system "set default launcher"
     // dialog (RoleManager) so a fresh install — e.g. downloaded from GitHub — can become the launcher like
@@ -611,53 +556,6 @@ fun HomeScreen(
             ),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            if (settings.showStatusBar) {
-                val density = LocalDensity.current
-                // The status-bar zone height: use the display-cutout band (≈ system status bar height,
-                // and non-zero even when the system bar is hidden), with a sane fallback for no-cutout
-                // devices. Lets the themed bar sit in the cutout band, beside a centred punch-hole.
-                val statusZone = with(density) {
-                    WindowInsets.displayCutout.getTop(this).toDp()
-                }.coerceAtLeast(STATUS_ZONE_MIN)
-                // Height of the still-visible system status bar; reserved as internal top padding so the
-                // themed bar's scrim can extend up behind it to the top edge (no gap on tall-status-bar
-                // phones like the Pixel 10 Pro) while the glyphs sit below the system bar.
-                val systemBarInset = with(density) {
-                    WindowInsets.statusBars.getTop(this).toDp()
-                }
-                // Blank the themed bar whenever the system status bar sits (or is about to sit) on top of
-                // it, so the two never overlap:
-                //  - systemBarInset > 0: the system bar takes real layout space — a permanent show
-                //    (freeform/desktop windowing, lock-task) or a frame of our own hide/show animation.
-                //  - headsUpActive: a heads-up notification TRANSIENTLY reveals the system bar OVER our
-                //    content; WindowManager deliberately withholds that reveal from WindowInsets to keep the
-                //    layout stable (verified against AOSP), so it can't be seen via insets — we detect it
-                //    from our own NotificationListener instead and blank the bar for the heads-up window.
-                val suppressThemedBar =
-                    settings.hideSystemStatusBar && (systemBarInset > 0.dp || headsUpActive)
-                StatusBar(
-                    // Only align to the camera cutout when we own the top zone (system bar hidden).
-                    alignToCutout = settings.hideSystemStatusBar,
-                    scrimAlpha = settings.statusBarScrimOpacity,
-                    // When hidden we own the whole top zone (no inset, self-aligns to the cutout);
-                    // otherwise reserve the system bar's height so the scrim fills it and glyphs clear it.
-                    topInset = if (settings.hideSystemStatusBar) 0.dp else systemBarInset,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        // Blank with alpha, NOT by leaving composition: the bar is the Column sibling
-                        // that pushes the workspace down, so removing it would jump the whole grid up
-                        // for the heads-up window and back — and let the top row sit under a
-                        // force-shown system bar. Only the pixels must vanish; the slot stays.
-                        .graphicsLayer { alpha = if (suppressThemedBar) 0f else 1f }
-                        // When the system bar is hidden, occupy its zone at the very top (replacing it).
-                        // Otherwise the scrim + topInset (inside StatusBar) handle the system-bar band, so
-                        // no external statusBarsPadding here — that padding is what left the scrim gap.
-                        .then(
-                            if (settings.hideSystemStatusBar) Modifier.heightIn(min = statusZone)
-                            else Modifier,
-                        ),
-                )
-            }
             val lockNeedsServiceMsg = stringResource(R.string.double_tap_lock_needs_service)
             Workspace(
                 pageCount = uiState.pageCount,
@@ -747,7 +645,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .homeWorkspacePadding(settings.showStatusBar, dockShown = settings.dockEnabled),
+                    .homeWorkspacePadding(dockShown = settings.dockEnabled),
             )
 
             // Show the dock whenever it's enabled — even with no favorites yet — so a fresh install
@@ -871,7 +769,7 @@ fun HomeScreen(
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()
                     // Clear the themed status bar (when shown) so the "remove" pill doesn't overlap it.
-                    .padding(top = if (settings.showStatusBar) 44.dp else 16.dp)
+                    .padding(top = 16.dp)
                     .onGloballyPositioned { dragController.removeBounds = it.boundsInRoot() },
             ) {
                 Row(
@@ -916,8 +814,6 @@ fun HomeScreen(
         if (showOnboarding) {
             OnboardingFlow(
                 onFinish = { viewModel.finishOnboarding() },
-                onContactsGranted = { viewModel.onContactsPermissionGranted() },
-                onPhoneGranted = { viewModel.onPhonePermissionGranted() },
                 modifier = Modifier.fillMaxSize(),
             )
         }

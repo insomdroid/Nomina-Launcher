@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import com.insomdroid.nomina.data.AppLabelCache
+import com.insomdroid.nomina.data.AppLabelStore
 import com.insomdroid.nomina.data.AppRepository
 import com.insomdroid.nomina.data.AppUsageRepository
 import com.insomdroid.nomina.data.CustomIconSource
@@ -72,8 +74,12 @@ internal class ProductionWiring(private val context: Application, testScope: Tes
     private val appUsageRepository = AppUsageRepository::class.java.constructors.single().newInstance(dataStore) as AppUsageRepository
 
     /** The image loader is only used for icons; its type (Coil) is what keeps this reflective. */
+    private val labelCache = AppLabelCache(object : AppLabelStore {
+        override suspend fun read(locale: String): Map<String, String> = emptyMap()
+        override suspend fun write(locale: String, labels: Map<String, String>) = Unit
+    })
     private val source = LauncherAppsSource::class.java.constructors.single()
-        .newInstance(context, IconPackRepository(context), Provider<Any?> { error("unused") }) as LauncherAppsSource
+        .newInstance(context, IconPackRepository(context), Provider<Any?> { error("unused") }, labelCache) as LauncherAppsSource
 
     /** Eagerly shared, like the application scope in the app: the LauncherApps callback registers
      *  right here, so a shortcut published after this is reported whether or not anyone collects. */

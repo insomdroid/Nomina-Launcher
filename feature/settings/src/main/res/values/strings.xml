@@ -17,7 +17,8 @@
     <string name="settings_folder_swipe_first_app_desc">Home screen only. Opens the first app in the folder\'s own order; reorder the folder to pick another. Off, a swipe up from a folder opens the app list like anywhere else.</string>
     <string name="settings_dock">Dock</string>
     <string name="settings_dock_show">Show dock</string>
-    <string name="settings_dock_icons">Dock icon count</string>
+    <string name="settings_dock_icons">Maximum apps in dock</string>
+    <string name="settings_dock_icons_desc">Up to 10 apps can be kept here; five are visible at once and the rest are available by swiping.</string>
     <string name="settings_drawer">App drawer</string>
     <string name="settings_home">Home screen</string>
     <string name="settings_columns">Columns</string>

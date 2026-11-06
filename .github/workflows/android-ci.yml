@@ -39,7 +39,7 @@ jobs:
             echo "Android SDK command-line tools were not found under $sdk_root." >&2
             exit 1
           fi
-          yes | "$sdkmanager_path" --licenses
+          yes | "$sdkmanager_path" --licenses || true
           "$sdkmanager_path" "platforms;android-37"
 
       - name: Set up Gradle

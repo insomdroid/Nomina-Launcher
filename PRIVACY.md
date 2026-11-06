@@ -60,21 +60,15 @@ public, so every claim here can be verified:
    the keyless [Open-Meteo](https://open-meteo.com) API. Your coordinates are
    rounded to about one-kilometre precision before the request; the exact
    position never leaves the device.
-2. **Municipality name** shown next to the weather: the name is resolved with
-   the device's own geocoder. Only if you turn on *Place name from the
-   internet* (Settings ▸ Home, off by default) and the device has no working
-   geocoder backend (some models don't), the app asks the keyless
-   [BigDataCloud](https://www.bigdatacloud.com) reverse-geocoding API instead,
-   sending the same ~1 km rounded coordinates plus the device's interface
-   language — at most once per 30-minute weather refresh, and only when the
-   local geocoder failed. With the setting off, no request is ever made to
-   BigDataCloud; on such devices the weather then shows without a place name.
+2. **Municipality name** shown next to the weather: it is resolved locally
+   with Android's own geocoder. Nomina does not send a reverse-geocoding
+   request to an external place-name service.
 
 That is the complete list. The "Check for updates" row in Settings only opens
 the GitHub releases page in your browser — the app itself performs no update
 checks or downloads.
 
-Neither request carries account information, cookies or advertising
+The weather request carries no account information, cookies or advertising
 identifiers. Like all internet traffic they necessarily reveal your IP address
 to the server; the requests identify themselves with a generic
 `Nomina/<version>` User-Agent that contains no device details.
@@ -84,23 +78,21 @@ to the server; the requests identify themselves with a generic
 | Permission | Used for |
 |---|---|
 | `QUERY_ALL_PACKAGES` | Listing and launching your installed apps — the launcher's core purpose |
-| Notification access (`BIND_NOTIFICATION_LISTENER_SERVICE`) | Notification dots/badges, status-bar icons, notification and people widgets, and local batch delivery |
+| Notification access (`BIND_NOTIFICATION_LISTENER_SERVICE`) | Notification dots/badges, notification and people widgets, and local batch delivery |
 | Accessibility service (`BIND_ACCESSIBILITY_SERVICE`, opt-in) | The double-tap-to-lock gesture only. The service receives no accessibility events and cannot read screen content; it exists solely to lock the screen, and only runs if you enable it yourself |
 | `READ_CALENDAR` | Showing your next event in the clock widget |
-| `READ_CONTACTS` | Contact results in app search and matching people-widget contacts (opt-in) |
-| `READ_PHONE_STATE` | Signal-strength indicator in the status bar |
+| `READ_CONTACTS` | Matching contacts for the People widget (opt-in) |
 | `ACCESS_COARSE_LOCATION` | Weather in the clock widget |
-| `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `BLUETOOTH` (≤ Android 11) | Connectivity indicators in the status bar |
 | `INTERNET` | The weather requests described above |
 | `REQUEST_DELETE_PACKAGES` | The "uninstall" action in an icon's long-press menu |
 | `EXPAND_STATUS_BAR` | The swipe-down-for-notifications gesture |
 | `HIDE_OVERLAY_WINDOWS` | Hiding other apps' overlay windows while the restore dialog for a backup opened from another app is shown (Android 12+), so no overlay can cover or trick it |
 
-Calendar, contacts and phone-state data are read on demand for the features
-above, used on the device only, and never stored beyond in-memory caches or
-transmitted anywhere. Location is handled the same way on the device; the only
-location data that ever leaves it is the ~1 km rounded coordinates sent to the
-weather and reverse-geocoding services described under *Network use*.
+Calendar and contact data are read on demand for the features above, used on
+the device only, and never transmitted anywhere. Place names are resolved on
+the device. The only location data that leaves the device is the ~1 km rounded
+coordinates sent to Open-Meteo for the weather request described under
+*Network use*.
 
 ## Children
 

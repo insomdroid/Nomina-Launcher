@@ -7,8 +7,6 @@
     <string name="settings_gestures">Gesten</string>
     <string name="settings_show_weather">Wetter im Widget</string>
     <string name="settings_weather_app">Tippen auf das Wetter öffnet</string>
-    <string name="settings_network_place_names">Ortsname aus dem Internet</string>
-    <string name="settings_network_place_names_desc">Wenn dein Smartphone den Ortsnamen nicht selbst ermitteln kann, wird er bei BigDataCloud abgefragt. Der Dienst erhält dabei deinen ungefähren Standort.</string>
     <string name="settings_swipe_up_drawer">Nach oben wischen → Apps</string>
     <string name="settings_swipe_down_notif">Nach unten wischen → Benachrichtigungen</string>
     <string name="settings_folder_swipe_first_app">Nach oben wischen auf einem Ordner → seine erste App</string>
@@ -142,15 +140,11 @@
     <string name="settings_font_casual">Leger</string>
     <string name="settings_font_cursive">Handschrift</string>
     <string name="settings_search">Suche</string>
-    <string name="settings_search_contacts">Kontakte durchsuchen</string>
     <string name="settings_left_edge">Linker Rand</string>
     <string name="settings_left_edge_none">Keine</string>
     <string name="settings_left_edge_pick">App auswählen</string>
     <string name="settings_close">Schließen</string>
     <string name="settings_lock_desktop">Startbildschirm-Layout sperren</string>
-    <string name="settings_hide_status_bar">System-Statusleiste ausblenden (Vollbild)</string>
-    <string name="settings_status_bar">Statusleiste (Uhr, Akku, Signal)</string>
-    <string name="settings_status_bar_scrim">Abdunklung hinter der Statusleiste</string>
     <string name="settings_frequent_apps">Meistgenutzte Apps oben</string>
     <string name="settings_hide_home_apps">Apps auf dem Startbildschirm ausblenden</string>
     <string name="settings_hide_home_apps_desc">Apps auf dem Startbildschirm, in seinen Ordnern oder im Dock verschwinden aus der Liste. Die Suche findet sie weiterhin.</string>
@@ -181,15 +175,6 @@
     <string name="settings_widget_inset">Widget-Ränder an den Symbolen ausrichten</string>
     <string name="settings_widget_inset_desc">Widgets erhalten denselben Seitenabstand wie App-Symbole, statt ihre Zellen bis zum Rand zu füllen. Widgets mit eigenem Rand können kleiner wirken.</string>
     <string name="settings_sounds">Töne</string>
-    <string name="settings_lock_sounds">Sperr- und Entsperrtöne</string>
-    <string name="settings_lock_sounds_desc">Ein Ton deiner Wahl erklingt, wenn das Telefon gesperrt und entsperrt wird – nicht im Lautlos- oder Vibrationsmodus, bei „Bitte nicht stören“ oder während eines Anrufs.</string>
-    <string name="settings_lock_sound">Sperrton</string>
-    <string name="settings_unlock_sound">Entsperrton</string>
-    <string name="settings_sound_none">Kein Ton</string>
-    <string name="settings_sound_from_files">Datei auswählen</string>
-    <string name="settings_sound_from_phone">Töne des Telefons</string>
-    <string name="settings_sound_play">Abspielen</string>
-    <string name="settings_sound_picked">Ausgewählter Ton</string>
     <string name="settings_phone_sound_settings">Toneinstellungen des Telefons</string>
     <string name="settings_phone_sound_settings_desc">Schalte dort den eigenen Displaysperre-Ton des Telefons aus, damit nicht beide gleichzeitig erklingen.</string>
 </resources>

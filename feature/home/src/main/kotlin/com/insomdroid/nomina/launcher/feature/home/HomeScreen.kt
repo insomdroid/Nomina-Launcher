@@ -71,6 +71,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -177,6 +180,20 @@ fun HomeScreen(
     val showOnboarding by viewModel.showOnboarding.collectAsStateWithLifecycle()
     val leftSwipeAvailable by viewModel.leftSwipeAvailable.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val hostView = LocalView.current
+    val hostWindow = (context as? android.app.Activity)?.window
+    SideEffect {
+        hostWindow?.let { window ->
+            val controller = WindowInsetsControllerCompat(window, hostView)
+            if (settings.hideStatusBar) controller.hide(WindowInsetsCompat.Type.statusBars())
+            else controller.show(WindowInsetsCompat.Type.statusBars())
+        }
+    }
+    DisposableEffect(hostWindow) {
+        onDispose {
+            hostWindow?.let { WindowInsetsControllerCompat(it, hostView).show(WindowInsetsCompat.Type.statusBars()) }
+        }
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     val windowHeightPx = LocalWindowInfo.current.containerSize.height
 
@@ -719,6 +736,7 @@ fun HomeScreen(
                         contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
                         modifier = Modifier
                             .size(24.dp)
+                            .offset(y = if (settings.dockExpanded) 0.dp else (-4).dp)
                             .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
                             .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
                         tint = Color.White,
@@ -762,7 +780,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .width(124.dp)
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 0.dp, bottom = 8.dp)
+                    .padding(top = 0.dp, bottom = 12.dp)
+                    .offset(y = if (settings.dockExpanded) 0.dp else (-4).dp)
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
                 color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
                 shape = RoundedCornerShape(18.dp),

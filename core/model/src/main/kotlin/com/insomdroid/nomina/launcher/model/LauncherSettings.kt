@@ -62,8 +62,6 @@ data class LauncherSettings(
     /** Package name of the selected third-party icon pack (empty = system default). Overrides
      *  [useThemedIcons] when set: mapped apps use the pack's icon, unmapped apps are masked to its style. */
     val iconPackPackage: String = "",
-    /** Include contacts in app-drawer search (gated by READ_CONTACTS; requested when enabled). */
-    val searchContacts: Boolean = false,
     /** App key launched by the left-edge home swipe (Settings ▸ Eleet); blank = gesture disabled. */
     val leftSwipeAppKey: String = "",
     /** App key opened by a tap on the smartspace weather line (Settings > Home); blank = plain text. */
@@ -117,20 +115,8 @@ data class LauncherSettings(
      *  the drawer picks by what it looks like (see [drawerBackgroundColor]); the owner's 1.0.1 ask, the choice
      *  home's labels have. */
     val drawerLabelColor: Int? = null,
-    /** Show a slim status bar (clock + battery + signal, with dynamic battery/signal colors) at the top
-     *  of the home screen. */
-    val showStatusBar: Boolean = false,
     /** Show the current weather (Open-Meteo; needs a location permission) in the smartspace widget. */
     val showWeather: Boolean = true,
-    /** Name the weather's place with BigDataCloud's reverse geocoder when the device's own Geocoder
-     *  can't. Opt-in: BigDataCloud is a proprietary service (F-Droid's NonFreeNet anti-feature). */
-    val networkPlaceNames: Boolean = false,
-    /** Hide the system status bar while the launcher is in the foreground (immersive/fullscreen home).
-     *  Independent of [showStatusBar]; combine the two to replace the system bar with the themed one. */
-    val hideSystemStatusBar: Boolean = false,
-    /** Darkness of the scrim drawn behind the themed status bar (0 = none, 1 = solid black); keeps the
-     *  clock/indicators legible over bright wallpapers. Own setting, like [dockBackgroundOpacity]. */
-    val statusBarScrimOpacity: Float = DEFAULT_STATUS_BAR_SCRIM,
     /** Count indicator of the built-in notifications widget: [COUNT_NUMBER], [COUNT_DOT] or [COUNT_NONE]. */
     /** Use theme surfaces for built-in widgets; false keeps the translucent wallpaper style. */
     val widgetTonalBackground: Boolean = false,
@@ -140,12 +126,6 @@ data class LauncherSettings(
     val notificationWidgetCountStyle: String = COUNT_NUMBER,
     /** Double-tap on empty home-screen space locks the screen (needs the lock accessibility service). */
     val doubleTapToLock: Boolean = false,
-    /** Play [lockSoundUri] when the phone locks and [unlockSoundUri] when it unlocks. */
-    val lockSoundsEnabled: Boolean = false,
-    /** The sound picked for locking (a content URI; "" = none). Kept on this phone only. */
-    val lockSoundUri: String = "",
-    /** The sound picked for unlocking (a content URI; "" = none). Kept on this phone only. */
-    val unlockSoundUri: String = "",
     /** What the built-in people widget shows of a notification on the (shared) home screen:
      *  [PRIVACY_ALL] = sender + message text, [PRIVACY_SENDER] = sender only, [PRIVACY_COUNT] = the
      *  tile colors and counts but shows no text at all (pinned people keep their user-chosen name). */
@@ -191,10 +171,6 @@ data class LauncherSettings(
         const val PRIVACY_COUNT = "count"
 
         const val DEFAULT_BATCH_TIMES = "08:00,12:00,17:00"
-
-        /** [statusBarScrimOpacity] out of the box: 60 % black keeps white status text readable even
-         *  over a white wallpaper, without the band looking heavy. */
-        const val DEFAULT_STATUS_BAR_SCRIM = 0.6f
 
         /** [dockBackgroundOpacity] out of the box: a light tint that sets the dock off the wallpaper. */
         const val DEFAULT_DOCK_BACKGROUND = 0.35f

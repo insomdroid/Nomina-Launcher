@@ -629,6 +629,8 @@ class HomeViewModel @Inject constructor(
     fun reorderDock(newOrder: List<DockEntry>) =
         viewModelScope.launch { homeLayoutRepository.reorderDock(newOrder.map { it.rowId }) }
 
+    fun setDockExpanded(value: Boolean) = viewModelScope.launch { settingsRepository.setDockExpanded(value) }
+
     fun removeFromHome(appItem: AppItem) =
         viewModelScope.launch { homeLayoutRepository.removeFromHome(appItem) }
 

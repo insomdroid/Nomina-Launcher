@@ -67,23 +67,15 @@ julkinen, joten jokaisen väitteen voi tarkistaa itse:
    [Open-Meteo](https://open-meteo.com)-rajapinnasta. Koordinaatit pyöristetään
    noin kilometrin tarkkuuteen ennen pyyntöä; tarkka sijainti ei koskaan
    poistu laitteelta.
-2. **Kuntanimi** sään vieressä: nimi selvitetään laitteen omalla
-   geokooderilla. Vain jos olet ottanut käyttöön asetuksen *Paikkakunta
-   verkosta* (Asetukset ▸ Etusivu, oletuksena pois) eikä laitteessa ole
-   toimivaa geokooderia (joissakin malleissa ei ole), sovellus käyttää sen
-   sijaan avaimetonta
-   [BigDataCloud](https://www.bigdatacloud.com)-käänteisgeokoodausrajapintaa
-   ja lähettää sinne samat ~1 km:n tarkkuuteen pyöristetyt koordinaatit sekä
-   laitteen käyttöliittymäkielen — enintään kerran 30 minuutin säähakua
-   kohden, ja vain kun paikallinen geokooderi epäonnistui. Kun asetus on pois,
-   BigDataCloudiin ei lähetetä mitään; tällaisissa laitteissa sää näkyy silloin
-   ilman paikkakunnan nimeä.
+2. **Kuntanimi** sään vieressä: nimi selvitetään paikallisesti Androidin
+   omalla geokooderilla. Nomina ei lähetä käänteisgeokoodauspyyntöjä ulkoiseen
+   paikkakuntien nimipalveluun.
 
 Tämä on koko lista. Asetusten "Tarkista päivitykset" -rivi vain avaa GitHubin
 julkaisusivun selaimessa — sovellus itse ei tee päivitystarkistuksia eikä
 latauksia.
 
-Kumpikaan pyyntö ei sisällä tilitietoja, evästeitä tai mainostunnisteita.
+Sääpyyntö ei sisällä tilitietoja, evästeitä tai mainostunnisteita.
 Kuten kaikki internet-liikenne, ne väistämättä paljastavat IP-osoitteesi
 palvelimelle; pyynnöt tunnistautuvat yleisluontoisella
 `Nomina/<versio>`-User-Agent-otsakkeella, jossa ei ole laitetietoja.
@@ -93,13 +85,11 @@ palvelimelle; pyynnöt tunnistautuvat yleisluontoisella
 | Lupa | Käyttötarkoitus |
 |---|---|
 | `QUERY_ALL_PACKAGES` | Asennettujen sovellusten listaus ja käynnistys — launcherin ydintehtävä |
-| Ilmoitusten käyttöoikeus (`BIND_NOTIFICATION_LISTENER_SERVICE`) | Pistemerkit, tilarivin kuvakkeet, ilmoitus- ja henkilöwidgetit sekä paikallinen eräposti |
+| Ilmoitusten käyttöoikeus (`BIND_NOTIFICATION_LISTENER_SERVICE`) | Pistemerkit, ilmoitus- ja henkilöwidgetit sekä paikallinen eräposti |
 | Esteettömyyspalvelu (`BIND_ACCESSIBILITY_SERVICE`, valinnainen) | Ainoastaan tuplanapautuslukitus. Palvelu ei vastaanota esteettömyystapahtumia eikä voi lukea näytön sisältöä; se on olemassa vain näytön lukitsemista varten ja käynnissä vain, jos itse otat sen käyttöön |
 | `READ_CALENDAR` | Seuraavan tapahtuman näyttäminen kellowidgetissä |
-| `READ_CONTACTS` | Yhteystulokset sovellushaussa ja henkilöwidgetin yhteystietojen yhdistäminen (valinnainen) |
-| `READ_PHONE_STATE` | Signaalinvoimakkuus tilarivillä |
+| `READ_CONTACTS` | Henkilöwidgetin yhteystietojen yhdistäminen (valinnainen) |
 | `ACCESS_COARSE_LOCATION` | Sää kellowidgetissä |
-| `ACCESS_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `BLUETOOTH` (≤ Android 11) | Yhteysilmaisimet tilarivillä |
 | `INTERNET` | Yllä kuvatut sääpyynnöt |
 | `REQUEST_DELETE_PACKAGES` | Kuvakkeen pitkän painalluksen "poista asennus" -toiminto |
 | `EXPAND_STATUS_BAR` | Ilmoitusten avaus alaspyyhkäisyllä |

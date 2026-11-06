@@ -341,15 +341,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setOnboardingDone() }
     }
 
-    /**
-     * True for a short window after a heads-up-worthy notification is posted, while the system
-     * transiently reveals its own status bar over the launcher. HomeScreen blanks the themed status bar
-     * during it so the two don't overlap (the reveal is not dispatched as a WindowInsets change, so this
-     * NotificationListener-fed signal is the only way to detect it).
-     */
-    val headsUpActive: StateFlow<Boolean> = notificationBadgeRepository.headsUpActive
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), false)
-
     val uiState: StateFlow<HomeUiState> = combine(
         settingsRepository.settings,
         appRepository.apps,

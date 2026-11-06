@@ -18,6 +18,7 @@ jobs:
   build-debug:
     name: Build debug APK
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - name: Checkout source
@@ -35,9 +36,6 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Run unit tests
-        run: ./gradlew :app:testDebugUnitTest :core:data:testDebugUnitTest :core:model:testDebugUnitTest :core:ui:testDebugUnitTest :feature:appdrawer:testDebugUnitTest :feature:backup:testDebugUnitTest :feature:home:testDebugUnitTest :feature:settings:testDebugUnitTest --stacktrace
-
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
@@ -53,3 +51,6 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Run unit tests
+        run: ./gradlew :app:testDebugUnitTest :core:data:testDebugUnitTest :core:model:testDebugUnitTest :core:ui:testDebugUnitTest :feature:appdrawer:testDebugUnitTest :feature:backup:testDebugUnitTest :feature:home:testDebugUnitTest :feature:settings:testDebugUnitTest --stacktrace

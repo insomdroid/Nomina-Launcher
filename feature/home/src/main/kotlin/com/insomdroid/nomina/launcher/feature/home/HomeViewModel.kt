@@ -209,7 +209,6 @@ class HomeViewModel @Inject constructor(
     private val appRepository: AppRepository,
     private val homeLayoutRepository: HomeLayoutRepository,
     notificationBadgeRepository: NotificationBadgeRepository,
-    private val signalMonitor: com.insomdroid.nomina.launcher.system.SignalMonitor,
     private val customIcons: CustomIconStore,
 ) : ViewModel() {
 
@@ -341,19 +340,6 @@ class HomeViewModel @Inject constructor(
         _showOnboarding.value = false
         viewModelScope.launch { settingsRepository.setOnboardingDone() }
     }
-
-    /** Contacts granted in the intro → also enable the drawer's contact search (its whole point). */
-    fun onContactsPermissionGranted() =
-        viewModelScope.launch { settingsRepository.setSearchContacts(true) }
-
-    /** Phone-state granted in the intro → restart the telephony callbacks so the network
-     *  generation label appears without waiting for a process restart. */
-    fun onPhonePermissionGranted() = signalMonitor.onPermissionsChanged()
-
-    /** Called on every home resume: catches a READ_PHONE_STATE grant made outside onboarding
-     *  (Settings ▸ Luvat, system app info), which has no callback into the monitor. Cheap no-op
-     *  when the grant state hasn't changed. */
-    fun refreshPhonePermission() = signalMonitor.refreshPermission()
 
     /**
      * True for a short window after a heads-up-worthy notification is posted, while the system

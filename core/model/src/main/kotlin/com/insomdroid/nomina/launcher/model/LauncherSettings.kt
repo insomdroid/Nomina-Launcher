@@ -162,20 +162,8 @@ data class LauncherSettings(
         /** Launcher text families. The legacy default key now uses the bundled Geist UI face. */
         const val FONT_DEFAULT = "default"
         const val FONT_GEIST_MONO = "geist_mono"
-        const val FONT_CONDENSED = "condensed"
-        const val FONT_SERIF = "serif"
-        const val FONT_MONOSPACE = "monospace"
-        const val FONT_CASUAL = "casual"
-        const val FONT_CURSIVE = "cursive"
-        val FONTS = listOf(
-            FONT_DEFAULT,
-            FONT_GEIST_MONO,
-            FONT_CONDENSED,
-            FONT_SERIF,
-            FONT_MONOSPACE,
-            FONT_CASUAL,
-            FONT_CURSIVE,
-        )
+        /** Only the two general-purpose launcher families remain selectable. Legacy stored keys fall back to Geist. */
+        val FONTS = listOf(FONT_DEFAULT, FONT_GEIST_MONO)
 
         const val PRIVACY_ALL = "all"
         const val PRIVACY_SENDER = "sender"

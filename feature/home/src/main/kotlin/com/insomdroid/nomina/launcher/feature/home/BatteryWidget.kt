@@ -48,6 +48,7 @@ import com.insomdroid.nomina.launcher.system.BatteryMonitor
 import com.insomdroid.nomina.model.BatteryStatus
 import javax.inject.Inject
 import com.insomdroid.nomina.ui.themedTextStyle
+import com.insomdroid.nomina.ui.launcherDisplayFontFamily
 
 @HiltViewModel
 class BatteryWidgetViewModel @Inject constructor(
@@ -61,7 +62,7 @@ class BatteryWidgetViewModel @Inject constructor(
 
 /**
  * The built-in battery widget: an app-icon-sized ring gauge with the percent in the middle and a
- * bolt while charging, in the launcher's shared vivid battery ramp (the launcher uses the same
+ * bolt while charging, with a restrained monochrome ring and a red low-battery signal (the launcher uses the same
  * [com.insomdroid.nomina.designsystem.theme.LauncherColors], so the two always agree). Scales
  * with its footprint like the other built-ins. Tap opens the system battery screen.
  */
@@ -132,6 +133,7 @@ fun BatteryWidget(
                     text = "${s.percent.coerceIn(0, 100)}%",
                     color = ink,
                     style = themedTextStyle(TextStyle(
+                        fontFamily = launcherDisplayFontFamily(),
                         fontSize = with(density) { (diameter * 0.23f).toSp() },
                         fontWeight = FontWeight.Medium,
                         shadow = shadow,

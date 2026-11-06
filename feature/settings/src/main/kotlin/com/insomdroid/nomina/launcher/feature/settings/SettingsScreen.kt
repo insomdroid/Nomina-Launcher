@@ -1197,7 +1197,7 @@ private fun SliderRow(
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(label)
@@ -1224,7 +1224,7 @@ private fun LabelColorRow(selected: Int, onPick: (Int) -> Unit) {
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_label_color))
@@ -1241,8 +1241,7 @@ private fun LabelColorRow(selected: Int, onPick: (Int) -> Unit) {
 
 /** The colours offered for app labels and the drawer's background: white, black, grey and six Material hues. */
 internal val COLOR_SWATCHES: List<Int> = listOf(
-    0xFFFFFFFF, 0xFF000000, 0xFFBDBDBD, 0xFFEF5350,
-    0xFFFFA726, 0xFFFFEE58, 0xFF66BB6A, 0xFF42A5F5, 0xFFAB47BC,
+    0xFFFFFFFF, 0xFF000000, 0xFFBDBDBD, 0xFFE53935,
 ).map { it.toInt() }
 
 /** A test tag per swatch, by its colour. */
@@ -1276,16 +1275,10 @@ internal fun fontChipTag(key: String): String = "font-$key"
 /** The name of a font choice, in its own words. */
 private fun fontNameRes(key: String): Int = when (key) {
     LauncherSettings.FONT_GEIST_MONO -> R.string.settings_font_geist_mono
-    LauncherSettings.FONT_CONDENSED -> R.string.settings_font_condensed
-    LauncherSettings.FONT_SERIF -> R.string.settings_font_serif
-    LauncherSettings.FONT_MONOSPACE -> R.string.settings_font_monospace
-    LauncherSettings.FONT_CASUAL -> R.string.settings_font_casual
-    LauncherSettings.FONT_CURSIVE -> R.string.settings_font_cursive
     else -> R.string.settings_font_default
 }
 
-/** The launcher's font (a Telegram request after 0.9.9): seven families, each chip set in its
- *  own face so the choice can be seen before it is made. Widgets keep their own fonts. */
+/** Two carefully selected launcher families; numeric widget displays use Doto independently. */
 @Composable
 internal fun FontRow(selected: String, onPick: (String) -> Unit) {
     val p = LocalExpressivePalette.current
@@ -1293,7 +1286,7 @@ internal fun FontRow(selected: String, onPick: (String) -> Unit) {
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_font))
@@ -1304,9 +1297,14 @@ internal fun FontRow(selected: String, onPick: (String) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
             ) {
+                val selectedFont = if (selected == LauncherSettings.FONT_GEIST_MONO) {
+                    LauncherSettings.FONT_GEIST_MONO
+                } else {
+                    LauncherSettings.FONT_DEFAULT
+                }
                 LauncherSettings.FONTS.forEach { key ->
                     FilterChip(
-                        selected = key == selected,
+                        selected = key == selectedFont,
                         onClick = { onPick(key) },
                         label = { Text(stringResource(fontNameRes(key)), fontFamily = launcherFontFamily(key)) },
                         modifier = Modifier.testTag(fontChipTag(key)),
@@ -1335,7 +1333,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_wallpaper))
@@ -1380,7 +1378,7 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_color))
@@ -1422,7 +1420,7 @@ internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_label_color))
@@ -1527,7 +1525,7 @@ private fun DockPreview(opacity: Float, icon: ImageBitmap?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp)
+            .padding(bottom = 8.dp)
             .background(Color(0xFFB9C3D4), RoundedCornerShape(22.dp))
             .padding(8.dp),
     ) {
@@ -1556,7 +1554,7 @@ private fun DockPreview(opacity: Float, icon: ImageBitmap?) {
 @Composable
 private fun BadgePreview(icon: ImageBitmap?, showDots: Boolean, showCount: Boolean, scale: Float) {
     Box(
-        modifier = Modifier.padding(bottom = 10.dp),
+        modifier = Modifier.padding(bottom = 8.dp),
         contentAlignment = Alignment.TopEnd,
     ) {
         if (icon != null) {

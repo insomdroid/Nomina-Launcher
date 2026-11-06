@@ -136,14 +136,9 @@
     <string name="settings_long_press_delay_desc">How long to hold an icon before its menu opens or it can be moved</string>
     <string name="settings_label_color">Label text color</string>
     <string name="settings_font">Font</string>
-    <string name="settings_font_desc">For everything the launcher draws itself; widgets keep their own.</string>
+    <string name="settings_font_desc">Geist for the interface; Geist Mono for compact technical information. Numeric displays use Doto.</string>
     <string name="settings_font_default">Geist</string>
     <string name="settings_font_geist_mono">Geist Mono</string>
-    <string name="settings_font_condensed">Condensed</string>
-    <string name="settings_font_serif">Serif</string>
-    <string name="settings_font_monospace">Monospace</string>
-    <string name="settings_font_casual">Casual</string>
-    <string name="settings_font_cursive">Handwriting</string>
     <string name="settings_left_edge">Left edge</string>
     <string name="settings_left_edge_none">None</string>
     <string name="settings_left_edge_pick">Choose app</string>

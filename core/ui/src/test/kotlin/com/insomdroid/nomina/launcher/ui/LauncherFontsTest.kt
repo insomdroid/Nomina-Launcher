@@ -7,22 +7,18 @@ import com.insomdroid.nomina.designsystem.theme.withFontFamily
 import com.insomdroid.nomina.model.LauncherSettings
 import org.junit.Test
 
-/**
- * The launcher's font (a Telegram request after 0.9.9): bundled and system families, one per settings
- * key, the default sans for anything unknown; and the theme's typography takes the family in every
- * style, so a text that names no family inherits it.
- */
+/** The selectable launcher typography is limited to Geist and Geist Mono; removed legacy keys safely use Geist. */
 class LauncherFontsTest {
-
-    @Test fun everyKeyHasItsOwnFamilyAndUnknownIsTheDefault() {
-        val families = LauncherSettings.FONTS.map { launcherFontFamily(it) }
-        assertThat(families.toSet()).hasSize(LauncherSettings.FONTS.size)
+    @Test fun onlyGeistFamiliesRemainSelectableAndLegacyKeysFallBackToGeist() {
+        assertThat(LauncherSettings.FONTS).containsExactly(
+            LauncherSettings.FONT_DEFAULT,
+            LauncherSettings.FONT_GEIST_MONO,
+        ).inOrder()
         assertThat(launcherFontFamily(LauncherSettings.FONT_DEFAULT)).isNotEqualTo(FontFamily.Default)
         assertThat(launcherFontFamily(LauncherSettings.FONT_GEIST_MONO)).isNotEqualTo(FontFamily.Default)
-        assertThat(launcherFontFamily(LauncherSettings.FONT_SERIF)).isEqualTo(FontFamily.Serif)
-        assertThat(launcherFontFamily(LauncherSettings.FONT_MONOSPACE)).isEqualTo(FontFamily.Monospace)
-        assertThat(launcherFontFamily(LauncherSettings.FONT_CURSIVE)).isEqualTo(FontFamily.Cursive)
-        assertThat(launcherFontFamily("comic")).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
+        listOf("condensed", "serif", "monospace", "casual", "cursive", "unknown").forEach { legacy ->
+            assertThat(launcherFontFamily(legacy)).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
+        }
     }
 
     @Test fun theTypographyTakesTheFamilyInEveryStyle() {
@@ -35,7 +31,6 @@ class LauncherFontsTest {
             typography.labelLarge, typography.labelMedium, typography.labelSmall,
         )
         assertThat(styles.map { it.fontFamily }).containsExactlyElementsIn(List(15) { FontFamily.Serif })
-        // The sizes and weights are the theme's own, untouched.
         assertThat(typography.bodyLarge.fontSize).isEqualTo(Typography().bodyLarge.fontSize)
         assertThat(typography.titleLarge.fontWeight).isEqualTo(Typography().titleLarge.fontWeight)
     }

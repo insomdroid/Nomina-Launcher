@@ -29,7 +29,7 @@ fun ExpressiveSectionTitle(text: String, color: Color = LocalExpressivePalette.c
     Text(
         text = text, color = color, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, fontFamily = launcherTechnicalFontFamily(),
         letterSpacing = 0.sp,
-        modifier = Modifier.padding(top = 22.dp, start = 2.dp, bottom = 10.dp),
+        modifier = Modifier.padding(top = 24.dp, start = 2.dp, bottom = 12.dp),
     )
 }
 
@@ -45,12 +45,12 @@ fun ExpressiveCard(
         shadowElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp))
-            .padding(bottom = 6.dp)
+            .border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+            .padding(bottom = 8.dp)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             content = content,
         )

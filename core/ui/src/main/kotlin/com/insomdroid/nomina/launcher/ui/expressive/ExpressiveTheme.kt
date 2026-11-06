@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** Nothing Red, reserved for critical or live status rather than ordinary controls. */
-val Accent = Color(0xFFD71920)
+val Accent = Color(0xFFE53935)
 
 data class ExpressivePalette(
     val bg: Color,
@@ -26,15 +26,15 @@ data class ExpressivePalette(
 )
 
 val DarkExpressivePalette = ExpressivePalette(
-    bg = Color(0xFF090909), surfaceHi = Color(0xFF171717), text = Color(0xFFF1F1F1),
-    dim = Color(0xFFAAAAAA), faint = Color(0xFF707070), trackOff = Color(0xFF3A3A3A),
-    thumbOff = Color(0xFFBDBDBD), btn = Color.White.copy(alpha = 0.06f), shadow = 0.dp,
+    bg = Color(0xFF101010), surfaceHi = Color(0xFF191919), text = Color(0xFFF5F5F5),
+    dim = Color(0xFFA0A0A0), faint = Color(0xFF707070), trackOff = Color(0xFF303030),
+    thumbOff = Color(0xFFBDBDBD), btn = Color.White.copy(alpha = 0.05f), shadow = 0.dp,
 )
 
 val LightExpressivePalette = ExpressivePalette(
-    bg = Color(0xFFF4F4F4), surfaceHi = Color(0xFFFFFFFF), text = Color(0xFF171717),
-    dim = Color(0xFF5D5D5D), faint = Color(0xFF8A8A8A), trackOff = Color(0xFFD0D0D0),
-    thumbOff = Color(0xFFFFFFFF), btn = Color.Black.copy(alpha = 0.04f), shadow = 0.dp,
+    bg = Color(0xFFFFFFFF), surfaceHi = Color(0xFFF5F5F5), text = Color(0xFF171717),
+    dim = Color(0xFF777777), faint = Color(0xFF999999), trackOff = Color(0xFFD0D0D0),
+    thumbOff = Color(0xFFFFFFFF), btn = Color.Black.copy(alpha = 0.035f), shadow = 0.dp,
 )
 
 val LocalExpressivePalette = staticCompositionLocalOf { LightExpressivePalette }

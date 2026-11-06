@@ -18,15 +18,11 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
-/**
- * The font row (a Telegram request after 0.9.9): one chip per bundled or system font family, the chosen one
- * marked, a tap reports the family's settings key.
- */
+/** The two approved font families are offered and the selected one is marked. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = Application::class, qualifiers = "en")
 class FontRowTest {
     @get:Rule val compose = createComposeRule()
-
     private val res = RuntimeEnvironment.getApplication().resources
     private val picked = mutableListOf<String>()
 
@@ -35,29 +31,24 @@ class FontRowTest {
         compose.waitForIdle()
     }
 
-    @Test fun everyFamilyIsOfferedAndTheDefaultIsMarked() {
+    @Test fun onlyGeistFamiliesAreOfferedAndTheDefaultIsMarked() {
         show(LauncherSettings.FONT_DEFAULT)
-
         compose.onNodeWithText(res.getString(R.string.settings_font)).assertIsDisplayed()
         LauncherSettings.FONTS.forEach { compose.onNodeWithTag(fontChipTag(it)).performScrollTo().assertIsDisplayed() }
         compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().assertIsSelected()
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_SERIF)).performScrollTo().assertIsNotSelected()
-        assertThat(LauncherSettings.FONTS).hasSize(7)
+        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_GEIST_MONO)).performScrollTo().assertIsNotSelected()
+        assertThat(LauncherSettings.FONTS).hasSize(2)
     }
 
-    @Test fun aChipPicksItsFamily() {
+    @Test fun aChipPicksGeistMono() {
         show(LauncherSettings.FONT_DEFAULT)
-
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_SERIF)).performScrollTo().performClick()
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_CURSIVE)).performScrollTo().performClick()
-
-        assertThat(picked).containsExactly(LauncherSettings.FONT_SERIF, LauncherSettings.FONT_CURSIVE).inOrder()
+        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_GEIST_MONO)).performScrollTo().performClick()
+        assertThat(picked).containsExactly(LauncherSettings.FONT_GEIST_MONO)
     }
 
-    @Test fun theChosenFamilyIsMarked() {
-        show(LauncherSettings.FONT_MONOSPACE)
-
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_MONOSPACE)).performScrollTo().assertIsSelected()
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().assertIsNotSelected()
+    @Test fun aLegacyStoredChoiceIsShownAsGeist() {
+        show("serif")
+        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().assertIsSelected()
+        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_GEIST_MONO)).performScrollTo().assertIsNotSelected()
     }
 }

@@ -18,65 +18,43 @@ data class LauncherColors(
     /** Signal quality colors, index 0 (weakest) .. 4 (strongest). */
     val signal: List<Color>,
     val signalFaint: Color,
-    /** The status-bar flag glyphs (Bluetooth, VPN, alarm, DND, …) — a vivid azure matching the
-     *  battery/signal ramps' brightness; the M3 theme primary read pastel on the dark scrim. */
+    /** Monochrome status glyphs (Bluetooth, VPN, alarm, DND, …) over the wallpaper. */
     val statusFlag: Color,
     val dockScrim: Color,
     val pageIndicatorActive: Color,
     val pageIndicatorInactive: Color,
 ) {
-    /** Smooth red→yellow→green ramp: red at 0 %, yellow at the 50 % midpoint, green at 100 %. */
+    /** Red is reserved for a genuinely low battery; normal levels stay monochrome. */
     fun batteryColor(percent: Int): Color {
         val p = percent.coerceIn(0, 100)
-        return if (p <= 50) {
-            lerp(batteryLow, batteryMedium, p / 50f)
-        } else {
-            lerp(batteryMedium, batteryHigh, (p - 50) / 50f)
-        }
+        return if (p < 20) lerp(batteryLow, batteryMedium, p / 20f) else batteryHigh
     }
 
     fun signalColor(level: Int): Color = signal[level.coerceIn(0, 4)]
 }
 
 internal val LightLauncherColors = LauncherColors(
-    // Vivid battery ramp (user choice 2026-07-11): the ramp renders on dark scrims/wallpaper in
-    // both themes, and the old calmer stops read pale on the battery widget's large ring.
-    batteryHigh = Color(0xFF00FF6A),
-    batteryMedium = Color(0xFFFFEA00),
-    batteryLow = Color(0xFFFF1744),
-    // Signal levels share the battery ramp's vividness (Wi-Fi + mobile bars/labels use these).
-    signal = listOf(
-        Color(0xFFFF1744),
-        Color(0xFFFF9100),
-        Color(0xFFFFEA00),
-        Color(0xFF00FF6A),
-        Color(0xFF00FF6A),
-    ),
+    batteryHigh = Color(0xFFBDBDBD),
+    batteryMedium = Color(0xFFBDBDBD),
+    batteryLow = Color(0xFFE53935),
+    signal = List(5) { Color(0xFFBDBDBD) },
     signalFaint = Color(0x73FFFFFF),
-    statusFlag = Color(0xFF448AFF),
+    statusFlag = Color(0xFFF5F5F5),
     dockScrim = Color(0x2EFFFFFF),
     pageIndicatorActive = Color(0xFFFFFFFF),
     pageIndicatorInactive = Color(0x66FFFFFF),
 )
 
 internal val DarkLauncherColors = LauncherColors(
-    // Same vivid battery ramp as light — the dark pastels were the "pale green" the user reported.
-    batteryHigh = Color(0xFF00FF6A),
-    batteryMedium = Color(0xFFFFEA00),
-    batteryLow = Color(0xFFFF1744),
-    // Same vivid signal ramp as light — the dark pastels read washed out on the scrim.
-    signal = listOf(
-        Color(0xFFFF1744),
-        Color(0xFFFF9100),
-        Color(0xFFFFEA00),
-        Color(0xFF00FF6A),
-        Color(0xFF00FF6A),
-    ),
+    batteryHigh = Color(0xFFBDBDBD),
+    batteryMedium = Color(0xFFBDBDBD),
+    batteryLow = Color(0xFFE53935),
+    signal = List(5) { Color(0xFFBDBDBD) },
     signalFaint = Color(0x29FFFFFF),
-    statusFlag = Color(0xFF448AFF),
+    statusFlag = Color(0xFFF5F5F5),
     dockScrim = Color(0x12FFFFFF),
     pageIndicatorActive = Color(0xFFFFFFFF),
-    pageIndicatorInactive = Color(0x4DEAF0FF),
+    pageIndicatorInactive = Color(0x66FFFFFF),
 )
 
 val LocalLauncherColors = staticCompositionLocalOf<LauncherColors> {

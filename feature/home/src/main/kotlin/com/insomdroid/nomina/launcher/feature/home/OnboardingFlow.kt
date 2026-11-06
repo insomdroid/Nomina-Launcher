@@ -335,7 +335,7 @@ private fun PermissionsPage() {
     var openNotifAfterChain by remember { mutableStateOf(false) }
     val permissionsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
-    ) { result ->
+    ) { _ ->
         refresh()
         if (openNotifAfterChain) {
             openNotifAfterChain = false

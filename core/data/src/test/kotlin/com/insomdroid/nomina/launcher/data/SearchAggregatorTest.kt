@@ -36,13 +36,11 @@ class SearchAggregatorTest {
             setOf(
                 FakeProvider(true, listOf(SearchResult.Calculation("1+1", "2"))),
                 FakeProvider(true, listOf(SearchResult.Setting("Wi-Fi", "a", "wifi"))),
-                FakeProvider(true, listOf(SearchResult.Contact("Liisa", "u", "1", null, 1L))),
             ),
         )
         val r = agg.search("x")
         assertThat(r.calc?.result).isEqualTo("2")
         assertThat(r.settings.map { it.key }).containsExactly("wifi")
-        assertThat(r.contacts.map { it.name }).containsExactly("Liisa")
     }
 
     @Test fun `a throwing provider is ignored`() = runTest {

@@ -638,8 +638,8 @@ private fun AppDrawerContent(
                     if (showScrubber && !searching && itemCount > 1) {
                         val maxScroll = (itemCount - 1).coerceAtLeast(1)
                         val progress = (state.firstVisibleItemIndex.toFloat() / maxScroll).coerceIn(0f, 1f)
-                        val thumbHeight = (scrubberTrackHeight * (state.layoutInfo.visibleItemsInfo.size.toFloat() / itemCount))
-                            .coerceIn(22.dp, scrubberTrackHeight)
+                        val thumbHeight = 28.dp.coerceAtMost(scrubberTrackHeight)
+                        val scrubberPalette = LocalExpressivePalette.current
                         Box(
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
@@ -677,15 +677,23 @@ private fun AppDrawerContent(
                                         }
                                     }
                                 },
-
                             contentAlignment = Alignment.TopCenter,
                         ) {
+                            // A hairline track and a short accent thumb replace the old long,
+                            // heavy-looking scrollbar. The wider parent remains the touch target.
                             Box(
                                 Modifier
+                                    .fillMaxHeight()
+                                    .width(1.dp)
+                                    .background(scrubberPalette.trackOff, RoundedCornerShape(1.dp)),
+                            )
+                            Box(
+                                Modifier
+                                    .align(Alignment.TopCenter)
                                     .offset(y = (scrubberTrackHeight - thumbHeight) * progress)
-                                    .width(3.dp)
+                                    .width(2.dp)
                                     .height(thumbHeight)
-                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), RoundedCornerShape(4.dp)),
+                                    .background(scrubberPalette.accent, RoundedCornerShape(2.dp)),
                             )
                         }
                     }

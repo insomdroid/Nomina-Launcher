@@ -96,7 +96,6 @@ import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
 import com.insomdroid.nomina.ui.component.LocalThemedIcons
 import com.insomdroid.nomina.ui.component.NotificationBadge
-import com.insomdroid.nomina.ui.expressive.Accent
 import com.insomdroid.nomina.ui.launcherFontFamily
 import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
@@ -703,10 +702,10 @@ private fun BatchTimesEditor(initial: String, onSave: (String) -> Unit, onDismis
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(text) }) { Text(stringResource(R.string.settings_people_batch_times_save), color = Accent) }
+            TextButton(onClick = { onSave(text) }) { Text(stringResource(R.string.settings_people_batch_times_save), color = MaterialTheme.colorScheme.onSurface) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = Accent) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
         },
     )
 }
@@ -737,7 +736,7 @@ private fun ChoicePicker(
                     ) {
                         Text(
                             stringResource(labelRes),
-                            color = if (selected == value) Accent else p.text,
+                            color = if (selected == value) p.text else p.dim,
                             fontSize = 16.sp,
                         )
                     }
@@ -745,7 +744,7 @@ private fun ChoicePicker(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = Accent) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
         },
     )
 }
@@ -778,7 +777,7 @@ private fun IconPackPicker(
                 ) {
                     Text(
                         stringResource(R.string.settings_icon_pack_system),
-                        color = if (selected.isBlank()) Accent else p.text,
+                        color = if (selected.isBlank()) p.text else p.dim,
                         fontSize = 16.sp,
                     )
                 }
@@ -792,7 +791,7 @@ private fun IconPackPicker(
                     ) {
                         Text(
                             pack.label,
-                            color = if (selected == pack.packageName) Accent else p.text,
+                            color = if (selected == pack.packageName) p.text else p.dim,
                             fontSize = 16.sp,
                         )
                     }
@@ -800,7 +799,7 @@ private fun IconPackPicker(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = Accent) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
         },
     )
 }
@@ -856,7 +855,7 @@ private fun SingleAppPicker(
                         .padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(stringResource(R.string.settings_left_edge_none), color = Accent, fontSize = 16.sp)
+                    Text(stringResource(R.string.settings_left_edge_none), color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
                 }
                 apps.forEach { app ->
                     Row(
@@ -873,7 +872,7 @@ private fun SingleAppPicker(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = Accent) }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
         },
     )
 }
@@ -1074,9 +1073,9 @@ internal fun SwitchRow(
             onCheckedChange = onCheckedChange,
             enabled = enabled,
             colors = SwitchDefaults.colors(
-                checkedTrackColor = Accent,
-                checkedThumbColor = Color.White,
-                checkedBorderColor = Accent,
+                checkedTrackColor = p.text,
+                checkedThumbColor = p.bg,
+                checkedBorderColor = p.text,
                 uncheckedTrackColor = p.trackOff,
                 uncheckedThumbColor = p.thumbOff,
                 uncheckedBorderColor = p.trackOff,
@@ -1319,8 +1318,8 @@ private fun SliderRow(
                 onValueChange = onValueChange,
                 valueRange = valueRange,
                 colors = SliderDefaults.colors(
-                    thumbColor = Accent,
-                    activeTrackColor = Accent,
+                    thumbColor = p.text,
+                    activeTrackColor = p.text,
                     inactiveTrackColor = p.trackOff,
                 ),
             )
@@ -1374,7 +1373,7 @@ private fun ColorSwatch(argb: Int, selected: Boolean, enabled: Boolean = true, o
             .background(Color(argb).copy(alpha = fade))
             .border(
                 width = if (selected) 3.dp else 1.dp,
-                color = (if (selected) Accent else p.faint).copy(alpha = fade),
+                color = (if (selected) p.text else p.faint).copy(alpha = fade),
                 shape = CircleShape,
             )
             .testTag(colorSwatchTag(argb))
@@ -1470,11 +1469,11 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
                     onClick = { runCatching { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) } },
                     modifier = Modifier.testTag(DRAWER_WALLPAPER_PICK_TAG),
                 ) {
-                    Text(stringResource(R.string.settings_drawer_wallpaper_pick), color = Accent)
+                    Text(stringResource(R.string.settings_drawer_wallpaper_pick), color = MaterialTheme.colorScheme.onSurface)
                 }
                 if (wallpaper != null) {
                     TextButton(onClick = onClear, modifier = Modifier.testTag(DRAWER_WALLPAPER_REMOVE_TAG)) {
-                        Text(stringResource(R.string.settings_drawer_wallpaper_remove), color = Accent)
+                        Text(stringResource(R.string.settings_drawer_wallpaper_remove), color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -1601,9 +1600,9 @@ private fun HiddenAppsManager(
                             checked = app.key in hiddenKeys,
                             onCheckedChange = { onSetHidden(app.key, it) },
                             colors = SwitchDefaults.colors(
-                                checkedTrackColor = Accent,
-                                checkedThumbColor = Color.White,
-                                checkedBorderColor = Accent,
+                                checkedTrackColor = p.text,
+                                checkedThumbColor = p.bg,
+                                checkedBorderColor = p.text,
                                 uncheckedTrackColor = p.trackOff,
                                 uncheckedThumbColor = p.thumbOff,
                                 uncheckedBorderColor = p.trackOff,
@@ -1675,7 +1674,7 @@ private fun BadgePreview(icon: ImageBitmap?, showDots: Boolean, showCount: Boole
         if (icon != null) {
             Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(56.dp))
         } else {
-            Box(Modifier.size(56.dp).background(Accent, RoundedCornerShape(14.dp)))
+            Box(Modifier.size(56.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp)))
         }
         if (showDots) {
             NotificationBadge(count = 5, showCount = showCount, scale = scale)

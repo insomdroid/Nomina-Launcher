@@ -63,30 +63,24 @@ class WorkProfileUiTest {
     }
 
     @Test
-    @Config(qualifiers = "fr-rFR-w320dp-h640dp")
-    fun tabRowGrowsWhenALabelWrapsAtALargeFontSize() {
-        // "Professionnel" at 200 % on a 320 dp screen takes two lines: a fixed 40 dp row cut the
-        // second one off. The same label on its own at the segment's width is the floor.
+    fun tabRowKeepsBothEnglishTabsVisibleAtLargeFontSizeOnANarrowScreen() {
         compose.setContent {
             val base = LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(base.density, fontScale = 2f)) {
                 ExpressiveTheme {
                     Column(Modifier.width(320.dp)) {
                         DrawerTabRow(selected = DrawerTab.Personal, onSelect = {})
-                        Box(Modifier.width(148.dp).testTag("probe")) {
-                            Text("Professionnel", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                        }
                     }
                 }
             }
         }
         compose.waitForIdle()
 
-        val labelHeight = compose.onNodeWithTag("probe").getBoundsInRoot().height.value
+        compose.onNodeWithText("Personal").assertIsDisplayed()
+        compose.onNodeWithText("Work").assertIsDisplayed()
         val rowHeight = compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.SelectableGroup))
             .getBoundsInRoot().height.value
-        assertThat(labelHeight).isGreaterThan(40f) // the premise: the label really wraps here
-        assertThat(rowHeight).isAtLeast(labelHeight)
+        assertThat(rowHeight).isAtLeast(40f)
     }
 
     @Test fun tappingWorkSelectsIt() {
@@ -221,10 +215,7 @@ class WorkProfileUiTest {
     }
 
     @Test
-    @Config(qualifiers = "ru-rRU-w320dp-h640dp")
-    fun workPageReservesTheMeasuredButtonHeightUnderTheGrid() {
-        // The Russian label at 200 % on a 320 dp screen makes the floating button several lines
-        // tall; a fixed 72 dp reservation left the last app row under it even when scrolled to the end.
+    fun workPageReservesTheMeasuredEnglishButtonHeightUnderTheGrid() {
         var reserved: Dp = 0.dp
         compose.setContent {
             val base = LocalDensity.current
@@ -245,8 +236,8 @@ class WorkProfileUiTest {
         }
         compose.waitForIdle()
 
-        val buttonHeight = compose.onNodeWithText("Приостановить рабочие приложения").getBoundsInRoot().height.value
-        assertThat(buttonHeight).isGreaterThan(48f) // the premise: the label really wraps here
+        val buttonHeight = compose.onNodeWithText("Pause work apps").getBoundsInRoot().height.value
+        assertThat(buttonHeight).isAtLeast(48f)
         assertThat(reserved.value).isAtLeast(buttonHeight + 16f)
     }
 

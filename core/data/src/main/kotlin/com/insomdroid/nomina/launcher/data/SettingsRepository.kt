@@ -127,7 +127,6 @@ class SettingsRepository @Inject constructor(
             notificationDotScale = (p[Keys.NOTIF_DOT_SCALE] ?: 1.0f).coerceIn(MIN_DOT_SCALE, MAX_DOT_SCALE),
             useThemedIcons = p[Keys.USE_THEMED_ICONS] ?: false,
             iconPackPackage = p[Keys.ICON_PACK] ?: "",
-            searchContacts = p[Keys.SEARCH_CONTACTS] ?: false,
             leftSwipeAppKey = p[Keys.LEFT_SWIPE_APP_KEY] ?: "",
             weatherAppKey = p[Keys.WEATHER_APP_KEY] ?: "",
             desktopLocked = p[Keys.DESKTOP_LOCKED] ?: false,
@@ -151,19 +150,12 @@ class SettingsRepository @Inject constructor(
             twoLineDrawerLabels = p[Keys.TWO_LINE_DRAWER_LABELS] ?: true,
             appLabelColor = p[Keys.APP_LABEL_COLOR] ?: 0xFFFFFFFF.toInt(),
             drawerLabelColor = p[Keys.DRAWER_LABEL_COLOR],
-            showStatusBar = p[Keys.SHOW_STATUS_BAR] ?: false,
             showWeather = p[Keys.SHOW_WEATHER] ?: true,
-            networkPlaceNames = p[Keys.NETWORK_PLACE_NAMES] ?: false,
-            hideSystemStatusBar = p[Keys.HIDE_SYSTEM_STATUS_BAR] ?: false,
-            statusBarScrimOpacity = (p[Keys.STATUS_BAR_SCRIM] ?: LauncherSettings.DEFAULT_STATUS_BAR_SCRIM).coerceIn(0f, 1f),
             widgetTonalBackground = p[Keys.WIDGET_TONAL_BACKGROUND] ?: false,
             widgetEdgesAlignWithIcons = p[Keys.WIDGET_INSET_LIKE_ICONS] ?: false,
             notificationWidgetCountStyle = (p[Keys.NOTIF_WIDGET_COUNT_STYLE] ?: LauncherSettings.COUNT_NUMBER)
                 .let { if (it == LauncherSettings.COUNT_DOT || it == LauncherSettings.COUNT_NONE) it else LauncherSettings.COUNT_NUMBER },
             doubleTapToLock = p[Keys.DOUBLE_TAP_LOCK] ?: false,
-            lockSoundsEnabled = p[Keys.LOCK_SOUNDS_ENABLED] ?: false,
-            lockSoundUri = p[Keys.LOCK_SOUND_URI].orEmpty(),
-            unlockSoundUri = p[Keys.UNLOCK_SOUND_URI].orEmpty(),
             peoplePrivacy = (p[Keys.PEOPLE_PRIVACY] ?: LauncherSettings.PRIVACY_ALL).let {
                 if (it == LauncherSettings.PRIVACY_SENDER || it == LauncherSettings.PRIVACY_COUNT) it
                 else LauncherSettings.PRIVACY_ALL
@@ -285,9 +277,6 @@ class SettingsRepository @Inject constructor(
         }
 
     suspend fun setDoubleTapToLock(value: Boolean) = edit { it[Keys.DOUBLE_TAP_LOCK] = value }
-    suspend fun setLockSoundsEnabled(value: Boolean) = edit { it[Keys.LOCK_SOUNDS_ENABLED] = value }
-    suspend fun setLockSoundUri(uri: String) = edit { it[Keys.LOCK_SOUND_URI] = uri }
-    suspend fun setUnlockSoundUri(uri: String) = edit { it[Keys.UNLOCK_SOUND_URI] = uri }
 
     /** App keys hidden from the app drawer (see AppItem.key). */
     val hiddenApps: Flow<Set<String>> = dataStore.data.map { p ->
@@ -465,7 +454,6 @@ class SettingsRepository @Inject constructor(
     /** Count indicator style of the built-in notifications widget (see LauncherSettings.COUNT_*). */
     suspend fun setWidgetTonalBackground(value: Boolean) = edit { it[Keys.WIDGET_TONAL_BACKGROUND] = value }
     suspend fun setNotificationWidgetCountStyle(style: String) = edit { it[Keys.NOTIF_WIDGET_COUNT_STYLE] = style }
-    suspend fun setSearchContacts(value: Boolean) = edit { it[Keys.SEARCH_CONTACTS] = value }
 
     /** Sets (or, for a blank/null [key], clears) the app launched by the left-edge home swipe. */
     suspend fun setLeftSwipeAppKey(key: String?) = edit { it[Keys.LEFT_SWIPE_APP_KEY] = key?.trim().orEmpty() }
@@ -542,19 +530,7 @@ class SettingsRepository @Inject constructor(
     /** Lets app-drawer labels wrap onto a second line. */
     suspend fun setTwoLineDrawerLabels(value: Boolean) = edit { it[Keys.TWO_LINE_DRAWER_LABELS] = value }
 
-    /** Shows/hides the home status bar (clock + battery + signal). */
-    suspend fun setShowStatusBar(value: Boolean) = edit { it[Keys.SHOW_STATUS_BAR] = value }
-
     suspend fun setShowWeather(value: Boolean) = edit { it[Keys.SHOW_WEATHER] = value }
-
-    suspend fun setNetworkPlaceNames(value: Boolean) = edit { it[Keys.NETWORK_PLACE_NAMES] = value }
-
-    /** Hides/shows the system status bar while the launcher is foreground (immersive home). */
-    suspend fun setHideSystemStatusBar(value: Boolean) = edit { it[Keys.HIDE_SYSTEM_STATUS_BAR] = value }
-
-    /** Darkness of the themed status bar's scrim (0..1). */
-    suspend fun setStatusBarScrimOpacity(value: Float) =
-        edit { it[Keys.STATUS_BAR_SCRIM] = value.coerceIn(0f, 1f) }
 
     /** Every app key the settings refer to: hidden apps, custom labels and icons, drawer folders,
      *  the left-swipe and weather apps (see [APP_KEY_PREFS]; the dock is rows since 0.9.7). */
@@ -651,9 +627,6 @@ class SettingsRepository @Inject constructor(
             val reminderDismissed = prefs[Keys.DEFAULT_REMINDER_DISMISSED]
             val firstRunFresh = prefs[Keys.FIRST_RUN_FRESH]
             val heldNotifications = prefs[Keys.PEOPLE_HELD]
-            // The picked sounds' file permissions belong to this phone (see DEVICE_LOCAL_KEYS).
-            val lockSound = prefs[Keys.LOCK_SOUND_URI]
-            val unlockSound = prefs[Keys.UNLOCK_SOUND_URI]
             // Device-local usage stats aren't in the backup (see exportRaw) — preserve this device's.
             val appUsage = prefs[stringPreferencesKey(AppUsageRepository.USAGE_KEY)]
             // Gallery images are files on this phone (not in a backup): keep them for the apps, the
@@ -691,8 +664,6 @@ class SettingsRepository @Inject constructor(
             if (reminderDismissed != null) prefs[Keys.DEFAULT_REMINDER_DISMISSED] = reminderDismissed
             if (firstRunFresh != null) prefs[Keys.FIRST_RUN_FRESH] = firstRunFresh
             if (heldNotifications != null) prefs[Keys.PEOPLE_HELD] = heldNotifications
-            if (lockSound != null) prefs[Keys.LOCK_SOUND_URI] = lockSound
-            if (unlockSound != null) prefs[Keys.UNLOCK_SOUND_URI] = unlockSound
             if (appUsage != null) prefs[stringPreferencesKey(AppUsageRepository.USAGE_KEY)] = appUsage
             for ((name, images) in localImages) {
                 if (images.isEmpty()) continue
@@ -768,14 +739,10 @@ class SettingsRepository @Inject constructor(
         val NOTIF_WIDGET_COUNT_STYLE = stringPreferencesKey("notif_widget_count_style")
         val USE_THEMED_ICONS = booleanPreferencesKey("use_themed_icons")
         val ICON_PACK = stringPreferencesKey("icon_pack_package")
-        val SEARCH_CONTACTS = booleanPreferencesKey("search_contacts")
         val LEFT_SWIPE_APP_KEY = stringPreferencesKey("left_swipe_app_key")
         val WEATHER_APP_KEY = stringPreferencesKey("weather_app_key")
         val DESKTOP_LOCKED = booleanPreferencesKey("desktop_locked")
         val DOUBLE_TAP_LOCK = booleanPreferencesKey("double_tap_lock")
-        val LOCK_SOUNDS_ENABLED = booleanPreferencesKey("lock_sounds_enabled")
-        val LOCK_SOUND_URI = stringPreferencesKey("lock_sound_uri")
-        val UNLOCK_SOUND_URI = stringPreferencesKey("unlock_sound_uri")
         val SHOW_FREQUENT_APPS = booleanPreferencesKey("show_frequent_apps")
         val DRAWER_OPENS_AT_TOP = booleanPreferencesKey("drawer_opens_at_top")
         val SORT_DRAWER_FOLDERS = booleanPreferencesKey("sort_drawer_folders")
@@ -796,11 +763,7 @@ class SettingsRepository @Inject constructor(
         val DRAWER_LABEL_COLOR = intPreferencesKey("drawer_label_color")
         val TWO_LINE_HOME_LABELS = booleanPreferencesKey("two_line_home_labels")
         val TWO_LINE_DRAWER_LABELS = booleanPreferencesKey("two_line_drawer_labels")
-        val SHOW_STATUS_BAR = booleanPreferencesKey("show_status_bar")
         val SHOW_WEATHER = booleanPreferencesKey("show_weather")
-        val NETWORK_PLACE_NAMES = booleanPreferencesKey("network_place_names")
-        val HIDE_SYSTEM_STATUS_BAR = booleanPreferencesKey("hide_system_status_bar")
-        val STATUS_BAR_SCRIM = floatPreferencesKey("status_bar_scrim")
         val DEFAULT_LAYOUT_SEEDED = booleanPreferencesKey("default_layout_seeded")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
         val DEFAULT_REMINDER_DISMISSED = booleanPreferencesKey("default_reminder_dismissed")
@@ -853,7 +816,6 @@ class SettingsRepository @Inject constructor(
         /** Preference keys whose value must be restored as Float (JSON loses the Int/Float distinction). */
         val FLOAT_KEYS = setOf(
             "dock_opacity", "drawer_opacity", "notif_dot_scale", "app_label_scale", "icon_scale", "drawer_icon_scale",
-            "status_bar_scrim", "long_press_scale", "drawer_blur_strength", "drawer_picture_dim",
         )
         val INT_KEYS = setOf(
             "dock_columns", "dock_bottom_spacing", "home_columns", "home_rows", "drawer_columns", "app_label_color",
@@ -867,11 +829,7 @@ class SettingsRepository @Inject constructor(
             "dock_enabled", "show_drawer_search", "swipe_up_drawer", "swipe_down_notif", "folder_swipe_first_app",
             "hide_home_apps_from_drawer", "widget_inset_like_icons",
             "show_dock_labels", "show_home_labels", "show_drawer_labels", "show_page_indicator",
-            "show_notif_dots", "notif_dot_count", "use_themed_icons", "search_contacts",
-            "desktop_locked", "show_frequent_apps", "drawer_opens_at_top", "show_status_bar",
-            "show_weather", "hide_system_status_bar", "double_tap_lock", "widget_tonal_background",
             "two_line_home_labels", "two_line_drawer_labels", "people_batch_enabled", "people_show_apps",
-            "network_place_names", "infinite_scroll", "lock_sounds_enabled", "sort_drawer_folders",
             "show_home_folder_names", "show_drawer_folder_names", "mix_drawer_folders", "blur_behind_drawer",
             "theme_all_icons",
         )
@@ -944,8 +902,7 @@ class SettingsRepository @Inject constructor(
             "auto_update_enabled", "update_last_check", "update_last_notified_version",
             "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications",
             "default_reminder_dismissed",
-            // A picked lock/unlock sound is a content URI this phone holds a read grant for; another
-            // phone could not play it.
+            // Legacy lock/unlock sound URIs are ignored after the feature's removal.
             "lock_sound_uri", "unlock_sound_uri",
         )
     }

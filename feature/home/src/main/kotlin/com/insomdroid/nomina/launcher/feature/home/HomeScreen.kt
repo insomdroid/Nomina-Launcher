@@ -718,7 +718,9 @@ fun HomeScreen(
                     Icon(
                         painter = painterResource(LauncherIcons.ExpandMore),
                         contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
-                        modifier = Modifier.size(24.dp).graphicsLayer { rotationZ = if (settings.dockExpanded) 180f else 0f }
+                        modifier = Modifier
+                            .size(24.dp)
+                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
                             .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
                         tint = Color.White,
                     )
@@ -752,29 +754,30 @@ fun HomeScreen(
                     onDropOnTile = { app, target -> dropOnDock(app, target, DragSource.Dock) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp),
+                        .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp)
+                        .padding(bottom = 12.dp),
                 )
                 }
             }
-            // Permanent mini dock: camera, drawer search and the system's selected browser.
+            // Compact Nothing-inspired mini dock: camera, app search and browser.
             Surface(
                 modifier = Modifier
-                    .width(196.dp)
+                    .width(124.dp)
                     .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 4.dp)
-                    .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(22.dp)),
+                    .padding(top = 2.dp, bottom = 16.dp)
+                    .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
                 color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
-                shape = RoundedCornerShape(22.dp),
+                shape = RoundedCornerShape(18.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(42.dp),
+                    modifier = Modifier.fillMaxWidth().height(34.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        painter = painterResource(android.R.drawable.ic_menu_camera),
+                        painter = painterResource(R.drawable.ic_mini_camera),
                         contentDescription = "Camera",
-                        modifier = Modifier.size(18.dp).clickable {
+                        modifier = Modifier.size(16.dp).clickable {
                             val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
                             runCatching { context.startActivity(intent) }.onFailure {
                                 runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
@@ -785,13 +788,13 @@ fun HomeScreen(
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = "Search apps",
-                        modifier = Modifier.size(18.dp).clickable { onOpenDrawer() },
+                        modifier = Modifier.size(16.dp).clickable { onOpenDrawer() },
                         tint = Color.White,
                     )
                     Icon(
-                        painter = painterResource(android.R.drawable.ic_menu_view),
+                        painter = painterResource(R.drawable.ic_mini_browser),
                         contentDescription = "Browser",
-                        modifier = Modifier.size(18.dp).clickable {
+                        modifier = Modifier.size(16.dp).clickable {
                             val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
                             runCatching { context.startActivity(intent) }.onFailure {
                                 runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }

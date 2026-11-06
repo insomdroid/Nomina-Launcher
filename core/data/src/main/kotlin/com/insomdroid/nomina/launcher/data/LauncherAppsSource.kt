@@ -420,9 +420,7 @@ class LauncherAppsSource @Inject constructor(
         } else {
             null
         }
-        val generatedThemed = if (
-            themed && themeAll && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        ) {
+        val generatedThemed = if (themed && themeAll) {
             generatedThemedIcon(info, dark)
         } else {
             null
@@ -451,7 +449,6 @@ class LauncherAppsSource @Inject constructor(
      * Generates a themed icon when an app has no native monochrome layer. Adaptive foregrounds retain
      * their transparent glyph shape; opaque legacy artwork gets a best-effort edge-background removal.
      */
-    @RequiresApi(Build.VERSION_CODES.S)
     private fun generatedThemedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
         val icon = info.getIcon(0) ?: return null
         val adaptive = icon as? AdaptiveIconDrawable
@@ -465,13 +462,10 @@ class LauncherAppsSource @Inject constructor(
         return AdaptiveIconDrawable(ColorDrawable(bg), rendered)
     }
 
-    /** Background/foreground colours for themed icons, from the system dynamic (Monet) palette. */
-    @RequiresApi(Build.VERSION_CODES.S)
+    /** Neutral monochrome surfaces that follow the system light/dark appearance. */
     private fun themedColors(dark: Boolean): Pair<Int, Int> = if (dark) {
-        context.getColor(android.R.color.system_neutral1_800) to
-            context.getColor(android.R.color.system_accent1_100)
+        0xFF171717.toInt() to 0xFFF5F5F5.toInt()
     } else {
-        context.getColor(android.R.color.system_accent1_100) to
-            context.getColor(android.R.color.system_neutral2_700)
+        0xFFF0F0F0.toInt() to 0xFF171717.toInt()
     }
 }

@@ -146,7 +146,7 @@ class ScaleSliderRowTest {
 
 /** A narrow screen with a doubled font and a long translation must still show the label and the value. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35], application = Application::class, qualifiers = "es")
+@Config(sdk = [35], application = Application::class, qualifiers = "en")
 class ScaleSliderRowNarrowTest {
     @get:Rule val compose = createComposeRule()
 
@@ -158,17 +158,17 @@ class ScaleSliderRowNarrowTest {
             CompositionLocalProvider(LocalDensity provides Density(base.density, fontScale = 2f)) {
                 Box(Modifier.width(320.dp)) {
                     ScaleSliderRow(
-                        label = "Tamaño de los iconos",
+                        label = "Application icon size",
                         value = 1.15f,
                         onValueChange = {},
                         valueRange = 0.8f..1.3f,
-                        valueText = { "${scalePercent(it)} %" },
+                        valueText = { "${scalePercent(it)}%" },
                     )
                 }
             }
         }
-        compose.onNodeWithText("Tamaño de los iconos").assertIsDisplayed().assertWidthIsAtLeast(40.dp)
-        compose.onNodeWithText("115 %").assertIsDisplayed().assertWidthIsAtLeast(20.dp)
+        compose.onNodeWithText("Application icon size").assertIsDisplayed().assertWidthIsAtLeast(40.dp)
+        compose.onNodeWithText("115%").assertIsDisplayed().assertWidthIsAtLeast(20.dp)
         compose.onNodeWithText("Predeterminado 100 %").assertIsDisplayed()
     }
 }

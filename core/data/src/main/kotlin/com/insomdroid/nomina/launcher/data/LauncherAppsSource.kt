@@ -38,6 +38,17 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
+/**
+ * Applies the icon-source priority shared by the launcher and its unit tests:
+ * a mapped pack icon wins; otherwise themed artwork is preferred before the original icon.
+ */
+internal fun <T : Any> selectAppIcon(
+    packed: T?,
+    nativeThemed: T?,
+    generatedThemed: T?,
+    original: T?,
+): T? = packed ?: nativeThemed ?: generatedThemed ?: original
+
 /** Pure decision behind [LauncherAppsSource.isAppInstalled]; [profile] is the profile lookup's outcome. */
 internal fun <U : Any> installVerdict(profile: Result<U?>, appInfo: (U) -> Result<*>): Boolean {
     // A lookup that THREW is not a removed profile: only a successful null answer is definitive.
@@ -398,15 +409,26 @@ class LauncherAppsSource @Inject constructor(
         val info = launcherApps.getActivityList(appItem.packageName, appItem.user)
             .firstOrNull { it.componentName.className == appItem.className }
             ?: return@runCatching null
-        // A selected icon pack overrides themed icons: use the pack's drawable if it maps this app,
-        // otherwise fall through to the normal icon below.
-        if (iconPack.isNotBlank()) {
-            iconPacks.get(iconPack)?.getIcon(appItem.componentName)?.let { return@runCatching it }
-        } else if (themed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            themedIcon(info, dark)?.let { return@runCatching it }
-            if (themeAll) silhouetteThemedIcon(info, dark)?.let { return@runCatching it }
+        // A mapped icon-pack entry wins. When the selected pack has no mapping for this app,
+        // keep the Material You setting active instead of silently reverting to the full-colour icon.
+        val packed = if (iconPack.isNotBlank()) {
+            iconPacks.get(iconPack)?.getIcon(appItem.componentName)
+        } else {
+            null
         }
-        info.getBadgedIcon(0)
+        val nativeThemed = if (themed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            themedIcon(info, dark)
+        } else {
+            null
+        }
+        val generatedThemed = if (
+            themed && themeAll && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        ) {
+            silhouetteThemedIcon(info, dark)
+        } else {
+            null
+        }
+        selectAppIcon(packed, nativeThemed, generatedThemed, info.getBadgedIcon(0))
     }.getOrNull()
 
     /**

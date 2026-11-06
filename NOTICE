@@ -53,6 +53,6 @@ implementations here are original.
 Weather data in the clock widget is provided by Open-Meteo
 (https://open-meteo.com/), licensed under CC BY 4.0.
 
-When the device has no local geocoder backend, the place name shown next to
-the weather uses the free client-side reverse-geocoding API by BigDataCloud
-(https://www.bigdatacloud.com/).
+The imported upstream source included a reference to BigDataCloud's free
+client-side reverse-geocoding API (https://www.bigdatacloud.com/). Nomina no
+longer calls this API; this attribution is retained to preserve the upstream notice.

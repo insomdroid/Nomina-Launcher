@@ -549,13 +549,15 @@ fun HomeScreen(
                             pass = PointerEventPass.Initial,
                         )
                         var moved = false
-                        do {
+                        var pointerPressed = true
+                        while (pointerPressed) {
                             val event = awaitPointerEvent(PointerEventPass.Initial)
                             val change = event.changes.firstOrNull { it.id == down.id } ?: break
                             if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) {
                                 moved = true
                             }
-                        } while (change.pressed)
+                            pointerPressed = change.pressed
+                        }
                         if (!moved && !dragController.isOverDock(down.position + homeOrigin)) {
                             viewModel.setDockExpanded(false)
                         }

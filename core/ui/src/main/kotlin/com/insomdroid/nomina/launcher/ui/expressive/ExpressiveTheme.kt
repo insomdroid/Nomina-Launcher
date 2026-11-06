@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Warm-orange accent shared by the settings page and the drawer search results. */
+/** Nothing Red, reserved for critical or live status rather than ordinary controls. */
 val Accent = Color(0xFFD71920)
 
 data class ExpressivePalette(
@@ -21,9 +21,7 @@ data class ExpressivePalette(
     val thumbOff: Color,
     val btn: Color,
     val shadow: Dp,
-    /** The accent as a FOREGROUND on [surfaceHi] (titles, result text, icon tints): [Accent] itself on the system
-     *  palettes, pushed toward the text on a chosen drawer colour whose cards it would vanish on (see the drawer's
-     *  palette). Accent-filled surfaces (a selected tab, a button) keep [Accent] with their own white text. */
+    /** Reserved red signal colour. Ordinary controls use text/onSurface colours instead. */
     val accent: Color = Accent,
 )
 

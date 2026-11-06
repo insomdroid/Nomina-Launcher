@@ -10,6 +10,8 @@ data class LauncherSettings(
     val homeRows: Int = 6,
     val drawerColumns: Int = 4,
     val showDrawerSearch: Boolean = true,
+    val hideStatusBar: Boolean = false,
+    val showDrawerScrubber: Boolean = true,
     val swipeUpForDrawer: Boolean = true,
     val swipeDownForNotifications: Boolean = true,
     /** Issue #17 (opt-in, Nova-style): a swipe up that starts on a HOME folder icon opens the folder's first app

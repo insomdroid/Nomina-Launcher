@@ -2,17 +2,13 @@ package com.insomdroid.nomina.data.smartspace
 
 import java.util.Locale
 
-/** A resolved place name and whether it came from the network fallback. */
-data class PlaceName(val name: String, val fromNetwork: Boolean)
+/** A place name resolved by Android's local Geocoder. */
+data class PlaceName(val name: String)
 
 /**
- * The weather's place name: the device's own geocoder first, then (only when the user opted in) the
- * network fallback. The last name is kept for its rounded area so a transient geocoder failure does
- * not blank a name the user was already seeing — but a clearly different area must not keep the
- * previous town, a dead geocoder must not pin a stale name forever, and a name that came from the
- * network is dropped as soon as the fallback is turned off. The area key carries the UI language
- * ([placeAreaKey]): a name resolved in one language is never shown after the user switches the
- * app or system language. Not thread-safe: the weather refresh is its single caller.
+ * Caches the platform Geocoder's last usable name for a rounded area. A transient geocoder failure
+ * does not blank a name already shown, but a different area or an expired entry never reuses it.
+ * The area key includes the UI language so a language switch triggers a fresh lookup.
  */
 internal class PlaceNameCache(
     private val maxAgeMs: Long,
@@ -21,24 +17,19 @@ internal class PlaceNameCache(
     private var name: String? = null
     private var areaKey: String? = null
     private var atMs = 0L
-    private var fromNetwork = false
 
-    /** [network] is null while the network fallback is turned off; it is never called then. */
-    fun resolve(areaKey: String, local: () -> String?, network: (() -> String?)?): PlaceName? {
-        local()?.let { return remember(it, areaKey, fromNetwork = false) }
-        network?.invoke()?.let { return remember(it, areaKey, fromNetwork = true) }
+    fun resolve(areaKey: String, local: () -> String?): PlaceName? {
+        local()?.let { return remember(it, areaKey) }
         val alive = now() - atMs < maxAgeMs
-        val allowed = network != null || !fromNetwork
         val cached = name
-        return if (cached != null && areaKey == this.areaKey && alive && allowed) PlaceName(cached, fromNetwork) else null
+        return if (cached != null && areaKey == this.areaKey && alive) PlaceName(cached) else null
     }
 
-    private fun remember(name: String, areaKey: String, fromNetwork: Boolean): PlaceName {
+    private fun remember(name: String, areaKey: String): PlaceName {
         this.name = name
         this.areaKey = areaKey
         this.atMs = now()
-        this.fromNetwork = fromNetwork
-        return PlaceName(name, fromNetwork)
+        return PlaceName(name)
     }
 }
 

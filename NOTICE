@@ -25,6 +25,19 @@ This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 Third-party attributions
 ------------------------------------------------------------------------------
 
+The following bundled font software is licensed under the SIL Open Font License,
+Version 1.1. The complete license texts are included in
+core/ui/src/main/assets/licenses/:
+
+  - Geist: Copyright 2024 The Geist Project Authors
+    https://github.com/vercel/geist-font
+  - Geist Mono: Copyright 2024 The Geist Project Authors
+    https://github.com/vercel/geist-font
+  - Doto: Copyright 2024 The Doto Project Authors
+    https://github.com/oliverlalan/Doto
+
+The font files are redistributed under their original OFL 1.1 licenses.
+
 This product includes design and implementation patterns adapted from the
 Android Open Source Project (AOSP) Launcher3, licensed under the
 Apache License, Version 2.0:

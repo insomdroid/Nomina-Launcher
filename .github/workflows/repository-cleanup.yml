@@ -77,8 +77,8 @@ jobs:
           text = gradle.read_text(encoding="utf-8")
 
           text, packaging_count = re.subn(
-              r"\\n    // F-Droid's build server.*?\\n    }\\n\\n(?=    signingConfigs)",
-              "\\n",
+              r"\n    // F-Droid's build server.*?\\n    }\\n\\n(?=    signingConfigs)",
+              "\n,
               text,
               count=1,
               flags=re.S,
@@ -99,7 +99,7 @@ jobs:
               }
               release {"""
           text, debug_count = re.subn(
-              r"        debug \\{.*?        release \\{",
+              r"        debug \{.*?        release \{",
               debug_block,
               text,
               count=1,

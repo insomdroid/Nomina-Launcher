@@ -4,6 +4,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -572,6 +573,11 @@ private fun AppDrawerContent(
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth().border(
+                        1.dp,
+                        searchPalette.trackOff.copy(alpha = 0.7f),
+                        RoundedCornerShape(8.dp),
+                    ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = searchPalette.surfaceHi,
                         unfocusedContainerColor = searchPalette.surfaceHi,

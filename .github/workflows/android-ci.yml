@@ -41,6 +41,11 @@ jobs:
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
+      - name: Report APK size and largest packaged files
+        run: |
+          du -h app/build/outputs/apk/debug/app-debug.apk
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | sort -nr | head -n 25
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:

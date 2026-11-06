@@ -3,7 +3,6 @@
 *Last updated: 2026-10-26 · applies to Nomina v0.9.3 and later
 ([v0.9.2 policy](https://github.com/jrs8205/Nomina/blob/v0.9.2/PRIVACY.md))*
 
-*Tämä seloste suomeksi: [PRIVACY.fi.md](PRIVACY.fi.md)*
 
 Nomina is a free, open-source Android home-screen launcher (Apache 2.0).
 This policy describes exactly what data the app handles. The source code is

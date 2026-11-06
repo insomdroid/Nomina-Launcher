@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Nomina</string>
-    <string name="set_default_launcher">Ustaw jako domyślny launcher</string>
-    <string name="default_launcher_active">Ustawiono jako domyślny launcher</string>
-    <string name="settings_label">Ustawienia Nomina</string>
-</resources>

@@ -5,6 +5,10 @@
     <string name="settings_default_current">Nomina is your default launcher</string>
     <string name="settings_default_tap">Tap to set Nomina as your home app</string>
     <string name="settings_gestures">Gestures</string>
+    <string name="settings_about">About</string>
+    <string name="settings_backup_restore">Backup &amp; restore</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_gestures_interaction">Gestures &amp; interaction</string>
     <string name="settings_show_weather">Weather in the widget</string>
     <string name="settings_weather_app">Tap on weather opens</string>
     <string name="settings_network_place_names">Place name from the internet</string>

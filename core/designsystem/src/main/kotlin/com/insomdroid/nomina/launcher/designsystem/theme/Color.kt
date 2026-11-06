@@ -4,7 +4,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-/** Monochrome system surfaces with Nothing Red reserved for primary actions and selected states. */
+/** Monochrome system surfaces; red is reserved for errors and critical status signals. */
 internal val LightColorScheme = lightColorScheme(
     primary = Color(0xFF171717),
     onPrimary = Color(0xFF090909),

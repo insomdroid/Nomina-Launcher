@@ -1125,7 +1125,7 @@ private fun StepButton(@DrawableRes icon: Int, contentDescription: String, onCli
         Icon(
             painter = painterResource(icon),
             contentDescription = contentDescription,
-            tint = Accent,
+            tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(20.dp),
         )
     }

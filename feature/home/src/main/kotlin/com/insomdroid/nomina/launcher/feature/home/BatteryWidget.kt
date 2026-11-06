@@ -53,7 +53,7 @@ import com.insomdroid.nomina.ui.themedTextStyle
 class BatteryWidgetViewModel @Inject constructor(
     batteryMonitor: BatteryMonitor,
 ) : ViewModel() {
-    /** The same ACTION_BATTERY_CHANGED stream the status bar renders — the system's own rhythm,
+    /** The same ACTION_BATTERY_CHANGED broadcast Android sends — the system's own rhythm,
      *  updated on every percent/charging change, so this can never lag the official indicator. */
     val status: StateFlow<BatteryStatus?> = batteryMonitor.status
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -61,7 +61,7 @@ class BatteryWidgetViewModel @Inject constructor(
 
 /**
  * The built-in battery widget: an app-icon-sized ring gauge with the percent in the middle and a
- * bolt while charging, in the launcher's shared vivid battery ramp (the status bar uses the same
+ * bolt while charging, in the launcher's shared vivid battery ramp (the launcher uses the same
  * [com.insomdroid.nomina.designsystem.theme.LauncherColors], so the two always agree). Scales
  * with its footprint like the other built-ins. Tap opens the system battery screen.
  */
@@ -121,7 +121,7 @@ fun BatteryWidget(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (s.charging) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_status_charging),
+                        painter = painterResource(R.drawable.ic_battery_charging),
                         contentDescription = stringResource(R.string.status_desc_charging),
                         tint = color,
                         modifier = Modifier.size(diameter * 0.17f),

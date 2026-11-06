@@ -355,8 +355,10 @@ private fun RowScope.DockAppSlot(
             .pointerInput(app.key, slotCount, rowWidthPx(), locked) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    down.consume()
-                    // Match the home/folder press detector: moves stay unconsumed until the parent
+                    // Keep DOWN unconsumed so horizontalScroll can claim a swipe. Moves also stay
+                    // unconsumed until the parent horizontalScroll has had its Main pass. We inspect
+                    // the Final pass before deciding this was a tap, so a sideways swipe cannot launch.
+                    // Match the home/folder press detector:
                     // horizontalScroll has had its Main pass. We inspect the Final pass before
                     // deciding this was a tap, so a sideways dock swipe can never launch the app.
                     val press = awaitIconPress(down)
@@ -477,7 +479,6 @@ private fun RowScope.DockFolderSlot(
             .pointerInput(folder.id, locked) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    down.consume()
                     val press = awaitIconPress(down)
                     if (press is IconPressOutcome.Tap) { currentOnOpen(currentFolder); return@awaitEachGesture }
                     if (press !is IconPressOutcome.Held) return@awaitEachGesture

@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -757,12 +758,16 @@ fun HomeScreen(
             }
             // Permanent mini dock: camera, drawer search and the system's selected browser.
             Surface(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 2.dp),
+                modifier = Modifier
+                    .width(196.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .padding(vertical = 4.dp)
+                    .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(22.dp)),
                 color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(22.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(36.dp),
+                    modifier = Modifier.fillMaxWidth().height(42.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

@@ -19,7 +19,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 /**
- * The font row (a Telegram request after 0.9.9): one chip per family Android ships, the chosen one
+ * The font row (a Telegram request after 0.9.9): one chip per bundled or system font family, the chosen one
  * marked, a tap reports the family's settings key.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -42,7 +42,7 @@ class FontRowTest {
         LauncherSettings.FONTS.forEach { compose.onNodeWithTag(fontChipTag(it)).performScrollTo().assertIsDisplayed() }
         compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().assertIsSelected()
         compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_SERIF)).performScrollTo().assertIsNotSelected()
-        assertThat(LauncherSettings.FONTS).hasSize(6)
+        assertThat(LauncherSettings.FONTS).hasSize(7)
     }
 
     @Test fun aChipPicksItsFamily() {

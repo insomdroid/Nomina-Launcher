@@ -7,8 +7,6 @@
     <string name="settings_gestures">Rörelser</string>
     <string name="settings_show_weather">Väder i widgeten</string>
     <string name="settings_weather_app">Tryck på vädret öppnar</string>
-    <string name="settings_network_place_names">Ortnamn från internet</string>
-    <string name="settings_network_place_names_desc">Om telefonen inte själv kan avgöra vilken ort du befinner dig på hämtas namnet från BigDataCloud. Tjänsten får då din ungefärliga plats.</string>
     <string name="settings_swipe_up_drawer">Svep uppåt → appar</string>
     <string name="settings_swipe_down_notif">Svep nedåt → aviseringar</string>
     <string name="settings_folder_swipe_first_app">Svep uppåt på en mapp → dess första app</string>
@@ -142,15 +140,11 @@
     <string name="settings_font_casual">Ledig</string>
     <string name="settings_font_cursive">Handskrift</string>
     <string name="settings_search">Sökning</string>
-    <string name="settings_search_contacts">Sök bland kontakter</string>
     <string name="settings_left_edge">Vänsterkant</string>
     <string name="settings_left_edge_none">Ingen</string>
     <string name="settings_left_edge_pick">Välj app</string>
     <string name="settings_close">Stäng</string>
     <string name="settings_lock_desktop">Lås startskärmens layout</string>
-    <string name="settings_hide_status_bar">Dölj systemets statusfält (helskärm)</string>
-    <string name="settings_status_bar">Statusfält (klocka, batteri, signal)</string>
-    <string name="settings_status_bar_scrim">Mörkhet bakom statusfältet</string>
     <string name="settings_frequent_apps">Mest använda högst upp</string>
     <string name="settings_hide_home_apps">Dölj appar som finns på startskärmen</string>
     <string name="settings_hide_home_apps_desc">Appar som lagts på startskärmen, i dess mappar eller i docken lämnar listan. Sökningen hittar dem fortfarande.</string>
@@ -181,15 +175,6 @@
     <string name="settings_widget_inset">Justera widgetarnas kanter efter ikonerna</string>
     <string name="settings_widget_inset_desc">Widgetar får samma sidomarginal som appikoner i stället för att fylla sina celler kant till kant. Widgetar med egna marginaler kan se mindre ut.</string>
     <string name="settings_sounds">Ljud</string>
-    <string name="settings_lock_sounds">Ljud vid låsning och upplåsning</string>
-    <string name="settings_lock_sounds_desc">Ett ljud du väljer spelas när telefonen låses och när den låses upp – inte i ljudlöst läge, vibrationsläge, Stör ej eller under ett samtal.</string>
-    <string name="settings_lock_sound">Låsljud</string>
-    <string name="settings_unlock_sound">Upplåsningsljud</string>
-    <string name="settings_sound_none">Inget ljud</string>
-    <string name="settings_sound_from_files">Välj en fil</string>
-    <string name="settings_sound_from_phone">Telefonens ljud</string>
-    <string name="settings_sound_play">Spela upp</string>
-    <string name="settings_sound_picked">Valt ljud</string>
     <string name="settings_phone_sound_settings">Telefonens ljudinställningar</string>
     <string name="settings_phone_sound_settings_desc">Stäng av telefonens eget skärmlåsljud där, så att båda inte spelas samtidigt.</string>
 </resources>

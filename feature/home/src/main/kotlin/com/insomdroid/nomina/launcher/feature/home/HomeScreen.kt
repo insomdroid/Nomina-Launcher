@@ -719,7 +719,7 @@ fun HomeScreen(
                         contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
                         modifier = Modifier
                             .size(24.dp)
-                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 180f else 0f }
+                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
                             .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
                         tint = Color.White,
                     )

@@ -249,6 +249,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_home),
+                    icon = LauncherIcons.Home,
                     collapsed = "home" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("home", it) },
                 ) {
@@ -299,6 +300,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_dock),
+                    icon = LauncherIcons.Dock,
                     collapsed = "dock" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("dock", it) },
                 ) {
@@ -318,6 +320,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_drawer),
+                    icon = LauncherIcons.AppsGrid,
                     collapsed = "drawer" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("drawer", it) },
                 ) {
@@ -372,6 +375,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_appearance),
+                    icon = LauncherIcons.Appearance,
                     collapsed = "icons" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("icons", it) },
                 ) {
@@ -432,6 +436,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_gestures_interaction),
+                    icon = LauncherIcons.Gestures,
                     collapsed = "gestures" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("gestures", it) },
                 ) {
@@ -466,6 +471,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_notifications),
+                    icon = LauncherIcons.Notifications,
                     collapsed = "notifications" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("notifications", it) },
                 ) {
@@ -488,6 +494,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_permissions),
+                    icon = LauncherIcons.Permissions,
                     collapsed = "permissions" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("permissions", it) },
                 ) {
@@ -523,6 +530,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_backup_restore),
+                    icon = LauncherIcons.Backup,
                     collapsed = "backup" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("backup", it) },
                 ) {
@@ -534,6 +542,7 @@ fun SettingsScreen(
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_about),
+                    icon = LauncherIcons.Info,
                     collapsed = "updates" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("updates", it) },
                 ) {

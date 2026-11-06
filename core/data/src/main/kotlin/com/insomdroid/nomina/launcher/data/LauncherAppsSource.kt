@@ -57,6 +57,7 @@ class LauncherAppsSource @Inject constructor(
     private val iconPacks: IconPackRepository,
     // Provider breaks the instantiation cycle: the ImageLoader itself is built with this source.
     private val imageLoader: Provider<ImageLoader>,
+    private val labelCache: AppLabelCache,
 ) : AppRowResolver {
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
     private val userManager = context.getSystemService(UserManager::class.java)
@@ -221,7 +222,9 @@ class LauncherAppsSource @Inject constructor(
         val reloads = Channel<Unit>(Channel.CONFLATED)
         fun reload() { reloads.trySend(Unit) }
         launch(Dispatchers.IO) {
-            for (unused in reloads) trySend(queryApps())
+            for (unused in reloads) {
+                runCatching { scanApps { apps -> trySend(apps) } }
+            }
         }
         launch { reloadSignals.collect { reload() } }
 
@@ -291,24 +294,68 @@ class LauncherAppsSource @Inject constructor(
         }
     }
 
-    private fun queryApps(): List<AppItem> {
-        val profiles = runCatching { userManager?.userProfiles }.getOrNull() ?: listOf(Process.myUserHandle())
-        return profiles.flatMap { user ->
-            val serial = runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull() ?: 0L
-            val list = runCatching {
-                launcherApps.getActivityList(null, user)
-            }.getOrElse { emptyList() }
-            list.map { info ->
-                AppItem(
-                    packageName = info.componentName.packageName,
-                    className = info.componentName.className,
-                    user = user,
-                    userSerial = serial,
-                    label = info.label?.toString().orEmpty(),
-                )
-            }
-        }.sortedBy { it.label.lowercase() }
+    private data class ScannedApp(
+        val info: LauncherActivityInfo,
+        val user: UserHandle,
+        val serial: Long,
+    ) {
+        val packageName: String get() = info.componentName.packageName
+        val key: String get() = "$packageName/${info.componentName.className}/$serial"
     }
+
+    /**
+     * Emit persisted labels immediately, read only cache misses, then verify persisted labels in
+     * the background. The generation snapshot is taken BEFORE getActivityList because each returned
+     * LauncherActivityInfo is a snapshot that may still expose the old label during an update.
+     */
+    private suspend fun scanApps(send: (List<AppItem>) -> Unit) {
+        labelCache.prepare(context.resources.configuration.locales.toLanguageTags())
+        val generations = labelCache.generations()
+        val profiles = runCatching { userManager?.userProfiles }.getOrNull()
+            ?: listOf(Process.myUserHandle())
+        val scanned = profiles.flatMap { user ->
+            val serial = runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull() ?: 0L
+            runCatching { launcherApps.getActivityList(null, user) }
+                .getOrElse { emptyList() }
+                .map { ScannedApp(it, user, serial) }
+        }
+
+        fun toItems(labelOf: (ScannedApp) -> String): List<AppItem> =
+            scanned.map { app ->
+                AppItem(
+                    packageName = app.packageName,
+                    className = app.info.componentName.className,
+                    user = app.user,
+                    userSerial = app.serial,
+                    label = labelOf(app),
+                )
+            }.sortedBy { it.label.lowercase() }
+
+        send(toItems { app ->
+            labelCache.label(app.key) ?: readLabel(app.info).also { label ->
+                labelCache.put(app.key, label, generations[app.packageName] ?: 0)
+            }
+        })
+
+        labelCache.retain(scanned.mapTo(HashSet()) { it.key })
+        val unverified = labelCache.unverified()
+        if (unverified.isNotEmpty()) {
+            val fresh = scanned.asSequence()
+                .filter { it.key in unverified }
+                .associate { app ->
+                    app.key to AppLabelCache.Reading(
+                        readLabel(app.info),
+                        generations[app.packageName] ?: 0,
+                    )
+                }
+            if (labelCache.verify(fresh)) {
+                send(toItems { app -> fresh[app.key]?.label ?: labelCache.label(app.key).orEmpty() })
+            }
+        }
+        labelCache.persist()
+    }
+
+    private fun readLabel(info: LauncherActivityInfo): String = info.label?.toString().orEmpty()
 
     /**
      * Launches [appItem], opening from [sourceBounds] (the icon on screen) with [options] (its zoom)

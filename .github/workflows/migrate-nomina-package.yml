@@ -53,7 +53,7 @@ jobs:
           while IFS= read -r -d '' old_dir; do
             parent="${old_dir%/org/arkikeskus}"
             mkdir -p "$parent/com"
-            git mv "$old_dir" "$parent/com/insomdroid"
+            git mv "$old_dir" "$parent/com/insomdroid/nomina"
           done < <(find . -type d -path '*/org/arkikeskus' -print0)
 
           old_schema="core/data/schemas/org.arkikeskus.launcher.data.local.LauncherDatabase"
@@ -64,6 +64,13 @@ jobs:
 
           if [ -f settings.gradle.kts ]; then
             sed -i 's/rootProject.name = "arkikeskus-launcher"/rootProject.name = "Nomina"/' settings.gradle.kts
+          fi
+
+          if [ -f README.md ]; then
+            sed -i \
+              -e "s/Until that work is complete, some screens, labels, package identifiers, resources and documentation still carry ARK's original identity./The Android package identity is being migrated to \`com.insomdroid.nomina\`. Some visual elements and ARK-branded resources will remain until the Nomina redesign is complete./" \
+              -e 's/App identity, package name, signing configuration, and the final visual design have not yet been migrated./The package identity is \`com.insomdroid.nomina\`; release signing configuration and the final visual design remain to be completed./' \
+              README.md
           fi
 
           if git grep -n "$old_package" -- . ':!LICENSE' ':!NOTICE'; then

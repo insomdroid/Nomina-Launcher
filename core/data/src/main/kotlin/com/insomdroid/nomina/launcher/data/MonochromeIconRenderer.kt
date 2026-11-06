@@ -3,6 +3,8 @@ package com.insomdroid.nomina.data
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
@@ -14,14 +16,18 @@ import kotlin.math.min
 private const val ICON_RENDER_SIZE = 216
 private const val MIN_TRANSPARENT_FRACTION = 0.08f
 private const val MAX_TRANSPARENT_FRACTION = 0.92f
+private const val MIN_GLYPH_SIZE_FRACTION = 0.56f
 private const val MAX_GLYPH_SIZE_FRACTION = 0.72f
+private const val MAX_ROUND_GLYPH_OCCUPANCY = 0.76f
+private const val ROUND_GLYPH_MIN_ASPECT = 0.82f
+private const val ROUND_GLYPH_MAX_ASPECT = 1.22f
 
 /**
  * Conservative fallback for apps without a native monochrome layer.
  *
- * Only genuinely transparent artwork is eligible. The visible alpha bounds are fitted into a
- * consistent safe area before tinting, preventing full-bleed legacy artwork from being enlarged
- * to the edge of the adaptive icon mask. Opaque artwork is rejected rather than guessed.
+ * Only genuinely transparent artwork with a plausible glyph silhouette is eligible. The visible
+ * alpha bounds are fitted into a consistent safe area before tinting. Opaque artwork and large,
+ * nearly-solid round shapes are rejected rather than turned into oversized monochrome blobs.
  */
 internal object MonochromeIconRenderer {
 
@@ -104,6 +110,39 @@ internal object MonochromeIconRenderer {
             source.recycle()
         }
     }
+
+    /**
+     * Last-resort themed fallback for artwork that is unsafe to extract as a glyph. It preserves
+     * the app's original icon geometry but removes saturated colour, avoiding a bright full-colour
+     * outlier in an otherwise monochrome drawer.
+     */
+    fun renderGrayscaleFallback(
+        icon: Drawable,
+        resources: Resources,
+    ): Drawable? {
+        val bitmap = Bitmap.createBitmap(
+            ICON_RENDER_SIZE,
+            ICON_RENDER_SIZE,
+            Bitmap.Config.ARGB_8888,
+        )
+        val drawable = icon.mutate()
+        val savedBounds = Rect(drawable.bounds)
+        val savedColorFilter = drawable.colorFilter
+        return try {
+            drawable.setBounds(0, 0, ICON_RENDER_SIZE, ICON_RENDER_SIZE)
+            drawable.colorFilter = ColorMatrixColorFilter(
+                ColorMatrix().apply { setSaturation(0f) },
+            )
+            drawable.draw(Canvas(bitmap))
+            BitmapDrawable(resources, bitmap)
+        } catch (_: Exception) {
+            bitmap.recycle()
+            null
+        } finally {
+            drawable.colorFilter = savedColorFilter
+            drawable.bounds = savedBounds
+        }
+    }
 }
 
 internal data class GlyphBounds(
@@ -154,8 +193,8 @@ internal fun alphaBounds(
 }
 
 /**
- * Fits a glyph into a centred safe area. Existing smaller artwork is never enlarged; oversized
- * artwork is reduced proportionally so its longest dimension occupies at most 72% of the canvas.
+ * Fits artwork into a consistent visual range. Very small artwork is gently enlarged, while
+ * oversized artwork is reduced; both retain their aspect ratio and remain centred.
  */
 internal fun fitGlyphBounds(
     bounds: GlyphBounds,
@@ -167,7 +206,10 @@ internal fun fitGlyphBounds(
     require(maxSizeFraction > 0f && maxSizeFraction <= 1f)
 
     val maxSize = min(width, height) * maxSizeFraction
-    val scale = min(1f, maxSize / max(bounds.width, bounds.height))
+    val minSize = min(width, height) * min(MIN_GLYPH_SIZE_FRACTION, maxSizeFraction)
+    val longestSide = max(bounds.width, bounds.height).toFloat()
+    val targetSize = longestSide.coerceIn(minSize, maxSize)
+    val scale = targetSize / longestSide
     val fittedWidth = bounds.width * scale
     val fittedHeight = bounds.height * scale
     val left = (width - fittedWidth) / 2f
@@ -176,8 +218,8 @@ internal fun fitGlyphBounds(
 }
 
 /**
- * Accepts only artwork with a meaningful transparent canvas. A transparent hole in an otherwise
- * opaque background is not enough to identify a reliable glyph.
+ * Accepts only artwork with a meaningful transparent canvas and a plausible glyph silhouette.
+ * Large, nearly solid round shapes are usually icon backgrounds rather than useful foregrounds.
  */
 internal fun hasUsableTransparentGlyph(
     pixels: IntArray,
@@ -195,7 +237,22 @@ internal fun hasUsableTransparentGlyph(
     if (transparentFraction !in MIN_TRANSPARENT_FRACTION..MAX_TRANSPARENT_FRACTION) {
         return false
     }
-    return alphaBounds(pixels, width, height) != null
+
+    val bounds = alphaBounds(pixels, width, height) ?: return false
+    val aspectRatio = bounds.width.toFloat() / bounds.height
+    if (aspectRatio in ROUND_GLYPH_MIN_ASPECT..ROUND_GLYPH_MAX_ASPECT) {
+        var occupied = 0
+        for (y in bounds.top..bounds.bottom) {
+            for (x in bounds.left..bounds.right) {
+                if ((pixels[y * width + x] ushr 24) > 8) occupied++
+            }
+        }
+        val boundsArea = bounds.width * bounds.height
+        if (occupied.toFloat() / boundsArea > MAX_ROUND_GLYPH_OCCUPANCY) {
+            return false
+        }
+    }
+    return true
 }
 
 /** Converts only source alpha into a white mask; original RGB values are never interpreted. */

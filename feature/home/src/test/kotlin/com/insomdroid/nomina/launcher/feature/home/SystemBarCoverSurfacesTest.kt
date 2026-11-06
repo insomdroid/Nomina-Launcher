@@ -63,7 +63,7 @@ class SystemBarCoverSurfacesTest {
         compose.setContent {
             CompositionLocalProvider(LocalSystemBarCovers provides covers) {
                 LauncherTheme(darkTheme = false) {
-                    OnboardingFlow(onFinish = {}, onContactsGranted = {}, onPhoneGranted = {}, modifier = Modifier.fillMaxSize())
+                    OnboardingFlow(onFinish = {}, modifier = Modifier.fillMaxSize())
                 }
             }
         }

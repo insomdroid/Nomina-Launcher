@@ -597,7 +597,7 @@ private fun AppDrawerContent(
             // Icon size derived from the column width so 6–7 columns fit a narrow screen (the fixed
             // 56dp default bled into neighbouring cells there). 56dp until the grid is measured.
             // The user's icon-size setting scales the nominal 56dp before the column clamp.
-            val nominalIconSize = 56.dp * LocalIconScale.current
+            val nominalIconSize = 48.dp * LocalIconScale.current
             val drawerIconSize = if (gridWidthPx > 0 && columns > 0) {
                 iconSizeForCell(with(density) { (gridWidthPx.toFloat() / columns).toDp() }, nominalIconSize)
             } else {
@@ -910,7 +910,7 @@ private fun DrawerFolderCard(
     val anchor = IntOffset(bounds.center.x.roundToInt(), (if (preferAbove) bounds.top else bounds.bottom).roundToInt())
     val width = with(LocalDensity.current) { minOf(FOLDER_CARD_WIDTH, windowSize.width.toDp() - 16.dp) }
     // The grid's rule: the icon shrinks to its cell when the icon-size setting would overflow it.
-    val iconSize = iconSizeForCell((width - 16.dp) / columns, 56.dp * LocalIconScale.current)
+    val iconSize = iconSizeForCell((width - 16.dp) / columns, 48.dp * LocalIconScale.current)
     // The drawer's palette (the user's colour) for the card AND its texts: the popup is its own window, where the
     // system palette would otherwise paint a light card under this palette's light text (round 11).
     val palette = LocalExpressivePalette.current

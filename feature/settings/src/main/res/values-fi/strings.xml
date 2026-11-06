@@ -7,8 +7,6 @@
     <string name="settings_gestures">Eleet</string>
     <string name="settings_show_weather">Sää widgetissä</string>
     <string name="settings_weather_app">Sään napautus avaa</string>
-    <string name="settings_network_place_names">Paikkakunta verkosta</string>
-    <string name="settings_network_place_names_desc">Jos puhelin ei itse tunnista paikkakuntaa, nimi haetaan BigDataCloud-palvelusta. Palveluun lähtee likimääräinen sijainti.</string>
     <string name="settings_swipe_up_drawer">Pyyhkäise ylös → sovellukset</string>
     <string name="settings_swipe_down_notif">Pyyhkäise alas → ilmoitukset</string>
     <string name="settings_folder_swipe_first_app">Pyyhkäisy ylös kansiolla → sen ensimmäinen sovellus</string>
@@ -142,15 +140,11 @@
     <string name="settings_font_casual">Rento</string>
     <string name="settings_font_cursive">Käsiala</string>
     <string name="settings_search">Haku</string>
-    <string name="settings_search_contacts">Hae yhteystietoja</string>
     <string name="settings_left_edge">Vasen reuna</string>
     <string name="settings_left_edge_none">Ei mitään</string>
     <string name="settings_left_edge_pick">Valitse sovellus</string>
     <string name="settings_close">Sulje</string>
     <string name="settings_lock_desktop">Lukitse työpöytä</string>
-    <string name="settings_hide_status_bar">Piilota järjestelmän tilapalkki (koko näyttö)</string>
-    <string name="settings_status_bar">Tilapalkki (kello, akku, signaali)</string>
-    <string name="settings_status_bar_scrim">Tilapalkin taustan tummuus</string>
     <string name="settings_frequent_apps">Eniten käytetyt ylimmäisinä</string>
     <string name="settings_hide_home_apps">Piilota etusivulla olevat sovellukset</string>
     <string name="settings_hide_home_apps_desc">Etusivulle, sen kansioihin tai dockkiin sijoitetut sovellukset poistuvat listasta. Haku löytää ne silti.</string>
@@ -181,15 +175,6 @@
     <string name="settings_widget_inset">Widgettien reunat kuvakkeiden tasalle</string>
     <string name="settings_widget_inset_desc">Widgetit saavat saman sivumarginaalin kuin sovelluskuvakkeet sen sijaan, että täyttäisivät solunsa reunasta reunaan. Widgetit, joilla on oma marginaali, voivat näyttää pienemmiltä.</string>
     <string name="settings_sounds">Äänet</string>
-    <string name="settings_lock_sounds">Lukituksen ja avauksen äänet</string>
-    <string name="settings_lock_sounds_desc">Valitsemasi ääni soi, kun puhelin lukittuu ja kun se avataan – ei äänettömällä, värinällä, Älä häiritse -tilassa eikä puhelun aikana.</string>
-    <string name="settings_lock_sound">Lukitusääni</string>
-    <string name="settings_unlock_sound">Avausääni</string>
-    <string name="settings_sound_none">Ei ääntä</string>
-    <string name="settings_sound_from_files">Valitse tiedosto</string>
-    <string name="settings_sound_from_phone">Puhelimen äänet</string>
-    <string name="settings_sound_play">Toista</string>
-    <string name="settings_sound_picked">Valittu ääni</string>
     <string name="settings_phone_sound_settings">Puhelimen ääniasetukset</string>
     <string name="settings_phone_sound_settings_desc">Sammuta siellä puhelimen oma näytön lukitusääni, jotta äänet eivät soi päällekkäin.</string>
 </resources>

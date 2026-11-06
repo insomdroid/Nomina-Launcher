@@ -93,6 +93,8 @@ class SettingsViewModel @Inject constructor(
     fun setDockColumns(value: Int) = update { repository.setDockColumns(value) }
     fun setDrawerColumns(value: Int) = update { repository.setDrawerColumns(value) }
     fun setShowDrawerSearch(value: Boolean) = update { repository.setShowDrawerSearch(value) }
+    fun setHideStatusBar(value: Boolean) = update { repository.setHideStatusBar(value) }
+    fun setShowDrawerScrubber(value: Boolean) = update { repository.setShowDrawerScrubber(value) }
     fun setShowFrequentApps(value: Boolean) = update { repository.setShowFrequentApps(value) }
     fun setDrawerOpensAtTop(value: Boolean) = update { repository.setDrawerOpensAtTop(value) }
     fun setSortDrawerFolders(value: Boolean) = update { repository.setSortDrawerFolders(value) }

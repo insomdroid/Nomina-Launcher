@@ -130,10 +130,7 @@ fun SettingsScreen(
     var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
-    var showCountStylePicker by rememberSaveable { mutableStateOf(false) }
     var showHomeMarkerPicker by rememberSaveable { mutableStateOf(false) }
-    var showPeoplePrivacyPicker by rememberSaveable { mutableStateOf(false) }
-    var showBatchTimesEditor by rememberSaveable { mutableStateOf(false) }
     var showBackup by rememberSaveable { mutableStateOf(false) }
     // Hoisted above the subpage early-returns so the main list's scroll position survives a visit to
     // the hidden-apps / backup subpage (an inline rememberScrollState would leave composition with the
@@ -220,15 +217,6 @@ fun SettingsScreen(
                     letterSpacing = (-0.3).sp,
                     modifier = Modifier.padding(start = 6.dp, top = 10.dp, bottom = 6.dp),
                 )
-
-                ExpressiveActionRow(
-                    label = stringResource(R.string.settings_set_default),
-                    description = stringResource(
-                        if (isDefaultLauncher) R.string.settings_default_current else R.string.settings_default_tap,
-                    ),
-                ) {
-                    runCatching { setDefaultLauncher.launch(DefaultLauncher.requestIntent(context)) }
-                }
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_home),
@@ -467,42 +455,6 @@ fun SettingsScreen(
                         showCount = s.notificationDotCount,
                         scale = s.notificationDotScale,
                     )
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_notif_widget_count),
-                        description = stringResource(
-                            when (s.notificationWidgetCountStyle) {
-                                LauncherSettings.COUNT_DOT -> R.string.settings_notif_widget_count_dot
-                                LauncherSettings.COUNT_NONE -> R.string.settings_notif_widget_count_none
-                                else -> R.string.settings_notif_widget_count_number
-                            },
-                        ),
-                    ) { showCountStylePicker = true }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_people_privacy),
-                        description = stringResource(
-                            when (s.peoplePrivacy) {
-                                LauncherSettings.PRIVACY_SENDER -> R.string.settings_people_privacy_sender
-                                LauncherSettings.PRIVACY_COUNT -> R.string.settings_people_privacy_count
-                                else -> R.string.settings_people_privacy_all
-                            },
-                        ),
-                    ) { showPeoplePrivacyPicker = true }
-                    SwitchRow(
-                        stringResource(R.string.settings_people_show_apps),
-                        s.peopleShowApps,
-                        viewModel::setPeopleShowApps,
-                    )
-                    SwitchRow(
-                        stringResource(R.string.settings_people_batch),
-                        s.peopleBatchEnabled,
-                        viewModel::setPeopleBatchEnabled,
-                    )
-                    if (s.peopleBatchEnabled) {
-                        ExpressiveActionRow(
-                            label = stringResource(R.string.settings_people_batch_times),
-                            description = s.peopleBatchTimes.replace(",", ", "),
-                        ) { showBatchTimesEditor = true }
-                    }
                 }
 
                 CollapsibleSection(
@@ -510,6 +462,14 @@ fun SettingsScreen(
                     collapsed = "permissions" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("permissions", it) },
                 ) {
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_set_default),
+                        description = stringResource(
+                            if (isDefaultLauncher) R.string.settings_default_current else R.string.settings_default_tap,
+                        ),
+                    ) {
+                        runCatching { setDefaultLauncher.launch(DefaultLauncher.requestIntent(context)) }
+                    }
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_notif_access),
                         description = stringResource(
@@ -525,10 +485,6 @@ fun SettingsScreen(
                     PermissionRow(
                         label = stringResource(R.string.settings_permission_calendar),
                         permission = android.Manifest.permission.READ_CALENDAR,
-                    )
-                    PermissionRow(
-                        label = stringResource(R.string.settings_permission_contacts),
-                        permission = android.Manifest.permission.READ_CONTACTS,
                     )
                     PermissionRow(
                         label = stringResource(R.string.settings_permission_location),
@@ -639,81 +595,10 @@ fun SettingsScreen(
                 onDismiss = { showHomeMarkerPicker = false },
             )
         }
-        if (showCountStylePicker) {
-            ChoicePicker(
-                title = R.string.settings_notif_widget_count,
-                options = listOf(
-                    LauncherSettings.COUNT_NUMBER to R.string.settings_notif_widget_count_number,
-                    LauncherSettings.COUNT_DOT to R.string.settings_notif_widget_count_dot,
-                    LauncherSettings.COUNT_NONE to R.string.settings_notif_widget_count_none,
-                ),
-                selected = s.notificationWidgetCountStyle,
-                onPick = {
-                    viewModel.setNotificationWidgetCountStyle(it)
-                    showCountStylePicker = false
-                },
-                onDismiss = { showCountStylePicker = false },
-            )
-        }
-        if (showBatchTimesEditor) {
-            BatchTimesEditor(
-                initial = s.peopleBatchTimes.replace(",", ", "),
-                onSave = {
-                    viewModel.setPeopleBatchTimes(it)
-                    showBatchTimesEditor = false
-                },
-                onDismiss = { showBatchTimesEditor = false },
-            )
-        }
-        if (showPeoplePrivacyPicker) {
-            ChoicePicker(
-                title = R.string.settings_people_privacy,
-                options = listOf(
-                    LauncherSettings.PRIVACY_ALL to R.string.settings_people_privacy_all,
-                    LauncherSettings.PRIVACY_SENDER to R.string.settings_people_privacy_sender,
-                    LauncherSettings.PRIVACY_COUNT to R.string.settings_people_privacy_count,
-                ),
-                selected = s.peoplePrivacy,
-                onPick = {
-                    viewModel.setPeoplePrivacy(it)
-                    showPeoplePrivacyPicker = false
-                },
-                onDismiss = { showPeoplePrivacyPicker = false },
-            )
-        }
     }
 }
 
-/** Free-text "HH:mm, HH:mm" editor for the people batch delivery times. */
-@Composable
-private fun BatchTimesEditor(initial: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
-    val p = LocalExpressivePalette.current
-    var text by remember(initial) { mutableStateOf(initial) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = p.surfaceHi,
-        title = { Text(stringResource(R.string.settings_people_batch_times), color = p.text) },
-        text = {
-            Column {
-                Text(stringResource(R.string.settings_people_batch_times_hint), color = p.text, fontSize = 13.sp)
-                androidx.compose.material3.OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onSave(text) }) { Text(stringResource(R.string.settings_people_batch_times_save), color = MaterialTheme.colorScheme.onSurface) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
-        },
-    )
-}
-
-/** Single-select picker over string-valued settings (widget count style, people privacy). */
+/** Single-select picker for the home page marker. */
 @Composable
 private fun ChoicePicker(
     @androidx.annotation.StringRes title: Int,

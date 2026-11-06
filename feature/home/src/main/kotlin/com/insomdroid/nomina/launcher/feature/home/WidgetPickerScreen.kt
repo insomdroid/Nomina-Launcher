@@ -93,9 +93,6 @@ fun WidgetPickerScreen(
     val builtinTitle = stringResource(R.string.widget_builtin_section)
     val builtins = listOf(
         WidgetOption(WidgetChoice.Builtin(HomeItemEntity.BUILTIN_SMARTSPACE), stringResource(R.string.smartspace_widget_name)),
-        WidgetOption(WidgetChoice.Builtin(HomeItemEntity.BUILTIN_BATTERY), stringResource(R.string.battery_widget_name)),
-        WidgetOption(WidgetChoice.Builtin(HomeItemEntity.BUILTIN_NOTIFICATIONS), stringResource(R.string.notifications_widget_name)),
-        WidgetOption(WidgetChoice.Builtin(HomeItemEntity.BUILTIN_PEOPLE), stringResource(R.string.people_widget_name)),
     )
     val all = listOf(WidgetGroup("builtin", builtinTitle, builtins)) + groups.orEmpty()
     val visible = visibleWidgetGroups(all, query, onlyPackage)

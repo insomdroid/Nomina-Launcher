@@ -70,7 +70,7 @@ fun ExpressiveActionRow(
     ExpressiveCard(onClick = onClick) {
         Column(modifier = Modifier.weight(1f)) {
             Text(label, color = p.text, fontSize = 15.sp, fontWeight = FontWeight.Medium)
-            Text(description, color = p.dim, fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+            Text(description, color = p.dim, fontSize = 12.sp, fontFamily = launcherTechnicalFontFamily())
         }
         Icon(
             painter = painterResource(trailingIcon),

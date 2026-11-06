@@ -10,8 +10,11 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -55,6 +58,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -72,6 +76,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import kotlinx.coroutines.launch
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -291,6 +296,7 @@ fun AppDrawerScreen(
         badgeShowCount = uiState.notificationDotCount,
         badgeScale = uiState.notificationDotScale,
         showSearch = uiState.showSearch,
+        showScrubber = uiState.showScrubber,
         onQueryChange = viewModel::onQueryChange,
         onFolderClick = { folder, bounds -> if (drawerOpen) folderCard = folder.id to bounds },
         onFolderLongClick = { if (drawerOpen) editFolderId = it.id },
@@ -461,6 +467,7 @@ private fun AppDrawerContent(
     badgeShowCount: Boolean,
     badgeScale: Float,
     showSearch: Boolean,
+    showScrubber: Boolean,
     onQueryChange: (String) -> Unit,
     onFolderClick: (DrawerFolderUi, Rect) -> Unit,
     onFolderLongClick: (DrawerFolderUi) -> Unit,
@@ -611,18 +618,58 @@ private fun AppDrawerContent(
             }
             // One grid shape for every page — the Personal page (the idle drawer as before), the
             // Work page and the search results — so they all measure the same icon size.
+            val scrubberScope = rememberCoroutineScope()
             @Composable
             fun DrawerGrid(state: LazyGridState, bottomPadding: Dp, content: LazyGridScope.() -> Unit) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(columns),
-                    state = state,
-                    contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + bottomPadding),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 12.dp)
-                        .onSizeChanged { gridWidthPx = it.width },
-                    content = content,
-                )
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(columns),
+                        state = state,
+                        contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + bottomPadding),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 12.dp)
+                            .onSizeChanged { gridWidthPx = it.width },
+                        content = content,
+                    )
+                    val itemCount = state.layoutInfo.totalItemsCount
+                    if (showScrubber && !searching && itemCount > 1) {
+                        val maxScroll = (itemCount - 1).coerceAtLeast(1)
+                        val progress = (state.firstVisibleItemIndex.toFloat() / maxScroll).coerceIn(0f, 1f)
+                        val thumbHeight = (maxHeight * (state.layoutInfo.visibleItemsInfo.size.toFloat() / itemCount))
+                            .coerceIn(22.dp, maxHeight)
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .fillMaxHeight()
+                                .width(24.dp)
+                                .pointerInput(state, itemCount, maxHeight) {
+                                    detectDragGestures(
+                                        onDragStart = { position ->
+                                            val index = (position.y / size.height.coerceAtLeast(1) * maxScroll)
+                                                .toInt().coerceIn(0, maxScroll)
+                                            scrubberScope.launch { state.scrollToItem(index) }
+                                        },
+                                        onDrag = { change, _ ->
+                                            change.consume()
+                                            val index = (change.position.y / size.height.coerceAtLeast(1) * maxScroll)
+                                                .toInt().coerceIn(0, maxScroll)
+                                            scrubberScope.launch { state.scrollToItem(index) }
+                                        },
+                                    )
+                                },
+                            contentAlignment = Alignment.TopCenter,
+                        ) {
+                            Box(
+                                Modifier
+                                    .offset(y = (maxHeight - thumbHeight) * progress)
+                                    .width(3.dp)
+                                    .height(thumbHeight)
+                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), RoundedCornerShape(4.dp)),
+                            )
+                        }
+                    }
+                }
             }
             val entries = remember(folders, apps, mixFolders) { drawerEntries(folders, apps, mixFolders) }
             val idleContent: LazyGridScope.() -> Unit = {

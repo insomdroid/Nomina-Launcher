@@ -816,6 +816,7 @@ class SettingsRepository @Inject constructor(
         /** Preference keys whose value must be restored as Float (JSON loses the Int/Float distinction). */
         val FLOAT_KEYS = setOf(
             "dock_opacity", "drawer_opacity", "notif_dot_scale", "app_label_scale", "icon_scale", "drawer_icon_scale",
+            "long_press_scale", "drawer_blur_strength", "drawer_picture_dim",
         )
         val INT_KEYS = setOf(
             "dock_columns", "dock_bottom_spacing", "home_columns", "home_rows", "drawer_columns", "app_label_color",
@@ -831,7 +832,9 @@ class SettingsRepository @Inject constructor(
             "show_dock_labels", "show_home_labels", "show_drawer_labels", "show_page_indicator",
             "two_line_home_labels", "two_line_drawer_labels", "people_batch_enabled", "people_show_apps",
             "show_home_folder_names", "show_drawer_folder_names", "mix_drawer_folders", "blur_behind_drawer",
-            "theme_all_icons",
+            "theme_all_icons", "show_notif_dots", "notif_dot_count", "use_themed_icons",
+            "desktop_locked", "double_tap_lock", "show_frequent_apps", "drawer_opens_at_top",
+            "sort_drawer_folders", "show_weather", "widget_tonal_background", "infinite_scroll",
         )
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",

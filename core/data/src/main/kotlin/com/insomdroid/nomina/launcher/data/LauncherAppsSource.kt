@@ -442,7 +442,6 @@ class LauncherAppsSource @Inject constructor(
         val glyph = MonochromeIconRenderer.render(
             glyph = monochrome,
             tint = fg,
-            adaptive = true,
             resources = context.resources,
         ) ?: return null
         return AdaptiveIconDrawable(ColorDrawable(bg), glyph)
@@ -461,7 +460,6 @@ class LauncherAppsSource @Inject constructor(
         val rendered = MonochromeIconRenderer.render(
             glyph = glyph,
             tint = fg,
-            adaptive = adaptive != null,
             resources = context.resources,
         ) ?: return null
         return AdaptiveIconDrawable(ColorDrawable(bg), rendered)

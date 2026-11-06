@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** Warm-orange accent shared by the settings page and the drawer search results. */
-val Accent = Color(0xFFE2714A)
+val Accent = Color(0xFFD71920)
 
 data class ExpressivePalette(
     val bg: Color,
@@ -28,15 +28,15 @@ data class ExpressivePalette(
 )
 
 val DarkExpressivePalette = ExpressivePalette(
-    bg = Color(0xFF0C0E13), surfaceHi = Color(0xFF1D222B), text = Color(0xFFE9EBEE),
-    dim = Color(0xFF9AA1AB), faint = Color(0xFF6C7079), trackOff = Color(0xFF3A404A),
-    thumbOff = Color(0xFFAEB4BD), btn = Color.White.copy(alpha = 0.07f), shadow = 0.dp,
+    bg = Color(0xFF090909), surfaceHi = Color(0xFF171717), text = Color(0xFFF1F1F1),
+    dim = Color(0xFFAAAAAA), faint = Color(0xFF707070), trackOff = Color(0xFF3A3A3A),
+    thumbOff = Color(0xFFBDBDBD), btn = Color.White.copy(alpha = 0.06f), shadow = 0.dp,
 )
 
 val LightExpressivePalette = ExpressivePalette(
-    bg = Color(0xFFECEEF2), surfaceHi = Color(0xFFF4F6F9), text = Color(0xFF1A1C1E),
-    dim = Color(0xFF5B616A), faint = Color(0xFF9499A1), trackOff = Color(0xFFC8CCD3),
-    thumbOff = Color(0xFFFFFFFF), btn = Color.Black.copy(alpha = 0.05f), shadow = 1.dp,
+    bg = Color(0xFFF4F4F4), surfaceHi = Color(0xFFFFFFFF), text = Color(0xFF171717),
+    dim = Color(0xFF5D5D5D), faint = Color(0xFF8A8A8A), trackOff = Color(0xFFD0D0D0),
+    thumbOff = Color(0xFFFFFFFF), btn = Color.Black.copy(alpha = 0.04f), shadow = 0.dp,
 )
 
 val LocalExpressivePalette = staticCompositionLocalOf { LightExpressivePalette }

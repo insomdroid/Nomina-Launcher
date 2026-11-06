@@ -5,6 +5,14 @@ on:
   push:
     branches:
       - main
+    # Reference images and screenshots do not affect the APK.
+    # A push containing source/config changes still triggers the build.
+    paths-ignore:
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.webp'
+      - '**/*.gif'
   workflow_dispatch:
 
 permissions:

@@ -22,12 +22,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.insomdroid.nomina.ui.LauncherIcons
+import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ExpressiveSectionTitle(text: String, color: Color = LocalExpressivePalette.current.text) {
     Text(
-        text = text, color = color, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace,
+        text = text, color = color, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, fontFamily = launcherTechnicalFontFamily(),
         letterSpacing = 0.sp,
         modifier = Modifier.padding(top = 22.dp, start = 2.dp, bottom = 10.dp),
     )

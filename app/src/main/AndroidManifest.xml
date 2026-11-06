@@ -5,7 +5,7 @@
     <!-- Open the notification shade with a swipe-down gesture. -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
 
-    <!-- Optional: contacts in app-drawer search; requested at runtime, gated by a setting. -->
+    <!-- Optional: contact matching for the People widget; requested at runtime. -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <!-- Optional: the smartspace widget's next-calendar-event row; requested at runtime from the

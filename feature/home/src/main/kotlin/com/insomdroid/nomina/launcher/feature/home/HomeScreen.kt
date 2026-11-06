@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,6 +61,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -731,16 +734,38 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        painter = painterResource(LauncherIcons.ExpandMore),
-                        contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
+                    Canvas(
                         modifier = Modifier
                             .size(24.dp)
                             .offset(y = if (settings.dockExpanded) 0.dp else (-24).dp)
                             .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
+                            .semantics {
+                                contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock"
+                            }
                             .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
-                        tint = Color.White,
-                    )
+                    ) {
+                        // Five small dots form a clean chevron. Rotation preserves the existing
+                        // direction and placement: down when expanded, up when collapsed.
+                        val radius = 1.25.dp.toPx()
+                        val halfWidth = 6.dp.toPx()
+                        val halfHeight = 4.dp.toPx()
+                        val centerX = size.width / 2f
+                        val centerY = size.height / 2f
+                        val stepX = halfWidth / 2f
+                        val stepY = halfHeight / 2f
+                        for (index in 0..2) {
+                            val x = centerX - halfWidth + index * stepX
+                            val y = centerY - halfHeight + index * stepY
+                            drawCircle(Color.White, radius, Offset(x, y))
+                            if (index < 2) {
+                                drawCircle(
+                                    Color.White,
+                                    radius,
+                                    Offset(centerX + halfWidth - index * stepX, centerY - halfHeight + index * stepY),
+                                )
+                            }
+                        }
+                    }
                 }
                 AnimatedVisibility(
                     visible = settings.dockExpanded,

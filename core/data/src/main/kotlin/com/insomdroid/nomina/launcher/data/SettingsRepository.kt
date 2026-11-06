@@ -100,6 +100,8 @@ class SettingsRepository @Inject constructor(
             homeRows = (p[Keys.HOME_ROWS] ?: 6).coerceIn(MIN_ROWS, MAX_ROWS),
             drawerColumns = (p[Keys.DRAWER_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_COLUMNS),
             showDrawerSearch = p[Keys.SHOW_DRAWER_SEARCH] ?: true,
+            hideStatusBar = p[Keys.HIDE_STATUS_BAR] ?: false,
+            showDrawerScrubber = p[Keys.SHOW_DRAWER_SCRUBBER] ?: true,
             swipeUpForDrawer = p[Keys.SWIPE_UP_DRAWER] ?: true,
             swipeDownForNotifications = p[Keys.SWIPE_DOWN_NOTIF] ?: true,
             folderSwipeOpensFirstApp = p[Keys.FOLDER_SWIPE_FIRST_APP] ?: false,
@@ -419,6 +421,8 @@ class SettingsRepository @Inject constructor(
     suspend fun setHomeRows(value: Int) = edit { it[Keys.HOME_ROWS] = value.coerceIn(MIN_ROWS, MAX_ROWS) }
     suspend fun setDrawerColumns(value: Int) = edit { it[Keys.DRAWER_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_COLUMNS) }
     suspend fun setShowDrawerSearch(value: Boolean) = edit { it[Keys.SHOW_DRAWER_SEARCH] = value }
+    suspend fun setHideStatusBar(value: Boolean) = edit { it[Keys.HIDE_STATUS_BAR] = value }
+    suspend fun setShowDrawerScrubber(value: Boolean) = edit { it[Keys.SHOW_DRAWER_SCRUBBER] = value }
     suspend fun setSwipeUpForDrawer(value: Boolean) = edit { it[Keys.SWIPE_UP_DRAWER] = value }
     suspend fun setSwipeDownForNotifications(value: Boolean) = edit { it[Keys.SWIPE_DOWN_NOTIF] = value }
     suspend fun setFolderSwipeOpensFirstApp(value: Boolean) = edit { it[Keys.FOLDER_SWIPE_FIRST_APP] = value }
@@ -714,6 +718,8 @@ class SettingsRepository @Inject constructor(
         val HOME_ROWS = intPreferencesKey("home_rows")
         val DRAWER_COLUMNS = intPreferencesKey("drawer_columns")
         val SHOW_DRAWER_SEARCH = booleanPreferencesKey("show_drawer_search")
+        val HIDE_STATUS_BAR = booleanPreferencesKey("hide_status_bar")
+        val SHOW_DRAWER_SCRUBBER = booleanPreferencesKey("show_drawer_scrubber")
         val SWIPE_UP_DRAWER = booleanPreferencesKey("swipe_up_drawer")
         val SWIPE_DOWN_NOTIF = booleanPreferencesKey("swipe_down_notif")
         val DOCK_FAVORITES = stringPreferencesKey("dock_favorites")

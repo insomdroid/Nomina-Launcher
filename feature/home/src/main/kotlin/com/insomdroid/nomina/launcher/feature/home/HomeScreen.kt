@@ -708,42 +708,8 @@ fun HomeScreen(
             )
             }
 
-            // Show the dock whenever it's enabled — even with no favorites yet — so a fresh install
-            // can be populated by dragging apps onto it (there is no "add to dock" menu item).
+            // The chevron stays above the expanded dock in both states.
             if (settings.dockEnabled) {
-                AnimatedVisibility(
-                    visible = settings.dockExpanded,
-                    enter = slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(220)) + fadeIn(tween(180)),
-                    exit = slideOutVertically(targetOffsetY = { it / 2 }, animationSpec = tween(180)) + fadeOut(tween(140)),
-                ) {
-                Dock(
-                    entries = uiState.dockEntries,
-                    badges = badges,
-                    badgeShowCount = badgeShowCount,
-                    badgeScale = badgeScale,
-                    showLabels = settings.showDockLabels,
-                    showFolderNames = settings.showHomeFolderNames,
-                    labelColor = Color(settings.appLabelColor),
-                    backgroundAlpha = settings.dockBackgroundOpacity,
-                    locked = settings.desktopLocked,
-                    dragController = dragController,
-                    onAppClick = launchApp,
-                    onReorder = viewModel::reorderDock,
-                    onMoveToHome = { app, page, cellX, cellY -> viewModel.moveToHome(app, page, cellX, cellY, defaultFolderName) },
-                    onRemoveFromDock = { viewModel.removeFromDock(it) },
-                    onAppMenu = { app, anchor -> menuTarget = AppMenuTarget(app, anchor, DragSource.Dock, anchor.y > windowHeightPx / 2) },
-                    onOpenFolder = { openFolderId = it.id },
-                    onMoveFolderToHome = { folderId, page, cellX, cellY ->
-                        widgetScope.launch { viewModel.moveDockFolderToHome(folderId, page, cellX, cellY) }
-                    },
-                    onRemoveFolder = { viewModel.removeFolder(it) },
-                    onDropOnTile = { app, target -> dropOnDock(app, target, DragSource.Dock) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp)
-                        .padding(bottom = 12.dp),
-                )
-                }
                 Box(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
                     contentAlignment = Alignment.Center,
@@ -753,9 +719,41 @@ fun HomeScreen(
                         contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
                         modifier = Modifier
                             .size(24.dp)
-                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
+                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 180f else 0f }
                             .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
                         tint = Color.White,
+                    )
+                }
+                AnimatedVisibility(
+                    visible = settings.dockExpanded,
+                    enter = slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(220)) + fadeIn(tween(180)),
+                    exit = slideOutVertically(targetOffsetY = { it / 2 }, animationSpec = tween(180)) + fadeOut(tween(140)),
+                ) {
+                    Dock(
+                        entries = uiState.dockEntries,
+                        badges = badges,
+                        badgeShowCount = badgeShowCount,
+                        badgeScale = badgeScale,
+                        showLabels = settings.showDockLabels,
+                        showFolderNames = settings.showHomeFolderNames,
+                        labelColor = Color(settings.appLabelColor),
+                        backgroundAlpha = settings.dockBackgroundOpacity,
+                        locked = settings.desktopLocked,
+                        dragController = dragController,
+                        onAppClick = launchApp,
+                        onReorder = viewModel::reorderDock,
+                        onMoveToHome = { app, page, cellX, cellY -> viewModel.moveToHome(app, page, cellX, cellY, defaultFolderName) },
+                        onRemoveFromDock = { viewModel.removeFromDock(it) },
+                        onAppMenu = { app, anchor -> menuTarget = AppMenuTarget(app, anchor, DragSource.Dock, anchor.y > windowHeightPx / 2) },
+                        onOpenFolder = { openFolderId = it.id },
+                        onMoveFolderToHome = { folderId, page, cellX, cellY ->
+                            widgetScope.launch { viewModel.moveDockFolderToHome(folderId, page, cellX, cellY) }
+                        },
+                        onRemoveFolder = { viewModel.removeFolder(it) },
+                        onDropOnTile = { app, target -> dropOnDock(app, target, DragSource.Dock) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp),
                     )
                 }
             }
@@ -764,7 +762,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .width(124.dp)
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 2.dp, bottom = 16.dp)
+                    .padding(top = 0.dp, bottom = 8.dp)
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
                 color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
                 shape = RoundedCornerShape(18.dp),

@@ -1,24 +1,23 @@
-name: Android CI
+name: Nomina Release APK
 
 on:
   push:
     branches:
       - main
-  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: android-ci-${{ github.ref }}
+  group: nomina-release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Build APK and run tests
+  release:
+    name: Build signed release APK and run unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout source
@@ -26,100 +25,73 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Detect application and test changes
-        id: changes
-        uses: dorny/paths-filter@v3
-        with:
-          base: main
-          filters: |
-            app:
-              - 'app/src/main/**'
-              - 'app/build.gradle.kts'
-              - 'app/proguard-rules.pro'
-              - 'core/**/src/main/**'
-              - 'core/**/build.gradle.kts'
-              - 'feature/**/src/main/**'
-              - 'feature/**/build.gradle.kts'
-              - 'build.gradle.kts'
-              - 'settings.gradle.kts'
-              - 'gradle/**'
-              - 'build-logic/**'
-              - 'gradle.properties'
-              - 'gradlew'
-              - 'gradlew.bat'
-            tests:
-              - '**/src/test/**'
-              - '**/src/androidTest/**'
-
       - name: Set up JDK 21
-        if: steps.changes.outputs.app == 'true' || steps.changes.outputs.tests == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Set up Gradle
-        if: steps.changes.outputs.app == 'true' || steps.changes.outputs.tests == 'true' || github.event_name == 'workflow_dispatch'
         uses: gradle/actions/setup-gradle@v4
 
       - name: Make Gradle wrapper executable
-        if: steps.changes.outputs.app == 'true' || steps.changes.outputs.tests == 'true' || github.event_name == 'workflow_dispatch'
         run: chmod +x ./gradlew
 
-      # Build and all JVM unit tests share one Gradle invocation, daemon, dependency resolution,
-      # configuration cache and worker pool. This avoids configuring the same multi-module project
-      # independently on two GitHub-hosted runners.
-      - name: Build debug APK and run unit tests
-        id: gradle
-        if: steps.changes.outputs.app == 'true' || steps.changes.outputs.tests == 'true' || github.event_name == 'workflow_dispatch'
+      # Temporary signing key for this interim release only. It is deliberately not committed.
+      # A future permanent release key must be stored as GitHub Actions secrets and reused.
+      - name: Create temporary release signing key
         shell: bash
-        env:
-          APP_CHANGED: ${{ steps.changes.outputs.app }}
-          TESTS_CHANGED: ${{ steps.changes.outputs.tests }}
-          RUN_ALL: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           set -euo pipefail
-          tasks=()
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/nomina-temporary-release.jks" \
+            -storepass "nomina-temporary-pass" \
+            -keypass "nomina-temporary-pass" \
+            -alias "nomina-temporary" \
+            -keyalg RSA -keysize 2048 -validity 3650 \
+            -dname "CN=Nomina Temporary Release, OU=Interim, O=Nomina, L=Unknown, ST=Unknown, C=ID"
+          cat > keystore.properties <<EOF
+          storeFile=$RUNNER_TEMP/nomina-temporary-release.jks
+          storePassword=nomina-temporary-pass
+          keyAlias=nomina-temporary
+          keyPassword=nomina-temporary-pass
+          EOF
 
-          if [[ "$APP_CHANGED" == "true" || "$RUN_ALL" == "true" ]]; then
-            tasks+=(":app:assembleDebug")
-          fi
-
-          if [[ "$APP_CHANGED" == "true" || "$TESTS_CHANGED" == "true" || "$RUN_ALL" == "true" ]]; then
-            tasks+=(
-              ":app:testDebugUnitTest"
-              ":core:data:testDebugUnitTest"
-              ":core:model:testDebugUnitTest"
-              ":core:ui:testDebugUnitTest"
-              ":feature:appdrawer:testDebugUnitTest"
-              ":feature:backup:testDebugUnitTest"
-              ":feature:home:testDebugUnitTest"
-              ":feature:settings:testDebugUnitTest"
-            )
-          fi
-
-          if (( ${#tasks[@]} == 0 )); then
-            echo "No application or test files changed; Gradle was not started."
-            exit 0
-          fi
-
-          ./gradlew "${tasks[@]}" --stacktrace
-
-      - name: Report APK size and largest packaged files
-        if: always() && (steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch')
+      # JVM tests remain in src/test and run as separate Gradle test tasks; they are not packaged.
+      - name: Build minified release APK and run unit tests
+        shell: bash
         run: |
-          if [[ -f app/build/outputs/apk/debug/app-debug.apk ]]; then
-            du -h app/build/outputs/apk/debug/app-debug.apk
-            unzip -l app/build/outputs/apk/debug/app-debug.apk | sort -nr | head -n 25
+          set -euo pipefail
+          ./gradlew \
+            :app:assembleRelease \
+            :app:testDebugUnitTest \
+            :core:data:testDebugUnitTest \
+            :core:model:testDebugUnitTest \
+            :core:ui:testDebugUnitTest \
+            :feature:appdrawer:testDebugUnitTest \
+            :feature:backup:testDebugUnitTest \
+            :feature:home:testDebugUnitTest \
+            :feature:settings:testDebugUnitTest \
+            --stacktrace
+
+      - name: Report release APK size and packaged files
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f app/build/outputs/apk/release/app-release.apk ]]; then
+            du -h app/build/outputs/apk/release/app-release.apk
+            unzip -l app/build/outputs/apk/release/app-release.apk | sort -nr | head -n 30
+            echo "R8 mapping files:"
+            find app/build/outputs/mapping/release -maxdepth 1 -type f -printf '%f %k KB\n' 2>/dev/null || true
           else
-            echo "APK was not produced."
+            echo "Release APK was not produced."
           fi
 
-      - name: Upload debug APK
-        if: always() && (steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch')
+      - name: Upload signed release APK
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nomina-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: nomina-release-apk-temporary-signing
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: ignore
           retention-days: 7

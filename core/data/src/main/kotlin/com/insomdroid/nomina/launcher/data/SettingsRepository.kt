@@ -500,7 +500,11 @@ class SettingsRepository @Inject constructor(
     }
 
     private fun parseSections(raw: String?): Set<String> =
-        raw.orEmpty().split(',').map { it.trim() }.filterTo(LinkedHashSet()) { it.isNotEmpty() }
+        if (raw == null) {
+            setOf("home", "dock", "drawer", "icons", "gestures", "notifications", "permissions", "backup", "updates")
+        } else {
+            raw.split(',').map { it.trim() }.filterTo(LinkedHashSet()) { it.isNotEmpty() }
+        }
 
     /** Size multiplier for app icon labels (clamped to the slider's range). */
     suspend fun setAppLabelTextScale(value: Float) =

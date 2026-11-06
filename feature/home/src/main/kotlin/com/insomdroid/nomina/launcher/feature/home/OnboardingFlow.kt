@@ -11,12 +11,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,11 +60,9 @@ import com.insomdroid.nomina.ui.CoverSystemBars
 import com.insomdroid.nomina.ui.DefaultLauncher
 import com.insomdroid.nomina.ui.LauncherIcons
 
-/** The Arkikeskus brand colors the aurora blobs drift in (fixed — independent of the theme). */
-private val AURORA_BASE = Color(0xFF111318)
-private val AURORA_BLUE = Color(0xFF1B53C0)
-private val AURORA_GREEN = Color(0xFF1E7D43)
-private val AURORA_AMBER = Color(0xFFB5530F)
+/** Nomina monochrome setup palette with a restrained Nothing Red accent. */
+private val AURORA_BASE = Color(0xFF080808)
+private val AURORA_BLUE = Color(0xFFE31B3D)
 
 /**
  * First-run intro shown once on a fresh install, over the whole home screen: welcome +
@@ -104,12 +96,18 @@ fun OnboardingFlow(
                 }
             },
     ) {
-        AuroraBackground()
+        DotMatrixBackground()
         Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                Text(
+                    text = "NOMINA  /  SETUP",
+                    color = Color.White.copy(alpha = 0.72f),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Spacer(Modifier.weight(1f))
                 TextButton(onClick = onFinish) {
                     Text(stringResource(R.string.onboarding_skip), color = Color.White.copy(alpha = 0.8f))
                 }
@@ -142,7 +140,7 @@ fun OnboardingFlow(
                             Modifier
                                 .size(8.dp)
                                 .background(
-                                    if (i == page) Color.White else Color.White.copy(alpha = 0.35f),
+                                    if (i == page) AURORA_BLUE else Color.White.copy(alpha = 0.28f),
                                     CircleShape,
                                 ),
                         )
@@ -163,34 +161,34 @@ fun OnboardingFlow(
     }
 }
 
-/** Slowly drifting radial-gradient blobs in the brand colors — a calm, asset-free backdrop. */
+/** Static dot-matrix backdrop; no perpetual animation while setup is open. */
 @Composable
-private fun AuroraBackground() {
-    val transition = rememberInfiniteTransition(label = "aurora")
-    fun drift(durationMs: Int) = infiniteRepeatable<Float>(
-        animation = tween(durationMs, easing = LinearEasing),
-        repeatMode = RepeatMode.Reverse,
-    )
-    val t1 by transition.animateFloat(0f, 1f, drift(19_000), label = "t1")
-    val t2 by transition.animateFloat(0f, 1f, drift(24_000), label = "t2")
-    val t3 by transition.animateFloat(0f, 1f, drift(31_000), label = "t3")
+private fun DotMatrixBackground() {
     Canvas(Modifier.fillMaxSize()) {
-        val w = size.width
-        val h = size.height
-        fun blob(color: Color, cx: Float, cy: Float, r: Float) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(color.copy(alpha = 0.50f), Color.Transparent),
-                    center = Offset(cx, cy),
-                    radius = r,
-                ),
-                radius = r,
-                center = Offset(cx, cy),
-            )
+        val spacing = 22.dp.toPx()
+        val radius = 1.1.dp.toPx()
+        var y = spacing * 0.7f
+        while (y < size.height) {
+            var x = spacing * 0.7f
+            while (x < size.width) {
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.12f),
+                    radius = radius,
+                    center = Offset(x, y),
+                )
+                x += spacing
+            }
+            y += spacing
         }
-        blob(AURORA_BLUE, w * (0.10f + 0.55f * t1), h * (0.08f + 0.22f * t2), w * 0.85f)
-        blob(AURORA_GREEN, w * (0.90f - 0.55f * t2), h * (0.50f + 0.22f * t3), w * 0.75f)
-        blob(AURORA_AMBER, w * (0.30f + 0.45f * t3), h * (0.95f - 0.25f * t1), w * 0.70f)
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(AURORA_BLUE.copy(alpha = 0.18f), Color.Transparent),
+                center = Offset(size.width * 0.88f, size.height * 0.12f),
+                radius = size.minDimension * 0.48f,
+            ),
+            radius = size.minDimension * 0.48f,
+            center = Offset(size.width * 0.88f, size.height * 0.12f),
+        )
     }
 }
 

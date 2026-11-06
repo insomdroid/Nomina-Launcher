@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import kotlin.math.max
 import kotlin.math.min
 
 private const val ICON_RENDER_SIZE = 216

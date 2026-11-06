@@ -1,9 +1,8 @@
 name: Nomina Release APK
 
+# APK builds are intentionally manual. Normal repository uploads and commits
+# must not start a release build.
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -22,6 +21,7 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -54,7 +54,6 @@ jobs:
           keyPassword=nomina-temporary-pass
           EOF
 
-      # Build the minified release APK, then publish it as a workflow artifact.
       - name: Build minified release APK
         shell: bash
         run: ./gradlew :app:assembleRelease --stacktrace

@@ -32,7 +32,7 @@ jobs:
       - name: Install Android SDK platform
         shell: bash
         run: |
-          set -euo pipefail
+          set -eu
           sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
           sdkmanager_path="$(find "$sdk_root/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)"
           if [ -z "$sdkmanager_path" ]; then

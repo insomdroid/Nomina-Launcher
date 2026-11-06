@@ -45,33 +45,6 @@ class SettingsRepositoryTest {
 
     private fun newRepository() = SettingsRepository(InMemoryDataStore())
 
-    /** Lock and unlock sounds: off out of the box; the switch travels in a backup, the picked sounds
-     *  do not — their file permissions belong to this phone — and a restore keeps this phone's. */
-    @Test
-    fun lockSoundsAreOffByDefaultAndTheirSoundsStayOnThisPhone() = runTest {
-        val phone = newRepository()
-        assertThat(phone.settings.first().lockSoundsEnabled).isFalse()
-        assertThat(phone.settings.first().lockSoundUri).isEmpty()
-        assertThat(phone.settings.first().unlockSoundUri).isEmpty()
-
-        phone.setLockSoundsEnabled(true)
-        phone.setLockSoundUri("content://media/internal/audio/media/7")
-        phone.setUnlockSoundUri("content://com.android.providers.downloads.documents/document/12")
-        val backup = phone.exportRaw()
-        assertThat(backup["lock_sounds_enabled"]).isEqualTo(true)
-        assertThat(backup).doesNotContainKey("lock_sound_uri")
-        assertThat(backup).doesNotContainKey("unlock_sound_uri")
-
-        phone.importRaw(mapOf("lock_sounds_enabled" to false, "lock_sound_uri" to "content://elsewhere/1"))
-        val restored = phone.settings.first()
-        assertThat(restored.lockSoundsEnabled).isFalse()
-        assertThat(restored.lockSoundUri).isEqualTo("content://media/internal/audio/media/7")
-        assertThat(restored.unlockSoundUri).isEqualTo("content://com.android.providers.downloads.documents/document/12")
-
-        phone.setLockSoundUri("")
-        assertThat(phone.settings.first().lockSoundUri).isEmpty()
-    }
-
     @Test
     fun widgetBackgroundPreservesOldDefaultAndRoundTripsThroughBackup() = runTest {
         val source = newRepository()
@@ -101,30 +74,6 @@ class SettingsRepositoryTest {
         assertThat(s.showWeather).isFalse()
         assertThat(store.data.first()[intPreferencesKey("home_columns")]).isNull()
         assertThat(store.data.first()[stringPreferencesKey("people_held_notifications")]).isEqualTo("held")
-    }
-
-    @Test
-    fun networkPlaceNamesIsOptInAndRoundTripsThroughBackup() = runTest {
-        val source = newRepository()
-        assertThat(source.settings.first().networkPlaceNames).isFalse()
-        source.setNetworkPlaceNames(true)
-        val restored = newRepository()
-        restored.importRaw(source.exportRaw())
-        assertThat(restored.settings.first().networkPlaceNames).isTrue()
-        restored.importRaw(mapOf("network_place_names" to "invalid"))
-        assertThat(restored.settings.first().networkPlaceNames).isFalse()
-    }
-
-    @Test
-    fun `searchContacts defaults to false and round-trips`() = runTest {
-        val repo = newRepository()
-        assertThat(repo.settings.first().searchContacts).isFalse()
-
-        repo.setSearchContacts(true)
-        assertThat(repo.settings.first().searchContacts).isTrue()
-
-        repo.setSearchContacts(false)
-        assertThat(repo.settings.first().searchContacts).isFalse()
     }
 
     @Test

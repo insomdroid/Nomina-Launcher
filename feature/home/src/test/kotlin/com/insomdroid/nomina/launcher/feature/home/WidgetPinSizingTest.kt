@@ -9,7 +9,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,13 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.flow.emptyFlow
-import com.insomdroid.nomina.data.NotificationBadgeRepository
 import com.insomdroid.nomina.designsystem.theme.LauncherTheme
 import com.insomdroid.nomina.data.PinSpans
-import com.insomdroid.nomina.launcher.system.BatteryMonitor
-import com.insomdroid.nomina.launcher.system.ConnectivityMonitor
-import com.insomdroid.nomina.launcher.system.SignalMonitor
-import com.insomdroid.nomina.launcher.system.SystemFlagsMonitor
 import com.insomdroid.nomina.model.AppItem
 import com.insomdroid.nomina.model.LauncherSettings
 import com.insomdroid.nomina.ui.HomeDragController
@@ -290,28 +284,12 @@ class WidgetPinSizingTest {
 
     private val dockApps = (1..4).map { AppItem("com.app$it", "Main", Process.myUserHandle(), 0L, "App $it") }
 
-    private val statusViewModel by lazy {
-        StatusViewModel(
-            BatteryMonitor(context), ConnectivityMonitor(context), SignalMonitor(context), SystemFlagsMonitor(context),
-            NotificationBadgeRepository(),
-        )
-    }
-
-    /** A real status bar, workspace and dock in the column HomeScreen puts them in (Robolectric's
-     *  window has no bars and no cutout). */
+    /** The workspace and dock in the column HomeScreen uses; the native system bars are insets. */
     @Composable
     private fun HomeColumn(settings: LauncherSettings, pageCount: Int, cellSize: HomeCellSize) {
         val drag = remember { HomeDragController() }
         CompositionLocalProvider(LocalAppLabelScale provides settings.appLabelTextScale) {
             Column(Modifier.fillMaxSize()) {
-                if (settings.showStatusBar) {
-                    StatusBar(
-                        alignToCutout = settings.hideSystemStatusBar,
-                        modifier = Modifier.fillMaxWidth()
-                            .then(if (settings.hideSystemStatusBar) Modifier.heightIn(min = STATUS_ZONE_MIN) else Modifier),
-                        viewModel = statusViewModel,
-                    )
-                }
                 Workspace(
                     pageCount = pageCount, columns = settings.homeColumns, rows = settings.homeRows,
                     entries = emptyList(), badges = emptyMap(), badgeShowCount = false, badgeScale = 1f,
@@ -323,7 +301,7 @@ class WidgetPinSizingTest {
                     onRemoveFromHome = {}, onOpenFolder = {}, onLaunchShortcut = {}, onRemoveShortcut = {},
                     onCreateFolder = { _, _ -> }, onAddToFolder = { _, _ -> }, onEmptyAreaMenu = { _, _ -> },
                     cellSize = cellSize, chrome = workspaceChrome(settings, pageCount, LocalDensity.current.fontScale, dockApps.size),
-                    modifier = Modifier.weight(1f).fillMaxWidth().homeWorkspacePadding(settings.showStatusBar, dockShown = settings.dockEnabled),
+                    modifier = Modifier.weight(1f).fillMaxWidth().homeWorkspacePadding(dockShown = settings.dockEnabled),
                 )
                 if (settings.dockEnabled) {
                     Dock(
@@ -384,30 +362,15 @@ class WidgetPinSizingTest {
                 LauncherSettings(showDockLabels = true, appLabelTextScale = 1.6f) to 1,
                 LauncherSettings(dockEnabled = false) to 2,
                 LauncherSettings(homeRows = 8, homePageMarker = LauncherSettings.MARKER_HOUSE) to 2,
-                LauncherSettings(showStatusBar = true) to 1,
-                LauncherSettings(showStatusBar = true, hideSystemStatusBar = true, showDockLabels = true) to 2,
             ),
         ) { settings, pages, real ->
             val estimate = estimateOf(settings, pages)
             val what = "$pages page(s), dock ${settings.dockEnabled}, labels ${settings.showDockLabels} × " +
-                "${settings.appLabelTextScale}, themed bar ${settings.showStatusBar}"
-            // The themed bar's second line (5G, the Wi-Fi band) only shows with a connection to name.
-            val secondLine = if (settings.showStatusBar) 9f / settings.homeRows else 0f
+                "${settings.appLabelTextScale}"
             assertWithMessage(what).that(estimate.widthDp).isWithin(0.01f).of(real.widthDp)
             assertWithMessage(what).that(estimate.heightDp).isAtMost(real.heightDp + 0.01f)
-            assertWithMessage(what).that(estimate.heightDp).isAtLeast(real.heightDp - 0.5f - secondLine)
+            assertWithMessage(what).that(estimate.heightDp).isAtLeast(real.heightDp - 0.5f)
         }
-    }
-
-    /** The home screen hides the system bar on its own setting, themed bar or not, and a shown one pads
-     *  the workspace: a cell measured with it hidden is not the grid's once it shows. */
-    @Test fun theSystemBarIsPartOfTheChromeWithoutTheThemedBarToo() {
-        val hidden = chromeOf(LauncherSettings(showStatusBar = false, hideSystemStatusBar = true))
-        val shown = chromeOf(LauncherSettings(showStatusBar = false, hideSystemStatusBar = false))
-        val cellSize = HomeCellSize().apply { publish(100f, 100f, columns = 4, rows = 6, chrome = hidden) }
-
-        assertThat(cellSize.cellFor(4, 6, chrome = shown)).isNull()
-        assertThat(cellSize.cellFor(4, 6, chrome = hidden)).isNotNull()
     }
 
     /** A foldable opened or closed meanwhile: another screen altogether. */
@@ -463,42 +426,29 @@ class WidgetPinSizingTest {
         (estimateOf(settings, window = HomeWindow(window.widthDp, window.heightDp)).heightDp -
             estimateOf(settings, window = window).heightDp) * settings.homeRows
 
-    /** The window's bars come off the grid where HomeScreen's column takes them: the system status bar
-     *  while it shows, the navigation bar under the dock (without a dock the grid reaches under it). */
+    /** The workspace reserves the native system status bar and navigation bar. */
     @Test fun theWindowsBarsComeOffTheGridWhereTheHomeScreenTakesThem() {
         val bars = HomeWindow(320f, 470f, statusBarDp = 24f, navigationBarDp = 48f)
 
         assertThat(lostToBars(LauncherSettings(), bars)).isWithin(0.01f).of(24f + 48f)
-        assertThat(lostToBars(LauncherSettings(hideSystemStatusBar = true), bars)).isWithin(0.01f).of(48f)
         // Without the dock the workspace itself keeps clear of the navigation bar.
         assertThat(lostToBars(LauncherSettings(dockEnabled = false), bars)).isWithin(0.01f).of(24f + 48f)
     }
 
-    /** The themed bar counts at its tallest: under a shown system bar, that bar and its own two lines
-     *  and fade; in the hidden bar's place, at least the cutout's band, its glyphs dropped level with
-     *  the camera's centre. */
-    @Test fun theThemedBarCountsAtItsTallestBesideTheSystemBarOrTheCamera() {
-        val bar = HomeWindow(320f, 470f, statusBarDp = 24f)
-        val camera = HomeWindow(320f, 470f, statusBarDp = 40f, cutoutDp = 40f, cutoutCenterDp = 20f)
+    /** The top inset uses the larger of the native status bar and a display cutout. */
+    @Test fun aTopCutoutAndTheStatusBarAreNotAddedTwice() {
+        val statusBar = HomeWindow(320f, 470f, statusBarDp = 24f)
+        val cutout = HomeWindow(320f, 470f, statusBarDp = 24f, cutoutDp = 40f, cutoutTopDp = 40f)
 
-        assertThat(lostToBars(LauncherSettings(showStatusBar = true), bar)).isWithin(0.01f).of(24f)
-        assertThat((estimateOf(LauncherSettings()).heightDp - estimateOf(LauncherSettings(showStatusBar = true)).heightDp) * 6)
-            .isWithin(0.01f).of(STATUS_BAR_TALLEST.value)
-        // No camera: the band's 24 dp, the glyphs' 35 below it are more.
-        assertThat((estimateOf(LauncherSettings(hideSystemStatusBar = true)).heightDp -
-            estimateOf(LauncherSettings(showStatusBar = true, hideSystemStatusBar = true)).heightDp) * 6)
-            .isWithin(0.01f).of(STATUS_BAR_TALLEST.value)
-        // The camera's centre 20 dp down: the glyph line's centre goes there, 11 dp from the top, and the bar ends 35 below.
-        val themed = estimateOf(LauncherSettings(showStatusBar = true, hideSystemStatusBar = true), window = camera)
-        val none = estimateOf(LauncherSettings(hideSystemStatusBar = true), window = camera)
-        assertThat((none.heightDp - themed.heightDp) * 6).isWithin(0.01f).of(20f - 9f + STATUS_BAR_TALLEST.value)
+        assertThat(lostToBars(LauncherSettings(), statusBar)).isWithin(0.01f).of(24f + 48f)
+        assertThat(lostToBars(LauncherSettings(), cutout)).isWithin(0.01f).of(40f + 48f)
     }
 
     /** A phone app held sideways: the upright home screen's window is the same display turned, the
      *  bars and the cutout counted at their largest since they sit on other edges now. */
     @Config(qualifiers = "+w800dp-h400dp-land")
     @Test fun aPhoneOnItsSideIsEstimatedInItsWindowTurnedUpright() {
-        val sideways = HomeWindow(800f, 400f, statusBarDp = 24f, navigationBarDp = 48f, cutoutDp = 30f, cutoutCenterDp = null)
+        val sideways = HomeWindow(800f, 400f, statusBarDp = 24f, navigationBarDp = 48f, cutoutDp = 30f, cutoutTopDp = 0f)
 
         val estimate = estimateOf(LauncherSettings(homeColumns = 4, homeRows = 6), window = sideways)
 

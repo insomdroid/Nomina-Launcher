@@ -264,11 +264,6 @@ fun SettingsScreen(
                         viewModel::setInfiniteScroll,
                     )
                     SwitchRow(stringResource(R.string.settings_lock_desktop), s.desktopLocked, viewModel::setDesktopLocked)
-                    SwitchRow(
-                        stringResource(R.string.settings_hide_status_bar),
-                        s.hideSystemStatusBar,
-                        viewModel::setHideSystemStatusBar,
-                    )
                     SwitchRow(stringResource(R.string.settings_widget_tonal), s.widgetTonalBackground, viewModel::setWidgetTonalBackground)
                     SwitchRow(
                         stringResource(R.string.settings_widget_inset),
@@ -281,16 +276,6 @@ fun SettingsScreen(
                         WeatherAppRow(appLabel = allApps.firstOrNull { it.key == s.weatherAppKey }?.label) {
                             showWeatherAppPicker = true
                         }
-                        SwitchRow(
-                            stringResource(R.string.settings_network_place_names),
-                            stringResource(R.string.settings_network_place_names_desc),
-                            s.networkPlaceNames,
-                            viewModel::setNetworkPlaceNames,
-                        )
-                    }
-                    StatusBarToggle(enabled = s.showStatusBar, onSetEnabled = viewModel::setShowStatusBar)
-                    if (s.showStatusBar) {
-                        StatusBarScrimRow(s.statusBarScrimOpacity, viewModel::setStatusBarScrimOpacity)
                     }
                 }
 
@@ -513,32 +498,6 @@ fun SettingsScreen(
                 }
 
                 CollapsibleSection(
-                    title = stringResource(R.string.settings_search),
-                    collapsed = "search" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("search", it) },
-                ) {
-                    ContactsSearchToggle(
-                        enabled = s.searchContacts,
-                        onSetEnabled = viewModel::setSearchContacts,
-                    )
-
-                }
-
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_sounds),
-                    collapsed = "sounds" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("sounds", it) },
-                ) {
-                    LockSoundsSettings(
-                        enabled = s.lockSoundsEnabled,
-                        lockUri = s.lockSoundUri,
-                        unlockUri = s.unlockSoundUri,
-                        onSetEnabled = viewModel::setLockSoundsEnabled,
-                        onSetSound = viewModel::setLockSound,
-                    )
-                }
-
-                CollapsibleSection(
                     title = stringResource(R.string.settings_permissions),
                     collapsed = "permissions" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("permissions", it) },
@@ -562,10 +521,6 @@ fun SettingsScreen(
                     PermissionRow(
                         label = stringResource(R.string.settings_permission_contacts),
                         permission = android.Manifest.permission.READ_CONTACTS,
-                    )
-                    PermissionRow(
-                        label = stringResource(R.string.settings_permission_phone),
-                        permission = android.Manifest.permission.READ_PHONE_STATE,
                     )
                     PermissionRow(
                         label = stringResource(R.string.settings_permission_location),
@@ -1047,23 +1002,6 @@ private fun WeatherToggle(enabled: Boolean, onSetEnabled: (Boolean) -> Unit) {
     }
 }
 
-/** Status-bar toggle. Turns on regardless (battery + Wi-Fi need no permission); when enabled it also
- *  asks for READ_PHONE_STATE so the mobile-signal indicator can show (battery/Wi-Fi work without it). */
-@Composable
-private fun StatusBarToggle(enabled: Boolean, onSetEnabled: (Boolean) -> Unit) {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { /* signal shows if granted */ }
-    SwitchRow(stringResource(R.string.settings_status_bar), enabled) { wantOn ->
-        onSetEnabled(wantOn)
-        if (wantOn &&
-            ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_PHONE_STATE) !=
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            launcher.launch(android.Manifest.permission.READ_PHONE_STATE)
-        }
-    }
-}
-
 /** Double-tap-to-lock toggle. Locking needs the lock accessibility service (used ONLY for
  *  performGlobalAction(LOCK_SCREEN)); enabling the switch opens the system accessibility settings
  *  when the service isn't allowed yet, and a grant row stays visible until it is. */
@@ -1093,23 +1031,6 @@ private fun DoubleTapLockToggle(enabled: Boolean, onSetEnabled: (Boolean) -> Uni
             label = stringResource(R.string.settings_double_tap_lock_grant),
             description = stringResource(R.string.settings_double_tap_lock_grant_desc),
         ) { openAccessibilitySettings() }
-    }
-}
-
-@Composable
-private fun ContactsSearchToggle(enabled: Boolean, onSetEnabled: (Boolean) -> Unit) {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        onSetEnabled(granted) // grant → on; deny → stays off
-    }
-    SwitchRow(stringResource(R.string.settings_search_contacts), enabled) { wantOn ->
-        if (!wantOn) {
-            onSetEnabled(false)
-        } else {
-            val has = ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_CONTACTS) ==
-                PackageManager.PERMISSION_GRANTED
-            if (has) onSetEnabled(true) else launcher.launch(android.Manifest.permission.READ_CONTACTS)
-        }
     }
 }
 
@@ -1203,21 +1124,6 @@ private fun StepButton(@DrawableRes icon: Int, contentDescription: String, onCli
             modifier = Modifier.size(20.dp),
         )
     }
-}
-
-/** The status bar background darkness as a percent of black: 0 % transparent, 100 % solid black, in
- *  5 % steps with a tick of haptic feedback on each, and a chip back to the default. */
-@Composable
-internal fun StatusBarScrimRow(value: Float, onValueChange: (Float) -> Unit) {
-    val resources = LocalResources.current
-    ScaleSliderRow(
-        label = stringResource(R.string.settings_status_bar_scrim),
-        value = value,
-        onValueChange = onValueChange,
-        valueRange = 0f..1f,
-        valueText = { resources.getString(R.string.settings_percent, scalePercent(it)) },
-        default = LauncherSettings.DEFAULT_STATUS_BAR_SCRIM,
-    )
 }
 
 /** The dock background darkness as a percent of black, in 5 % steps with a tick of haptic feedback

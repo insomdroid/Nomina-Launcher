@@ -14,10 +14,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
-/**
- * Settings ▸ Feedback lists every channel the README does: GitHub Discussions, the Telegram group and,
- * since 1.0.2, the r/ArkLauncher community (owner decision 2026-11-05). Each row opens its own page.
- */
+/** The available Nomina feedback channel opens the project's own GitHub Discussions page. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = Application::class, qualifiers = "en")
 class FeedbackRowsTest {
@@ -27,30 +24,25 @@ class FeedbackRowsTest {
     private val opened = mutableListOf<String>()
 
     private fun show() {
-        // In a Column as in the Feedback section: the rows are slot content, not a layout of their own.
         compose.setContent { Column { FeedbackRows(onOpen = { opened += it }) } }
         compose.waitForIdle()
     }
 
-    @Test fun allThreeChannelsAreListedWithTheirDescriptions() {
+    @Test fun onlyTheNominaDiscussionChannelIsListed() {
         show()
 
         compose.onNodeWithText(res.getString(R.string.settings_feedback_discussions)).assertIsDisplayed()
-        compose.onNodeWithText(res.getString(R.string.settings_feedback_telegram)).assertIsDisplayed()
-        compose.onNodeWithText(res.getString(R.string.settings_feedback_reddit)).assertIsDisplayed()
-        compose.onNodeWithText(res.getString(R.string.settings_feedback_reddit_desc)).assertIsDisplayed()
+        compose.onNodeWithText(res.getString(R.string.settings_feedback_discussions_desc)).assertIsDisplayed()
+        compose.onNodeWithText("Telegram group").assertDoesNotExist()
+        compose.onNodeWithText("Reddit community").assertDoesNotExist()
     }
 
-    @Test fun eachRowOpensItsOwnPage() {
+    @Test fun discussionRowOpensTheNominaRepository() {
         show()
 
         compose.onNodeWithText(res.getString(R.string.settings_feedback_discussions)).performClick()
-        compose.onNodeWithText(res.getString(R.string.settings_feedback_telegram)).performClick()
-        compose.onNodeWithText(res.getString(R.string.settings_feedback_reddit)).performClick()
 
-        assertThat(opened).containsExactly(DISCUSSIONS_URL, TELEGRAM_URL, REDDIT_URL).inOrder()
-        assertThat(DISCUSSIONS_URL).isEqualTo("https://github.com/jrs8205/Nomina/discussions")
-        assertThat(TELEGRAM_URL).isEqualTo("https://t.me/ARKlauncher")
-        assertThat(REDDIT_URL).isEqualTo("https://www.reddit.com/r/ArkLauncher/")
+        assertThat(opened).containsExactly(DISCUSSIONS_URL)
+        assertThat(DISCUSSIONS_URL).isEqualTo("https://github.com/insomdroid/Nomina-Launcher/discussions")
     }
 }

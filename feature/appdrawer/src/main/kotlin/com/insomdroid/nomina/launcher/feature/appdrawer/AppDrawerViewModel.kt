@@ -104,7 +104,6 @@ data class AppDrawerUiState(
      *  lists are the previous query's, so "No results" must wait. */
     val searchPending: Boolean = false,
     val settingResults: List<SearchResult.Setting> = emptyList(),
-    val contactResults: List<SearchResult.Contact> = emptyList(),
     val desktopLocked: Boolean = false,
     val showFrequentApps: Boolean = false,
     val frequentApps: List<AppItem> = emptyList(),
@@ -152,7 +151,7 @@ class AppDrawerViewModel @Inject constructor(
      *  results only after the debounce and the search, and the screen must tell the two apart. */
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     private val searchResults: Flow<Pair<String, SearchResults>> = combine(
-        query.debounce { if (it.isBlank()) 0L else 200L }, // contacts hit ContentResolver; avoid per-keystroke
+        query.debounce { if (it.isBlank()) 0L else 200L },
         appRepository.apps,                                 // install/uninstall/rename re-runs a live query
     ) { q, _ -> q }
         .mapLatest { it to searchAggregator.search(it) }    // mapLatest cancels the previous run
@@ -252,7 +251,6 @@ class AppDrawerViewModel @Inject constructor(
                 folders = emptyList(),         // no folders while searching
                 calc = results.calc,
                 settingResults = results.settings,
-                contactResults = results.contacts,
                 searchPending = answered != state.query,
             )
         }

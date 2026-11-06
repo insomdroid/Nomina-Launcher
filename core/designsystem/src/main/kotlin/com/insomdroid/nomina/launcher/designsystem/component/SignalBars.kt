@@ -9,16 +9,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.insomdroid.nomina.designsystem.theme.LocalLauncherColors
 
-/** Four ascending signal bars; the first [level] bars use [activeColor], the rest are faint. */
+/** Four ascending signal bars using one monochrome color with a quieter inactive level. */
 @Composable
 fun SignalBars(
     level: Int,
     activeColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    val faint = LocalLauncherColors.current.signalFaint
+    val inactiveColor = activeColor.copy(alpha = 0.24f)
     Canvas(modifier = modifier.size(width = 14.dp, height = 11.dp)) {
         val bars = 4
         val gap = size.width * 0.12f
@@ -28,7 +27,7 @@ fun SignalBars(
             val left = i * (barWidth + gap)
             val top = size.height - barHeight
             drawRoundRect(
-                color = if (i < level) activeColor else faint,
+                color = if (i < level.coerceIn(0, bars)) activeColor else inactiveColor,
                 topLeft = Offset(left, top),
                 size = Size(barWidth, barHeight),
                 cornerRadius = CornerRadius(barWidth * 0.3f),

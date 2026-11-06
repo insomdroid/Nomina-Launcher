@@ -3,8 +3,8 @@ package com.insomdroid.nomina.ui
 import androidx.annotation.DrawableRes
 
 /**
- * Shared vector-drawable icons (Material paths) used across the launcher's popups and rows, exposed
- * as resource ids so feature modules reference them without reaching into another module's R class.
+ * Shared monochrome outline vector icons used across launcher popups, actions, and rows.
+ * Feature modules reference these resource ids without reaching into another module's R class.
  */
 object LauncherIcons {
     @DrawableRes val Info: Int = R.drawable.ic_info

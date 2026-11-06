@@ -415,12 +415,17 @@ class LauncherAppsSource @Inject constructor(
         } else {
             null
         }
-        val nativeThemed = if (themed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val nativeThemed = if (
+            packed == null && themed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        ) {
             themedIcon(info, dark)
         } else {
             null
         }
-        val generatedThemed = if (themed && themeAll) {
+        // Never render an icon that will lose to a mapped pack entry or a usable native layer.
+        val generatedThemed = if (
+            packed == null && nativeThemed == null && themed && themeAll
+        ) {
             generatedThemedIcon(info, dark)
         } else {
             null

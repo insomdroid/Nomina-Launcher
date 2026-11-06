@@ -7,8 +7,6 @@
     <string name="settings_gestures">Gesty</string>
     <string name="settings_show_weather">Pogoda w widżecie</string>
     <string name="settings_weather_app">Dotknięcie pogody otwiera</string>
-    <string name="settings_network_place_names">Nazwa miejscowości z internetu</string>
-    <string name="settings_network_place_names_desc">Jeśli telefon nie potrafi sam ustalić nazwy twojej miejscowości, zostanie ona sprawdzona w BigDataCloud. Usługa otrzymuje twoją przybliżoną lokalizację.</string>
     <string name="settings_swipe_up_drawer">Przesuń w górę → aplikacje</string>
     <string name="settings_swipe_down_notif">Przesuń w dół → powiadomienia</string>
     <string name="settings_folder_swipe_first_app">Przesunięcie w górę na folderze → jego pierwsza aplikacja</string>
@@ -148,15 +146,11 @@
     <string name="settings_font_casual">Swobodna</string>
     <string name="settings_font_cursive">Odręczna</string>
     <string name="settings_search">Wyszukiwanie</string>
-    <string name="settings_search_contacts">Wyszukuj kontakty</string>
     <string name="settings_left_edge">Lewa krawędź</string>
     <string name="settings_left_edge_none">Brak</string>
     <string name="settings_left_edge_pick">Wybierz aplikację</string>
     <string name="settings_close">Zamknij</string>
     <string name="settings_lock_desktop">Zablokuj układ</string>
-    <string name="settings_hide_status_bar">Ukryj systemowy pasek stanu (pełny ekran)</string>
-    <string name="settings_status_bar">Pasek stanu (zegar, bateria, sygnał)</string>
-    <string name="settings_status_bar_scrim">Przyciemnienie tła paska stanu</string>
     <string name="settings_frequent_apps">Najczęściej używane na górze</string>
     <string name="settings_hide_home_apps">Ukryj aplikacje znajdujące się na ekranie głównym</string>
     <string name="settings_hide_home_apps_desc">Aplikacje umieszczone na ekranie głównym, w jego folderach lub w docku znikają z listy. Wyszukiwanie nadal je znajduje.</string>
@@ -187,15 +181,6 @@
     <string name="settings_widget_inset">Wyrównaj krawędzie widżetów do ikon</string>
     <string name="settings_widget_inset_desc">Widżety zachowują taki sam boczny margines jak ikony aplikacji, zamiast wypełniać komórki od krawędzi do krawędzi. Widżety z własnym marginesem mogą wyglądać na mniejsze.</string>
     <string name="settings_sounds">Dźwięki</string>
-    <string name="settings_lock_sounds">Dźwięki blokady i odblokowania</string>
-    <string name="settings_lock_sounds_desc">Wybrany przez Ciebie dźwięk odtwarza się, gdy telefon się blokuje i gdy się odblokowuje – nie w trybie cichym, wibracji, Nie przeszkadzać ani podczas rozmowy.</string>
-    <string name="settings_lock_sound">Dźwięk blokady</string>
-    <string name="settings_unlock_sound">Dźwięk odblokowania</string>
-    <string name="settings_sound_none">Brak dźwięku</string>
-    <string name="settings_sound_from_files">Wybierz plik</string>
-    <string name="settings_sound_from_phone">Dźwięki telefonu</string>
-    <string name="settings_sound_play">Odtwórz</string>
-    <string name="settings_sound_picked">Wybrany dźwięk</string>
     <string name="settings_phone_sound_settings">Ustawienia dźwięku telefonu</string>
     <string name="settings_phone_sound_settings_desc">Wyłącz tam dźwięk blokady ekranu samego telefonu, aby oba dźwięki nie grały jednocześnie.</string>
 </resources>

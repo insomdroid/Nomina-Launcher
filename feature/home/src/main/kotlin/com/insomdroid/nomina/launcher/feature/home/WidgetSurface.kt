@@ -17,14 +17,21 @@ val LocalTonalWidgets = staticCompositionLocalOf { false }
 internal fun widgetContentColor(): Color =
     if (LocalTonalWidgets.current) MaterialTheme.colorScheme.onSurface else Color.White
 
+/**
+ * Nomina's built-in widgets sit directly on the launcher wallpaper.
+ * Keep this shared color transparent so every built-in widget uses the same treatment.
+ */
 @Composable
-internal fun widgetSurfaceColor(): Color =
-    if (LocalTonalWidgets.current) MaterialTheme.colorScheme.surfaceContainer else Color.Black.copy(alpha = 0.30f)
+internal fun widgetSurfaceColor(): Color = Color.Transparent
 
 @Composable
 internal fun WidgetSurface(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    Surface(modifier, shape = RoundedCornerShape(24.dp),
-        color = widgetSurfaceColor(), contentColor = widgetContentColor()) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        color = Color.Transparent,
+        contentColor = widgetContentColor(),
+    ) {
         Box(content = content)
     }
 }

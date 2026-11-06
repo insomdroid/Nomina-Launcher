@@ -361,7 +361,6 @@ private fun RowScope.DockAppSlot(
                     // during the long-press hold. Without this the long-press was flaky ("had to try
                     // several times to get the popup"): the tiniest drift leaked out and cancelled
                     // the hold before it could open the menu.
-                    down.consume()
                     val slop = viewConfiguration.touchSlop
                     var tapped = false
                     var abandoned = false
@@ -381,7 +380,6 @@ private fun RowScope.DockAppSlot(
                                 abandoned = true
                                 return@withTimeoutOrNull
                             }
-                            c.consume()
                             if (!c.pressed) {
                                 tapped = true
                                 return@withTimeoutOrNull

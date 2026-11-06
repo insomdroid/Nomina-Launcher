@@ -399,7 +399,7 @@ internal fun SmartspaceContent(
                     TapTarget(onTap = openAlarms, fillWidth = false, fillHeight = true, interactionSource = noIndication) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_status_alarm),
+                                painter = painterResource(R.drawable.ic_alarm),
                                 contentDescription = stringResource(R.string.smartspace_next_alarm),
                                 tint = widgetContentColor().copy(alpha = 0.9f),
                                 modifier = Modifier.size((14 * scale).dp),

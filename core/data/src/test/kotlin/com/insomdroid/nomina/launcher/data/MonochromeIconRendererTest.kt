@@ -23,10 +23,9 @@ class MonochromeIconRendererTest {
     @Test
     fun acceptsTransparentArtworkWithBreathingRoom() {
         val pixels = IntArray(10 * 10)
-        for (y in 2..7) {
-            for (x in 2..7) {
-                pixels[y * 10 + x] = 0xFF336699.toInt()
-            }
+        for (offset in 2..7) {
+            pixels[5 * 10 + offset] = 0xFF336699.toInt()
+            pixels[offset * 10 + 5] = 0xFF336699.toInt()
         }
 
         assertThat(hasUsableTransparentGlyph(pixels, 10, 10)).isTrue()
@@ -48,8 +47,12 @@ class MonochromeIconRendererTest {
 
     @Test
     fun acceptsLargeTransparentGlyphSoItCanBeFittedIntoSafeZone() {
-        val pixels = IntArray(10 * 10) { 0xFFFFFFFF.toInt() }
-        for (index in 0 until 10) pixels[index] = 0
+        val pixels = IntArray(10 * 10)
+        for (y in 3..6) {
+            for (x in 0..9) {
+                pixels[y * 10 + x] = 0xFFFFFFFF.toInt()
+            }
+        }
 
         assertThat(hasUsableTransparentGlyph(pixels, 10, 10)).isTrue()
     }

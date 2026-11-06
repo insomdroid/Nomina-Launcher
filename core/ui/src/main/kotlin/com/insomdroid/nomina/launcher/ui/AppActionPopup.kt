@@ -214,7 +214,7 @@ fun IconMenuPopup(
 
 /**
  * Shared Version C popup chrome: an anchored, dismissible rounded card (with a caret pointing at the
- * icon) wrapped in [ExpressiveTheme] so it resolves the warm-orange dark/light palette regardless of
+ * icon) wrapped in [ExpressiveTheme] so it resolves the monochrome dark/light palette regardless of
  * the caller. [content] is the scrollable column of rows, [width] the card's width (the menus' by
  * default; a drawer folder's card is wider); while [blockTouches] a cover over the card takes every
  * touch, so no row gets one.
@@ -383,7 +383,7 @@ internal fun ShortcutPopupRow(
                 Icon(
                     painter = painterResource(LauncherIcons.Add),
                     contentDescription = stringResource(R.string.shortcut_pin),
-                    tint = LocalExpressivePalette.current.accent,
+                    tint = LocalExpressivePalette.current.text,
                     modifier = Modifier.size(22.dp),
                 )
             }
@@ -404,7 +404,7 @@ private fun PopupRow(text: String, @DrawableRes icon: Int?, onClick: () -> Unit)
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
-                tint = LocalExpressivePalette.current.accent,
+                tint = LocalExpressivePalette.current.text,
                 modifier = Modifier.size(20.dp),
             )
         }

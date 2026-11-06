@@ -554,7 +554,7 @@ private fun AppDrawerContent(
             DragHandle()
             if (showSearch) {
                 val searchPalette = LocalExpressivePalette.current
-                // Version C: rounded pill, surfaceHi background, Accent cursor, no underline.
+                // Nothing-inspired compact field, surfaceHi background, monochrome cursor, no underline.
                 TextField(
                     value = query,
                     onValueChange = onQueryChange,

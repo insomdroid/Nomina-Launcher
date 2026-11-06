@@ -56,6 +56,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -490,6 +491,22 @@ fun HomeScreen(
     LaunchedEffect(dragController.moving) {
         if (dragController.moving) menuTarget = null
     }
+
+    // When the expanded dock is hidden, reveal it as an incoming app drag reaches the lower
+    // portion of the workspace. The drag keeps running while AnimatedVisibility slides the dock in.
+    LaunchedEffect(dragController, settings.dockEnabled, settings.dockExpanded, homeOrigin, homeHeightPx) {
+        snapshotFlow { Triple(dragController.moving, dragController.source, dragController.rootPosition) }
+            .collect { (moving, source, position) ->
+                val incoming = source == DragSource.Home || source == DragSource.Drawer || source == DragSource.Folder
+                val revealZoneTop = homeOrigin.y + homeHeightPx * 0.82f
+                if (
+                    settings.dockEnabled && !settings.dockExpanded && moving && incoming &&
+                    homeHeightPx > 0 && position.y >= revealZoneTop
+                ) {
+                    viewModel.setDockExpanded(true)
+                }
+            }
+    }
     // Pressing HOME (onNewIntent → homeSignals) returns to a clean home: dismiss every open popup /
     // overlay — on every signal, also when coming home from an app. Without this the long-press app
     // menu and the empty-area options popup lingered until the user pressed Back — a Compose Popup
@@ -533,12 +550,14 @@ fun HomeScreen(
     // finger's root position, which the drag controller publishes.
     var homeOrigin by remember { mutableStateOf(Offset.Zero) }
     var homeWidthPx by remember { mutableIntStateOf(0) }
+    var homeHeightPx by remember { mutableIntStateOf(0) }
     Box(
         modifier = modifier
             .fillMaxSize()
             .onGloballyPositioned {
                 homeOrigin = it.positionInRoot()
                 homeWidthPx = it.size.width
+                homeHeightPx = it.size.height
             }
             .pointerInput(settings.dockExpanded, homeOrigin) {
                 if (settings.dockExpanded) {
@@ -691,6 +710,18 @@ fun HomeScreen(
             // Show the dock whenever it's enabled — even with no favorites yet — so a fresh install
             // can be populated by dragging apps onto it (there is no "add to dock" menu item).
             if (settings.dockEnabled) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(LauncherIcons.ExpandMore),
+                        contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
+                        modifier = Modifier.size(24.dp).graphicsLayer { rotationZ = if (settings.dockExpanded) 180f else 0f }
+                            .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
+                        tint = Color.White,
+                    )
+                }
                 AnimatedVisibility(
                     visible = settings.dockExpanded,
                     enter = slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(220)) + fadeIn(tween(180)),
@@ -722,18 +753,6 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp),
                 )
-                }
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(LauncherIcons.ExpandMore),
-                        contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
-                        modifier = Modifier.size(24.dp).graphicsLayer { rotationZ = if (settings.dockExpanded) 180f else 0f }
-                            .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
-                        tint = Color.White,
-                    )
                 }
             }
             // Permanent mini dock: camera, drawer search and the system's selected browser.

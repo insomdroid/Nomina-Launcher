@@ -32,7 +32,15 @@ import javax.inject.Provider
 @Config(sdk = [35])
 class LauncherAppsSourceReloadTest {
     private val context: Application = RuntimeEnvironment.getApplication()
-    private val source = LauncherAppsSource(context, IconPackRepository(context), Provider<ImageLoader> { error("unused") })
+    private val source = LauncherAppsSource(
+        context,
+        IconPackRepository(context),
+        Provider<ImageLoader> { error("unused") },
+        AppLabelCache(object : AppLabelStore {
+            override suspend fun read(locale: String): Map<String, String> = emptyMap()
+            override suspend fun write(locale: String, labels: Map<String, String>) = Unit
+        }),
+    )
     private val signals = MutableSharedFlow<Unit>()
     private val emissions = MutableStateFlow(0)
 

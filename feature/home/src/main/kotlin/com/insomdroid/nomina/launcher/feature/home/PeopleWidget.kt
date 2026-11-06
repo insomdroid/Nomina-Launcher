@@ -105,9 +105,9 @@ import com.insomdroid.nomina.data.PersonEventKind
 import com.insomdroid.nomina.data.PersonTileState
 import com.insomdroid.nomina.data.PinnedPerson
 import com.insomdroid.nomina.data.SettingsRepository
-import com.insomdroid.nomina.data.search.ContactDataSource
-import com.insomdroid.nomina.data.search.PermissionChecker
-import com.insomdroid.nomina.data.search.RawContact
+import com.insomdroid.nomina.data.people.PeopleContact
+import com.insomdroid.nomina.data.people.PeopleContactDataSource
+import com.insomdroid.nomina.data.people.PeoplePermissionChecker
 import com.insomdroid.nomina.model.AppItem
 import com.insomdroid.nomina.model.LauncherSettings
 import com.insomdroid.nomina.ui.LongPressDelay
@@ -136,8 +136,8 @@ class PeopleWidgetViewModel @Inject constructor(
     private val badgeRepository: NotificationBadgeRepository,
     private val settingsRepository: SettingsRepository,
     private val appRepository: AppRepository,
-    private val contacts: ContactDataSource,
-    private val permissions: PermissionChecker,
+    private val contacts: PeopleContactDataSource,
+    private val permissions: PeoplePermissionChecker,
 ) : ViewModel() {
 
     /**
@@ -150,7 +150,7 @@ class PeopleWidgetViewModel @Inject constructor(
         val name: String,
         val pinned: PinnedPerson?,
         val live: PersonTileState?,
-        val contact: RawContact?,
+        val contact: PeopleContact?,
         /** The launcher app behind the newest notification (null when quiet, or no launcher entry). */
         val app: AppItem? = null,
     ) {
@@ -198,7 +198,7 @@ class PeopleWidgetViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Contacts matches by person key; a null value records a miss so it isn't retried. */
-    private val contactCache = MutableStateFlow<Map<String, RawContact?>>(emptyMap())
+    private val contactCache = MutableStateFlow<Map<String, PeopleContact?>>(emptyMap())
     private val lookupsStarted = HashSet<String>()
 
     /** One launcher entry per package+profile, for app tiles' icons and launch. */
@@ -243,7 +243,7 @@ class PeopleWidgetViewModel @Inject constructor(
         if (pending.isEmpty()) return
         viewModelScope.launch {
             val found = pending.associate { tile ->
-                val matches = runCatching { contacts.search(tile.name, 3) }.getOrDefault(emptyList())
+                val matches = runCatching { contacts.findMatches(tile.name, 3) }.getOrDefault(emptyList())
                 tile.key to (matches.firstOrNull { it.name.equals(tile.name, ignoreCase = true) } ?: matches.singleOrNull())
             }
             contactCache.value = contactCache.value + found

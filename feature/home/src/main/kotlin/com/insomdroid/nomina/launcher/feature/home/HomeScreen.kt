@@ -711,20 +711,6 @@ fun HomeScreen(
             // Show the dock whenever it's enabled — even with no favorites yet — so a fresh install
             // can be populated by dragging apps onto it (there is no "add to dock" menu item).
             if (settings.dockEnabled) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(LauncherIcons.ExpandMore),
-                        contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
-                            .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
-                        tint = Color.White,
-                    )
-                }
                 AnimatedVisibility(
                     visible = settings.dockExpanded,
                     enter = slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(220)) + fadeIn(tween(180)),
@@ -757,6 +743,21 @@ fun HomeScreen(
                         .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp)
                         .padding(bottom = 12.dp),
                 )
+                }
+            }
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        painter = painterResource(LauncherIcons.ExpandMore),
+                        contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
+                            .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
+                        tint = Color.White,
+                    )
                 }
             }
             // Compact Nothing-inspired mini dock: camera, app search and browser.

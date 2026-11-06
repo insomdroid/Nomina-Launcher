@@ -9,6 +9,7 @@ import android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -295,7 +296,7 @@ internal fun PopupCardContent(
                 color = cardColor,
                 tonalElevation = 0.dp,
                 shadowElevation = 0.dp,
-                modifier = Modifier.width(width),
+                modifier = Modifier.width(width).border(1.dp, palette.trackOff.copy(alpha = 0.8f), RoundedCornerShape(8.dp)),
             ) {
                 Column(
                     modifier = Modifier

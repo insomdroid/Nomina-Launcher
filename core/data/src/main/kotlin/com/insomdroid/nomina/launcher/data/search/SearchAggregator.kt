@@ -31,7 +31,6 @@ class SearchAggregator @Inject constructor(
             calc = all.filterIsInstance<SearchResult.Calculation>().firstOrNull(),
             apps = all.filterIsInstance<SearchResult.App>().map { it.app },
             settings = all.filterIsInstance<SearchResult.Setting>(),
-            contacts = all.filterIsInstance<SearchResult.Contact>(),
         )
     }
 }

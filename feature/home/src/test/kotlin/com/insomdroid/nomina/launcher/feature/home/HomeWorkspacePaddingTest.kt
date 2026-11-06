@@ -45,7 +45,7 @@ class HomeWorkspacePaddingTest {
     /** The gap in px between the bottom of the padded workspace content and the bottom of the root. */
     private fun bottomGap(dockShown: Boolean, navigationBarPx: Int): Float {
         compose.setContent {
-            Box(Modifier.fillMaxSize().homeWorkspacePadding(showStatusBar = true, dockShown = dockShown)) {
+            Box(Modifier.fillMaxSize().homeWorkspacePadding(dockShown = dockShown)) {
                 Box(Modifier.fillMaxSize().testTag("content"))
             }
         }

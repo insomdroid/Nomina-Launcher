@@ -6,10 +6,10 @@ import androidx.compose.ui.graphics.Color
 
 /** Monochrome system surfaces with Nothing Red reserved for primary actions and selected states. */
 internal val LightColorScheme = lightColorScheme(
-    primary = Color(0xFFD71920),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFFFDAD8),
-    onPrimaryContainer = Color(0xFF410006),
+    primary = Color(0xFF171717),
+    onPrimary = Color(0xFF090909),
+    primaryContainer = Color(0xFFE5E5E5),
+    onPrimaryContainer = Color(0xFF171717),
     secondary = Color(0xFF555555),
     onSecondary = Color(0xFFFFFFFF),
     secondaryContainer = Color(0xFFE5E5E5),
@@ -33,10 +33,10 @@ internal val LightColorScheme = lightColorScheme(
 )
 
 internal val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFFF454D),
+    primary = Color(0xFFF1F1F1),
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFF8F0010),
-    onPrimaryContainer = Color(0xFFFFDAD8),
+    primaryContainer = Color(0xFF3A3A3A),
+    onPrimaryContainer = Color(0xFFF1F1F1),
     secondary = Color(0xFFBDBDBD),
     onSecondary = Color(0xFF202020),
     secondaryContainer = Color(0xFF3A3A3A),

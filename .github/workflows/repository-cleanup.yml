@@ -76,27 +76,17 @@ jobs:
           gradle = root / "app/build.gradle.kts"
           text = gradle.read_text(encoding="utf-8")
 
-          old_packaging = """    // F-Droid's build server has no NDK, so AGP packages the native libraries untouched there.
-              // Keep them untouched here too, whatever NDK this machine has, so the release APK is
-              // byte-identical on both sides.
-              packaging {
-                  jniLibs {
-                      keepDebugSymbols += "**/*.so"
-                  }
-              }
-
-          """
-          if old_packaging not in text:
+          text, packaging_count = re.subn(
+              r"\\n    // F-Droid's build server.*?\\n    }\\n\\n(?=    signingConfigs)",
+              "\\n",
+              text,
+              count=1,
+              flags=re.S,
+          )
+          if packaging_count != 1:
               raise SystemExit("Expected native-library packaging block not found; refusing an unsafe Gradle edit.")
-          text = text.replace(old_packaging, "", 1)
 
-          old_debug = """        debug {
-                  applicationIdSuffix = ".debug"
-                  // Installed beside the release build on the test phones: a distinct app-list label keeps
-                  // its own (separate) home screen from being taken for the release one.
-                  manifestPlaceholders["appLabel"] = "Nomina debug"
-              }"""
-          new_debug = """        debug {
+          debug_block = """        debug {
                   applicationIdSuffix = ".debug"
                   manifestPlaceholders["appLabel"] = "Nomina debug"
                   // Keep the installable CI APK compact by removing unused code and resources.
@@ -106,10 +96,17 @@ jobs:
                       getDefaultProguardFile("proguard-android-optimize.txt"),
                       "proguard-rules.pro",
                   )
-              }"""
-          if old_debug not in text:
+              }
+              release {"""
+          text, debug_count = re.subn(
+              r"        debug \\{.*?        release \\{",
+              debug_block,
+              text,
+              count=1,
+              flags=re.S,
+          )
+          if debug_count != 1:
               raise SystemExit("Expected debug build type block not found; refusing an unsafe Gradle edit.")
-          text = text.replace(old_debug, new_debug, 1)
 
           if "isShrinkResources = true" not in text:
               text = text.replace(

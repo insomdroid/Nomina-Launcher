@@ -786,7 +786,7 @@ fun HomeScreen(
                     Icon(
                         painter = painterResource(android.R.drawable.ic_menu_view),
                         contentDescription = "Browser",
-                        modifier = Modifier.size(22.dp).clickable {
+                        modifier = Modifier.size(18.dp).clickable {
                             val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
                             runCatching { context.startActivity(intent) }.onFailure {
                                 runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }

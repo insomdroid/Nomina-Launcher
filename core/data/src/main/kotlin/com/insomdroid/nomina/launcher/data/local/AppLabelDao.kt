@@ -11,15 +11,15 @@ interface AppLabelDao {
     @Query("SELECT * FROM app_labels WHERE locale = :locale")
     suspend fun getAll(locale: String): List<AppLabelEntity>
 
-    @Query("DELETE FROM app_labels WHERE locale = :locale")
-    suspend fun deleteLocale(locale: String)
+    @Query("DELETE FROM app_labels")
+    suspend fun deleteAll()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(labels: List<AppLabelEntity>)
 
     @Transaction
-    suspend fun replaceAll(labels: List<AppLabelEntity>, locale: String) {
-        deleteLocale(locale)
+    suspend fun replaceAll(labels: List<AppLabelEntity>) {
+        deleteAll()
         if (labels.isNotEmpty()) insertAll(labels)
     }
 }

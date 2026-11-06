@@ -99,15 +99,9 @@ class SmartspaceViewModel @Inject constructor(
         .map { it.showWeather }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
-    // A place name from the network fallback hides the moment the setting goes off, before any
-    // refresh: the repository drops it only when the home screen next resumes.
     val weather: StateFlow<CurrentWeather?> =
-        combine(weatherRepository.weather, settingsRepository.settings) { w, s ->
-            when {
-                !s.showWeather -> null
-                w != null && w.cityFromNetwork && !s.networkPlaceNames -> w.copy(city = null, cityFromNetwork = false)
-                else -> w
-            }
+        combine(weatherRepository.weather, settingsRepository.settings) { weather, settings ->
+            weather.takeIf { settings.showWeather }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Re-checks the permissions (resume / after a runtime grant) and re-queries the sources. */
@@ -119,7 +113,7 @@ class SmartspaceViewModel @Inject constructor(
         // value (true) would fire one location read + network query even with weather turned off.
         viewModelScope.launch {
             val s = settingsRepository.settings.first()
-            if (s.showWeather) weatherRepository.refresh(s.networkPlaceNames)
+            if (s.showWeather) weatherRepository.refresh()
         }
     }
 

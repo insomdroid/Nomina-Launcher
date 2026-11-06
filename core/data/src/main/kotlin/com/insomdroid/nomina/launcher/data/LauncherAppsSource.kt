@@ -434,30 +434,26 @@ class LauncherAppsSource @Inject constructor(
     }.getOrNull()
 
     /**
-     * Uses the app's native Android monochrome layer when it exists, but sends it through the same
-     * crop, scale and tint pipeline as generated artwork so both sources share one visual treatment.
+     * Uses Android's native monochrome layer as authored by the app. Its adaptive geometry and
+     * breathing room are already intentional, so do not crop, resize or rasterize it again.
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun themedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
         val adaptive = info.getIcon(0) as? AdaptiveIconDrawable ?: return null
         val monochrome = adaptive.monochrome ?: return null
         val (bg, fg) = themedColors(dark)
-        val glyph = MonochromeIconRenderer.render(
-            glyph = monochrome,
-            tint = fg,
-            resources = context.resources,
-        ) ?: return null
+        val glyph = monochrome.mutate().apply { setTint(fg) }
         return AdaptiveIconDrawable(ColorDrawable(bg), glyph)
     }
 
     /**
-     * Generates a themed icon when an app has no native monochrome layer. Adaptive foregrounds retain
-     * their transparent glyph shape; opaque legacy artwork gets a best-effort edge-background removal.
+     * Conservative generated fallback for transparent artwork only. Opaque legacy icons are not
+     * guessed or recoloured: the caller then keeps the original icon instead of showing a damaged
+     * silhouette. The renderer preserves the original canvas and adaptive safe-zone proportions.
      */
     private fun generatedThemedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
         val icon = info.getIcon(0) ?: return null
-        val adaptive = icon as? AdaptiveIconDrawable
-        val glyph = adaptive?.foreground ?: icon
+        val glyph = (icon as? AdaptiveIconDrawable)?.foreground ?: icon
         val (bg, fg) = themedColors(dark)
         val rendered = MonochromeIconRenderer.render(
             glyph = glyph,

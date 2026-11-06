@@ -566,18 +566,18 @@ private fun AppDrawerContent(
                                 Icon(
                                     painter = painterResource(LauncherIcons.Close),
                                     contentDescription = stringResource(R.string.search_clear),
-                                    tint = searchPalette.accent,
+                                    tint = searchPalette.text,
                                 )
                             }
                         }
                     },
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(8.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = searchPalette.surfaceHi,
                         unfocusedContainerColor = searchPalette.surfaceHi,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = searchPalette.accent,
+                        cursorColor = searchPalette.text,
                         focusedTextColor = searchPalette.text,
                         unfocusedTextColor = searchPalette.text,
                         // The hint follows the pill's own palette, not the drawer's text (a yellow pill on a
@@ -1413,7 +1413,7 @@ private fun CalcResultCard(calc: SearchResult.Calculation, onCopy: () -> Unit) {
     val p = LocalExpressivePalette.current
     ExpressiveCard(onClick = onCopy) {
         Text("${calc.expression} = ", color = p.dim, fontSize = 18.sp)
-        Text(calc.result, color = p.accent, fontSize = 22.sp,
+        Text(calc.result, color = p.text, fontSize = 22.sp,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
     }
 }

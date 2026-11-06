@@ -752,9 +752,9 @@ fun HomeScreen(
                         painter = painterResource(android.R.drawable.ic_menu_camera),
                         contentDescription = "Camera",
                         modifier = Modifier.size(22.dp).clickable {
-                            val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CAMERA)
+                            val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
                             runCatching { context.startActivity(intent) }.onFailure {
-                                runCatching { context.startActivity(Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)) }
+                                runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
                             }
                         },
                         tint = Color.White,

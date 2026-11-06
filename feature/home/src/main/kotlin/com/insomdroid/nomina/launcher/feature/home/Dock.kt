@@ -66,7 +66,6 @@ import com.insomdroid.nomina.ui.component.iconSizeForCell
 import com.insomdroid.nomina.ui.dragPointer
 import com.insomdroid.nomina.ui.rememberAppLaunchOrigin
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.roundToInt
 
 /**
@@ -356,46 +355,17 @@ private fun RowScope.DockAppSlot(
             .pointerInput(app.key, slotCount, rowWidthPx(), locked) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    // Claim the gesture immediately (same as Workspace icons): a dock touch belongs
-                    // to the icon, so nothing else can steal it — not the pager, not finger jitter
-                    // during the long-press hold. Without this the long-press was flaky ("had to try
-                    // several times to get the popup"): the tiniest drift leaked out and cancelled
-                    // the hold before it could open the menu.
-                    val slop = viewConfiguration.touchSlop
-                    var tapped = false
-                    var abandoned = false
-                    // The lift starts where the finger is when the hold completes.
-                    var holdPos = down.position
-                    withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
-                        while (true) {
-                            val ev = awaitPointerEvent()
-                            val c = ev.changes.firstOrNull { it.id == down.id }
-                            if (c == null) {
-                                abandoned = true
-                                return@withTimeoutOrNull
-                            }
-                            // Home's root detector (the Initial pass) took a clear flick up for the drawer:
-                            // the icon lets the gesture go instead of lifting into it at the hold.
-                            if (c.isConsumed) {
-                                abandoned = true
-                                return@withTimeoutOrNull
-                            }
-                            if (!c.pressed) {
-                                tapped = true
-                                return@withTimeoutOrNull
-                            }
-                            if (!IconPress.staysOnIcon(c.position, size, slop)) {
-                                abandoned = true
-                                return@withTimeoutOrNull
-                            }
-                            holdPos = c.position
-                        }
-                    }
-                    if (tapped) {
+                    down.consume()
+                    // Match the home/folder press detector: moves stay unconsumed until the parent
+                    // horizontalScroll has had its Main pass. We inspect the Final pass before
+                    // deciding this was a tap, so a sideways dock swipe can never launch the app.
+                    val press = awaitIconPress(down)
+                    if (press is IconPressOutcome.Tap) {
                         onAppClick(currentApp)
                         return@awaitEachGesture
                     }
-                    if (abandoned) return@awaitEachGesture
+                    if (press !is IconPressOutcome.Held) return@awaitEachGesture
+                    val holdPos = press.position
                     // Desktop locked: long-press does nothing (no menu, no lift); tap still launches.
                     if (locked) return@awaitEachGesture
                     // LONG PRESS → lift (refused while another finger holds one)

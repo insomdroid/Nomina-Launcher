@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import com.insomdroid.nomina.data.AppLabelCache
+import com.insomdroid.nomina.data.AppLabelStore
 import com.insomdroid.nomina.data.AppRepository
 import com.insomdroid.nomina.data.AppUsageRepository
 import com.insomdroid.nomina.data.CustomIconSource
@@ -69,8 +71,12 @@ internal class DrawerWiring(private val context: Application, testScope: TestSco
     private val appUsageRepository = AppUsageRepository::class.java.constructors.single().newInstance(dataStore) as AppUsageRepository
 
     private val iconPacks = IconPackRepository(context)
+    private val labelCache = AppLabelCache(object : AppLabelStore {
+        override suspend fun read(locale: String): Map<String, String> = emptyMap()
+        override suspend fun write(locale: String, labels: Map<String, String>) = Unit
+    })
     private val source = LauncherAppsSource::class.java.constructors.single()
-        .newInstance(context, iconPacks, Provider<Any?> { error("unused") }) as LauncherAppsSource
+        .newInstance(context, iconPacks, Provider<Any?> { error("unused") }, labelCache) as LauncherAppsSource
 
     private val appScope =
         CoroutineScope(testScope.backgroundScope.coroutineContext + UnconfinedTestDispatcher(testScope.testScheduler))

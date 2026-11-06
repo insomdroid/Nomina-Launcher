@@ -78,7 +78,7 @@ private const val POPUP_MARGIN_PX = 24
 
 /** The most the card waits for its shortcut and Widgets rows before showing with what has arrived. */
 internal const val POPUP_ROWS_WAIT_MS = 400L
-private val CARD_WIDTH = 232.dp
+private val CARD_WIDTH = 224.dp
 internal val SHORTCUT_ICON_SIZE = 24.dp
 
 /**
@@ -152,7 +152,7 @@ fun AppActionPopup(
         }
         if (!shortcuts.isNullOrEmpty()) {
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp),
+                modifier = Modifier.padding(vertical = 2.dp),
                 color = LocalExpressivePalette.current.trackOff,
             )
         }
@@ -191,20 +191,20 @@ fun IconMenuPopup(
                         item.onClick()
                         onDismiss()
                     }
-                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     painter = painterResource(item.icon),
                     contentDescription = null,
                     tint = LocalExpressivePalette.current.accent,
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(18.dp),
                 )
                 Text(
                     text = item.label,
                     style = MaterialTheme.typography.bodyLarge,
                     color = LocalExpressivePalette.current.text,
-                    modifier = Modifier.padding(start = 16.dp),
+                    modifier = Modifier.padding(start = 12.dp),
                 )
             }
         }
@@ -291,17 +291,17 @@ internal fun PopupCardContent(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             if (showCaret && !preferAbove) Caret(pointingUp = true, color = cardColor, modifier = caretModifier(caretStart))
             Surface(
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(8.dp),
                 color = cardColor,
-                tonalElevation = 3.dp,
-                shadowElevation = 10.dp,
+                tonalElevation = 0.dp,
+                shadowElevation = 0.dp,
                 modifier = Modifier.width(width),
             ) {
                 Column(
                     modifier = Modifier
                         .heightIn(max = 520.dp)
                         .verticalScroll(rememberScrollState())
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 4.dp),
                     content = content,
                 )
             }

@@ -394,10 +394,9 @@ class LauncherAppsSource @Inject constructor(
      * device HOME): the app can be removed mid-load or its profile locked, so any failure resolves to
      * a null icon instead of propagating.
      *
-     * A selected [iconPack] takes priority: a mapped app uses the pack's drawable, an unmapped app keeps
-     * its normal icon. Otherwise, when [themed] is set (and the device + app support it) the Material You
-     * monochrome icon is returned, tinted for the [dark]/light theme; an app without one gets a silhouette
-     * of its icon in the same colours when [themeAll] asks for it; else the normal icon.
+     * A mapped [iconPack] entry takes priority. Otherwise, when [themed] is enabled, Android's native
+     * monochrome layer is preferred; [themeAll] sends apps without one through Nomina's independent
+     * monochrome renderer. The original app icon remains the final fallback.
      */
     fun loadIcon(
         appItem: AppItem,
@@ -422,9 +421,9 @@ class LauncherAppsSource @Inject constructor(
             null
         }
         val generatedThemed = if (
-            themed && themeAll && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+            themed && themeAll && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         ) {
-            silhouetteThemedIcon(info, dark)
+            generatedThemedIcon(info, dark)
         } else {
             null
         }
@@ -432,33 +431,40 @@ class LauncherAppsSource @Inject constructor(
     }.getOrNull()
 
     /**
-     * Builds a Material You themed icon from [info]'s monochrome layer, or null if it has none (most
-     * non-Google apps). The monochrome drawable is the adaptive-icon foreground glyph; we tint it and
-     * composite it over a solid Monet-coloured background as a fresh AdaptiveIconDrawable, so the
-     * platform applies the icon mask and foreground scaling for us.
+     * Uses the app's native Android monochrome layer when it exists, but sends it through the same
+     * crop, scale and tint pipeline as generated artwork so both sources share one visual treatment.
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun themedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
         val adaptive = info.getIcon(0) as? AdaptiveIconDrawable ?: return null
-        val mono = (adaptive.monochrome ?: return null).mutate()
+        val monochrome = adaptive.monochrome ?: return null
         val (bg, fg) = themedColors(dark)
-        mono.setTint(fg)
-        return AdaptiveIconDrawable(ColorDrawable(bg), mono)
+        val glyph = MonochromeIconRenderer.render(
+            glyph = monochrome,
+            tint = fg,
+            adaptive = true,
+            resources = context.resources,
+        ) ?: return null
+        return AdaptiveIconDrawable(ColorDrawable(bg), glyph)
     }
 
     /**
-     * A themed icon for an app without a monochrome layer (a Telegram request, "Theme every icon"):
-     * the adaptive foreground, or the whole legacy icon inset, as a one-colour silhouette over the
-     * Monet background, so it sits among the real themed icons instead of breaking the set.
+     * Generates a themed icon when an app has no native monochrome layer. Adaptive foregrounds retain
+     * their transparent glyph shape; opaque legacy artwork gets a best-effort edge-background removal.
      */
     @RequiresApi(Build.VERSION_CODES.S)
-    private fun silhouetteThemedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
+    private fun generatedThemedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
         val icon = info.getIcon(0) ?: return null
         val adaptive = icon as? AdaptiveIconDrawable
         val glyph = adaptive?.foreground ?: icon
         val (bg, fg) = themedColors(dark)
-        val silhouette = silhouetteDrawable(glyph, fg, adaptive = adaptive != null, resources = context.resources)
-        return AdaptiveIconDrawable(ColorDrawable(bg), silhouette)
+        val rendered = MonochromeIconRenderer.render(
+            glyph = glyph,
+            tint = fg,
+            adaptive = adaptive != null,
+            resources = context.resources,
+        ) ?: return null
+        return AdaptiveIconDrawable(ColorDrawable(bg), rendered)
     }
 
     /** Background/foreground colours for themed icons, from the system dynamic (Monet) palette. */

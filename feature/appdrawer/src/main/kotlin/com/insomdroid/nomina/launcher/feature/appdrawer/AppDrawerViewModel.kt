@@ -79,6 +79,7 @@ data class AppDrawerUiState(
     /** The name under a folder tile (issue #17); labels off hide it too. */
     val showFolderNames: Boolean = true,
     val showSearch: Boolean = true,
+    val showScrubber: Boolean = true,
     /** The drawer surface's opacity over the wallpaper (settings, issue #21). */
     val backgroundOpacity: Float = 1f,
     /** The drawer surface's ARGB colour, or null for the theme's own (settings, a Telegram request). */
@@ -184,6 +185,7 @@ class AppDrawerViewModel @Inject constructor(
             showLabels = settings.showDrawerLabels,
             showFolderNames = settings.showDrawerFolderNames,
             showSearch = settings.showDrawerSearch,
+            showScrubber = settings.showDrawerScrubber,
             backgroundOpacity = settings.drawerBackgroundOpacity,
             backgroundColor = settings.drawerBackgroundColor,
             labelColor = settings.drawerLabelColor,

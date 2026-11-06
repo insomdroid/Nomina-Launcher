@@ -296,9 +296,6 @@ object BackupMapper {
     /** The builtin types this version can render — anything else in a file must not restore. */
     private val KNOWN_BUILTINS = setOf(
         HomeItemEntity.BUILTIN_SMARTSPACE,
-        HomeItemEntity.BUILTIN_NOTIFICATIONS,
-        HomeItemEntity.BUILTIN_BATTERY,
-        HomeItemEntity.BUILTIN_PEOPLE,
     )
 
     /** Upper bound for folder-child order indices (roomy; children index by cellX). */

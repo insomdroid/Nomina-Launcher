@@ -19,6 +19,8 @@ val generateLauncherFonts = tasks.register("generateLauncherFonts") {
         val outputDirectory = generatedLauncherFontResources.get().asFile
         outputDirectory.deleteRecursively()
         outputDirectory.mkdirs()
+        val fontDirectory = outputDirectory.resolve("font")
+        fontDirectory.mkdirs()
         fontSourceDirectory.asFile.listFiles()
             .orEmpty()
             .filter { it.isFile && it.name.endsWith(".ttf.b64") }
@@ -27,8 +29,8 @@ val generateLauncherFonts = tasks.register("generateLauncherFonts") {
                     .removeSuffix(".ttf.b64")
                     .lowercase()
                     .replace('-', '_')
-                val fontBytes = Base64.getDecoder().decode(source.readText().filterNot(Char::isWhitespace))
-                outputDirectory.resolve("$resourceName.ttf").writeBytes(fontBytes)
+                val fontBytes = Base64.getDecoder().decode(source.readText().filterNot { it.isWhitespace() })
+                fontDirectory.resolve("$resourceName.ttf").writeBytes(fontBytes)
             }
     }
 }

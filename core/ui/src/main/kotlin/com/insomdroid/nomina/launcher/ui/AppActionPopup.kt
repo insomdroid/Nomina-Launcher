@@ -197,7 +197,7 @@ fun IconMenuPopup(
                 Icon(
                     painter = painterResource(item.icon),
                     contentDescription = null,
-                    tint = LocalExpressivePalette.current.accent,
+                    tint = LocalExpressivePalette.current.text,
                     modifier = Modifier.size(18.dp),
                 )
                 Text(

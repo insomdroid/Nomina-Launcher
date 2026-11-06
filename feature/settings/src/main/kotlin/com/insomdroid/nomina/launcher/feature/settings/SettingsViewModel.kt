@@ -136,11 +136,11 @@ class SettingsViewModel @Inject constructor(
     fun setNotificationDotScale(value: Float) = update { repository.setNotificationDotScale(value) }
     fun setUseThemedIcons(value: Boolean) = update { repository.setUseThemedIcons(value) }
     fun setIconPack(pkg: String) {
-        // Persist immediately; warm the selected pack off-main at the same time. Icon requests
-        // share the repository's in-flight parse rather than parsing appfilter.xml per app.
-        update { repository.setIconPackPackage(pkg) }
-        if (pkg.isNotBlank()) {
-            viewModelScope.launch(Dispatchers.IO) { iconPackRepository.get(pkg) }
+        viewModelScope.launch(Dispatchers.IO) {
+            // Parse the pack once before publishing it to every icon surface. The next batch of
+            // Coil requests can then resolve icons from the warm repository cache.
+            if (pkg.isNotBlank()) iconPackRepository.get(pkg)
+            repository.setIconPackPackage(pkg)
         }
     }
 

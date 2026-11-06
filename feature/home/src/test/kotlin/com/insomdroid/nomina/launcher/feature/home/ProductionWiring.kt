@@ -37,7 +37,6 @@ import com.insomdroid.nomina.data.WorkProfileRepository
 import com.insomdroid.nomina.data.local.HomeItemDao
 import com.insomdroid.nomina.data.local.HomeItemEntity
 import com.insomdroid.nomina.data.local.LauncherDatabase
-import com.insomdroid.nomina.launcher.system.SignalMonitor
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.util.ReflectionHelpers
 import org.robolectric.util.ReflectionHelpers.ClassParameter.from
@@ -124,7 +123,7 @@ internal class ProductionWiring(private val context: Application, testScope: Tes
         settingsRepository.setDefaultLayoutSeeded()
         settingsRepository.setOnboardingDone()
         return HomeViewModel(
-            context, settingsRepository, appRepository, homeLayoutRepository, NotificationBadgeRepository(), SignalMonitor(context),
+            context, settingsRepository, appRepository, homeLayoutRepository, NotificationBadgeRepository(),
             CustomIconStore(settingsRepository, CustomIconSource(context, IconPackRepository(context))),
         )
     }

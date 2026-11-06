@@ -902,8 +902,9 @@ class SettingsRepository @Inject constructor(
             "auto_update_enabled", "update_last_check", "update_last_notified_version",
             "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications",
             "default_reminder_dismissed",
-            // Legacy lock/unlock sound URIs are ignored after the feature's removal.
-            "lock_sound_uri", "unlock_sound_uri",
+            // Legacy settings from removed features must not reappear in backups or be restored.
+            "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",
+            "hide_system_status_bar", "status_bar_scrim", "lock_sound_uri", "unlock_sound_uri",
         )
     }
 }

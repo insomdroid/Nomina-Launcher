@@ -1,8 +1,14 @@
 package com.insomdroid.nomina.feature.home
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.ContentUris
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.os.BatteryManager
 import android.provider.CalendarContract
 import android.text.format.DateUtils
 import android.util.Log
@@ -30,9 +36,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -81,7 +89,8 @@ import com.insomdroid.nomina.model.AppItem
 import kotlin.math.roundToInt
 import java.util.Date
 import javax.inject.Inject
-import com.insomdroid.nomina.ui.launcherDisplayFontFamily
+import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
+import androidx.core.content.ContextCompat
 import com.insomdroid.nomina.ui.themedTextStyle
 
 @HiltViewModel
@@ -187,9 +196,10 @@ fun SmartspaceWidget(
 }
 
 /**
- * The widget's layout. [onRefresh] re-reads the sources on resume and after a permission grant;
- * [onOpenWeatherApp] runs when the weather line is tapped, and the line is tappable only while
- * [SmartspaceState.weatherApp] resolves (no chosen app = plain text, no click action).
+ * Three left-aligned information rows:
+ * 1. Full local date and the device's 12/24-hour local time.
+ * 2. The next calendar agenda item and the current weather condition.
+ * 3. Battery level/charging state and the active internet transport.
  */
 @Composable
 internal fun SmartspaceContent(
@@ -199,12 +209,8 @@ internal fun SmartspaceContent(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val hasPermission = state.hasCalendarPermission
-    val nextEvent = state.nextEvent
-    val hasLocationPermission = state.hasLocationPermission
-    val showWeather = state.showWeather
-    val weather = state.weather
-    val weatherApp = state.weatherApp
+    val event = state.nextEvent
+    val deviceStatus = rememberDeviceStatus()
 
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
@@ -219,326 +225,247 @@ internal fun SmartspaceContent(
         onPauseOrDispose { }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
+    val calendarPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { onRefresh() }
+    val locationPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { onRefresh() }
 
     val timeFormat = rememberTimeFormat()
-    val timeText = remember(now, timeFormat) { timeFormat.format(Date(now)) }
     val dateText = remember(now) {
         DateUtils.formatDateTime(
-            context, now,
-            DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY or
-                DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_NO_YEAR,
+            context,
+            now,
+            DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR,
         )
     }
+    val timeText = remember(now, timeFormat) { timeFormat.format(Date(now)) }
+    val dateTimeText = "$dateText · $timeText"
 
-    // The wallpaper is arbitrary, so the text carries its own soft shadow (like the home labels).
-    val ink = widgetContentColor()
-    val shadow = Shadow(color = if (LocalTonalWidgets.current) Color.Transparent else Color.Black.copy(alpha = 0.55f), blurRadius = 8f)
-    // Taps must not show a ripple box over the wallpaper — the widget has no background surface.
-    val noIndication = remember { MutableInteractionSource() }
-
-    // Centered like the Pixel lock-screen clock — the widget is seeded full-width, so centering
-    // the content centers it on the screen (user feedback: left-aligned looked off). The card hugs
-    // the content instead of filling the whole grid footprint, so a tall span doesn't read as a
-    // giant empty panel. The TEXT scales with the footprint (user feedback: resizing must visibly
-    // grow the widget): height drives the scale, width caps it so a narrow span can't overflow.
-    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
-    // A short widget changes layout instead of shrinking every label into unreadable text.
-    if (maxHeight < 140.dp) {
-        // Its two lines share the footprint's height left after the card padding; each is a touch
-        // target up to TOUCH_TARGET tall when there is room (see the taller layouts below).
-        val lineMin = ((maxHeight - 24.dp) / 2).coerceIn(0.dp, TOUCH_TARGET)
-        WidgetSurface(Modifier.fillMaxWidth()) {
-            Row(Modifier.padding(12.dp).height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                // The clock's hit area spans both lines.
-                TapTarget(minHeight = 0.dp, fillWidth = false, ripple = true, modifier = Modifier.fillMaxHeight(), onTap = {
-                    openClockApp(context)
-                }) {
-                    Text(timeText, color = ink, style = MaterialTheme.typography.headlineMedium.copy(fontFamily = launcherDisplayFontFamily()), maxLines = 1)
-                }
-                Column(Modifier.weight(1f)) {
-                    TapTarget(minHeight = lineMin, alignment = Alignment.CenterStart, ripple = true, onTap = {
-                        val uri = CalendarContract.CONTENT_URI.buildUpon()
-                            .appendPath("time").appendPath(now.toString()).build()
-                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
-                    }) {
-                        Text(dateText, color = ink, style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                    val event = nextEvent
-                    val detail = when {
-                        !hasPermission -> stringResource(R.string.smartspace_allow_calendar)
-                        event != null -> event.title.ifBlank { stringResource(R.string.smartspace_no_title) }
-                        weather != null -> weather.temperatureC.roundToInt().toString() + "° " + WeatherCodes.emoji(weather.weatherCode)
-                        else -> null
-                    }
-                    // Only a line that does something gets a click action: a disabled clickable
-                    // would still announce itself as a (disabled) control.
-                    val detailTap: (() -> Unit)? = when {
-                        !hasPermission -> ({ permissionLauncher.launch(Manifest.permission.READ_CALENDAR) })
-                        event != null -> ({
-                            runCatching {
-                                context.startActivity(Intent(Intent.ACTION_VIEW,
-                                    ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.eventId))
-                                    .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin)
-                                    .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end))
-                            }
-                        })
-                        weather != null && weatherApp != null -> onOpenWeatherApp
-                        else -> null
-                    }
-                    if (detail != null) TapTarget(minHeight = lineMin, alignment = Alignment.CenterStart, ripple = true, onTap = detailTap) {
-                        Text(detail, color = ink.copy(alpha = 0.85f),
-                            style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                }
+    val agendaText = when {
+        !state.hasCalendarPermission -> "Calendar permission needed"
+        event == null -> "No upcoming agenda"
+        else -> {
+            val whenText = when {
+                event.begin <= now && event.end > now -> "Now"
+                event.allDay -> "All day"
+                DateUtils.isToday(event.begin) -> timeFormat.format(Date(event.begin))
+                else -> DateUtils.formatDateTime(
+                    context,
+                    event.begin,
+                    DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY,
+                ) + " " + timeFormat.format(Date(event.begin))
             }
+            val title = event.title.ifBlank { "Untitled event" }
+            "$whenText · $title"
         }
-        return@BoxWithConstraints
     }
-    val scale = if (maxHeight >= 260.dp && maxWidth >= 300.dp) 1.15f else 0.9f
-    val spacious = maxHeight >= 240.dp
-    val expanded = maxHeight >= 260.dp
-    val w = weather
-    val event = nextEvent
-    val nextAlarm = remember(now) {
-        context.getSystemService(android.app.AlarmManager::class.java)?.nextAlarmClock?.triggerTime
-    }
-    val alarmText = if (nextAlarm != null) {
-        remember(nextAlarm, timeFormat) {
-            buildString {
-                if (!DateUtils.isToday(nextAlarm)) {
-                    append(
-                        DateUtils.formatDateTime(
-                            context, nextAlarm,
-                            DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY,
-                        ),
+    val agendaAction: () -> Unit = when {
+        !state.hasCalendarPermission -> ({ calendarPermission.launch(Manifest.permission.READ_CALENDAR) })
+        event != null -> ({
+            runCatching {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.eventId),
                     )
-                    append(' ')
-                }
-                append(timeFormat.format(Date(nextAlarm)))
+                        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin)
+                        .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end),
+                )
             }
-        }
-    } else {
-        null
+        })
+        else -> ({
+            val uri = CalendarContract.CONTENT_URI.buildUpon()
+                .appendPath("time").appendPath(now.toString()).build()
+            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+        })
     }
-    val openCalendarDay = {
-        val uri = CalendarContract.CONTENT_URI.buildUpon()
-            .appendPath("time").appendPath(now.toString()).build()
-        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
-        Unit
+
+    val weatherText = when {
+        !state.showWeather -> null
+        !state.hasLocationPermission -> "Location needed"
+        state.weather != null -> "${WeatherCodes.emoji(state.weather.weatherCode)} ${weatherCondition(state.weather.weatherCode)}"
+        else -> "Weather unavailable"
     }
-    val openAlarms = {
-        openClockApp(context)
-        Unit
+    val weatherAction: (() -> Unit)? = when {
+        !state.showWeather -> null
+        !state.hasLocationPermission -> ({ locationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION) })
+        state.weatherApp != null -> onOpenWeatherApp
+        else -> null
     }
-    // The weather line opens the chosen app only while that app resolves; otherwise it is plain text.
-    val openWeather: (() -> Unit)? = if (weatherApp != null) onOpenWeatherApp else null
-    // The bottom line (the calendar event, or its tap-to-grant prompt) is what the compact mode
-    // makes room for: with it, weather + date + alarm share ONE middle row so the widget
-    // tops out at three rows; without it, they keep their own airy rows (user design).
-    val bottomLine = !hasPermission || event != null
-    val merged = !spacious && bottomLine
-    // Weather is on but can't run without a location — a tap-to-grant line. Independent of the
-    // calendar line: each launches its own dialog on tap, so nothing ever stacks two system
-    // prompts; a user who declines calendar must still be able to enable weather from here.
-    val locationLine = showWeather && !hasLocationPermission
-    // Touch targets (WCAG 2.5.5): the lines under the clock share the footprint's height left
-    // after the clock and the card padding, each growing to TOUCH_TARGET at most. A tight footprint
-    // keeps today's compact pitch; a tall one gets lines a finger can hit without aiming. The lines
-    // are measured by [BudgetedLines], never by a Column: a Column hands each line what the lines
-    // above it left, so touch areas grown to 44 dp cut a two-line event to one line.
-    BudgetedLines(
-        modifier = Modifier
-            // The lines fill the card's width so their hit areas do too; IntrinsicSize.Max keeps
-            // the card hugging its widest line instead of the whole footprint.
-            .width(IntrinsicSize.Max)
-            // A soft translucent card behind the text so the widget reads as one element on any
-            // wallpaper (user feedback; same idiom as the dock background and the restore tiles).
-            .background(widgetSurfaceColor(), RoundedCornerShape(24.dp))
-            .padding(horizontal = (22 * scale).dp, vertical = (10 * scale).dp),
+
+    val ink = widgetContentColor()
+    val noIndication = remember { MutableInteractionSource() }
+    val technicalStyle = TextStyle(
+        fontFamily = launcherTechnicalFontFamily(),
+        fontSize = 13.sp,
+        color = ink,
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(widgetSurfaceColor(), RoundedCornerShape(18.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp),
+        horizontalAlignment = Alignment.Start,
     ) {
-        TapTarget(onTap = openAlarms, interactionSource = noIndication) {
+        TapTarget(
+            onTap = { openClockApp(context) },
+            interactionSource = noIndication,
+            alignment = Alignment.CenterStart,
+        ) {
             Text(
-                text = timeText,
-                color = widgetContentColor(),
-                style = themedTextStyle(TextStyle(fontSize = (46 * scale).sp, fontWeight = FontWeight.Medium, fontFamily = launcherDisplayFontFamily(), shadow = shadow)),
+                text = dateTimeText,
+                color = ink,
+                style = themedTextStyle(technicalStyle.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium)),
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
-        if (merged) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (w != null) {
-                    val city = w.city?.let { " $it" }.orEmpty()
-                    // The city is the variable-length part — it alone gives way (ellipsis) when
-                    // the merged row runs out of width; fill=false keeps the card content-hugging.
-                    TapTarget(onTap = openWeather, fillWidth = false, fillHeight = true, interactionSource = noIndication,
-                        modifier = Modifier.weight(1f, fill = false)) {
-                        Text(
-                            text = "${w.temperatureC.roundToInt()}° ${WeatherCodes.emoji(w.weatherCode)}$city",
-                            color = widgetContentColor(),
-                            style = themedTextStyle(TextStyle(fontSize = (15 * scale).sp, shadow = shadow)),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    MiddleDot(scale, shadow)
-                }
-                TapTarget(onTap = openCalendarDay, fillWidth = false, fillHeight = true, interactionSource = noIndication) {
-                    Text(
-                        text = dateText,
-                        color = widgetContentColor(),
-                        style = themedTextStyle(TextStyle(fontSize = (15 * scale).sp, shadow = shadow)),
-                        maxLines = 1,
-                    )
-                }
-                if (alarmText != null) {
-                    MiddleDot(scale, shadow)
-                    TapTarget(onTap = openAlarms, fillWidth = false, fillHeight = true, interactionSource = noIndication) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_alarm),
-                                contentDescription = stringResource(R.string.smartspace_next_alarm),
-                                tint = widgetContentColor().copy(alpha = 0.9f),
-                                modifier = Modifier.size((14 * scale).dp),
-                            )
-                            Spacer(Modifier.width((3 * scale).dp))
-                            Text(
-                                text = alarmText,
-                                color = widgetContentColor().copy(alpha = 0.9f),
-                                style = themedTextStyle(TextStyle(fontSize = (15 * scale).sp, shadow = shadow)),
-                                maxLines = 1,
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            // Weather right under the clock on its own row (user choice — more prominent than
-            // riding on the date line).
-            if (w != null) {
-                val city = w.city?.let { " $it" }.orEmpty()
-                TapTarget(onTap = openWeather, interactionSource = noIndication) {
-                    Text(
-                        text = "${w.temperatureC.roundToInt()}° ${WeatherCodes.emoji(w.weatherCode)}$city",
-                        color = widgetContentColor(),
-                        style = themedTextStyle(TextStyle(fontSize = (16 * scale).sp, shadow = shadow)),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-            TapTarget(onTap = openCalendarDay, interactionSource = noIndication) {
-                Text(
-                    text = dateText,
-                    color = widgetContentColor(),
-                    style = themedTextStyle(TextStyle(fontSize = (15 * scale).sp, shadow = shadow)),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            // The next alarm (AlarmManager, no permission) gets its OWN row under the date.
-            if (alarmText != null) {
-                TapTarget(onTap = openAlarms, interactionSource = noIndication, modifier = Modifier.lineGap(2.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_alarm),
-                            contentDescription = stringResource(R.string.smartspace_next_alarm),
-                            tint = widgetContentColor().copy(alpha = 0.9f),
-                            modifier = Modifier.size((15 * scale).dp),
-                        )
-                        Spacer(Modifier.width((4 * scale).dp))
-                        Text(
-                            text = alarmText,
-                            color = widgetContentColor().copy(alpha = 0.9f),
-                            style = themedTextStyle(TextStyle(fontSize = (14 * scale).sp, shadow = shadow)),
-                            maxLines = 1,
-                        )
-                    }
-                }
-            }
-        }
-        when {
-            !hasPermission -> TapTarget(
-                onTap = { permissionLauncher.launch(Manifest.permission.READ_CALENDAR) },
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TapTarget(
+                onTap = agendaAction,
+                modifier = Modifier.weight(1f),
                 interactionSource = noIndication,
-                modifier = Modifier.lineGap(2.dp),
+                alignment = Alignment.CenterStart,
             ) {
                 Text(
-                    text = stringResource(R.string.smartspace_allow_calendar),
-                    color = widgetContentColor().copy(alpha = 0.85f),
-                    style = themedTextStyle(TextStyle(fontSize = (14 * scale).sp, shadow = shadow)),
+                    text = agendaText,
+                    color = ink.copy(alpha = 0.92f),
+                    style = themedTextStyle(technicalStyle),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            event != null -> {
-                val eventText = remember(event, now, timeFormat) {
-                    buildString {
-                        if (!DateUtils.isToday(event.begin)) {
-                            append(
-                                DateUtils.formatDateTime(
-                                    context, event.begin,
-                                    DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY,
-                                ),
-                            )
-                            append(' ')
-                        }
-                        if (!event.allDay) {
-                            append(timeFormat.format(Date(event.begin)))
-                            append(' ')
-                        }
-                        append(event.title)
-                    }
-                }
+            if (weatherText != null) {
                 TapTarget(
-                    onTap = {
-                        val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.eventId)
-                        runCatching {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, uri)
-                                    .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin)
-                                    .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end),
-                            )
-                        }
-                    },
+                    onTap = weatherAction,
+                    fillWidth = false,
                     interactionSource = noIndication,
-                    modifier = Modifier.lineGap(2.dp),
+                    alignment = Alignment.CenterEnd,
+                    modifier = Modifier.padding(start = 10.dp),
                 ) {
                     Text(
-                        text = eventText.ifBlank { stringResource(R.string.smartspace_no_title) },
-                        color = widgetContentColor().copy(alpha = 0.92f),
-                        style = themedTextStyle(TextStyle(fontSize = (14 * scale).sp, shadow = shadow)),
-                        maxLines = if (expanded) 2 else 1,
+                        text = weatherText,
+                        color = ink.copy(alpha = 0.92f),
+                        style = themedTextStyle(technicalStyle),
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
-            // No permission prompt needed and no event → clock + date only.
         }
-        if (locationLine) {
-            val locationLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.RequestPermission(),
-            ) { onRefresh() }
-            TapTarget(
-                onTap = { locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) },
-                interactionSource = noIndication,
-                modifier = Modifier.lineGap(2.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.smartspace_allow_location),
-                    color = widgetContentColor().copy(alpha = 0.85f),
-                    style = themedTextStyle(TextStyle(fontSize = (14 * scale).sp, shadow = shadow)),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+
+        Text(
+            text = "${deviceStatus.batteryText} · ${deviceStatus.networkText}",
+            color = ink.copy(alpha = 0.92f),
+            style = themedTextStyle(technicalStyle),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+private fun weatherCondition(code: Int): String = when (code) {
+    0 -> "Clear"
+    1 -> "Mainly clear"
+    2 -> "Partly cloudy"
+    3 -> "Overcast"
+    45, 48 -> "Fog"
+    51, 53, 55 -> "Drizzle"
+    56, 57 -> "Freezing drizzle"
+    61, 63, 65 -> "Rain"
+    66, 67 -> "Freezing rain"
+    71, 73, 75 -> "Snowfall"
+    77 -> "Snow grains"
+    80, 81, 82 -> "Rain showers"
+    85, 86 -> "Snow showers"
+    95 -> "Thunderstorm"
+    96, 99 -> "Thunderstorm with hail"
+    else -> "Cloudy"
+}
+
+private data class SmartspaceDeviceStatus(
+    val batteryText: String = "Battery —",
+    val networkText: String = "Offline",
+)
+
+@Composable
+private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
+    val context = LocalContext.current
+    var status by remember { mutableStateOf(SmartspaceDeviceStatus()) }
+
+    DisposableEffect(context) {
+        fun updateBattery(intent: Intent?) {
+            if (intent == null) return
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            if (level < 0 || scale <= 0) return
+            val percent = (level * 100 / scale).coerceIn(0, 100)
+            val charging = when (intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
+                BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> true
+                else -> false
             }
+            status = status.copy(batteryText = "${if (charging) "Charging" else "Battery"} $percent%")
+        }
+
+        val batteryReceiver = object : BroadcastReceiver() {
+            override fun onReceive(receiverContext: Context?, intent: Intent?) = updateBattery(intent)
+        }
+        val batteryIntent = ContextCompat.registerReceiver(
+            context,
+            batteryReceiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        updateBattery(batteryIntent)
+
+        val connectivity = context.getSystemService(ConnectivityManager::class.java)
+        var callbackRegistered = false
+        if (connectivity != null) {
+            fun updateNetwork(
+                network: Network? = connectivity.activeNetwork,
+                capabilities: NetworkCapabilities? = network?.let(connectivity::getNetworkCapabilities),
+            ) {
+                val label = when {
+                    network == null || capabilities == null ||
+                        !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) -> "Offline"
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "Wi-Fi"
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "Mobile data"
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "Ethernet"
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "VPN"
+                    else -> "Internet"
+                }
+                status = status.copy(networkText = label)
+            }
+
+            val callback = object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) = updateNetwork(network)
+                override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+                    updateNetwork(network, networkCapabilities)
+                }
+                override fun onLost(network: Network) = updateNetwork()
+            }
+            callbackRegistered = runCatching {
+                connectivity.registerDefaultNetworkCallback(callback)
+                true
+            }.getOrDefault(false)
+            updateNetwork()
+            onDispose {
+                runCatching { context.unregisterReceiver(batteryReceiver) }
+                if (callbackRegistered) runCatching { connectivity.unregisterNetworkCallback(callback) }
+            }
+        } else {
+            onDispose { runCatching { context.unregisterReceiver(batteryReceiver) } }
         }
     }
-    }
+    return status
 }
 
 /** WCAG 2.5.5 target size: a tappable line grows to at least this height when the footprint has room. */

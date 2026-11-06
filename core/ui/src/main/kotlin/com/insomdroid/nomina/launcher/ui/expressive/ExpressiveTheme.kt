@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** Nothing Red, reserved for critical or live status rather than ordinary controls. */
-val Accent = Color(0xFFE53935)
+val Accent = Color(0xFFD71921)
 
 data class ExpressivePalette(
     val bg: Color,

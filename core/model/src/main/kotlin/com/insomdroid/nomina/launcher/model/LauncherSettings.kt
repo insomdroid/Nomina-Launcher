@@ -157,15 +157,23 @@ data class LauncherSettings(
         const val SPEED_FAST = "fast"
         const val SPEED_FASTEST = "fastest"
 
-        /** [fontFamily] choices: the system's default sans, its condensed sans, serif, monospace, the
-         *  casual hand-drawn face and the cursive one -- all shipped with Android, nothing bundled. */
+        /** Launcher text families. The legacy default key now uses the bundled Geist UI face. */
         const val FONT_DEFAULT = "default"
+        const val FONT_GEIST_MONO = "geist_mono"
         const val FONT_CONDENSED = "condensed"
         const val FONT_SERIF = "serif"
         const val FONT_MONOSPACE = "monospace"
         const val FONT_CASUAL = "casual"
         const val FONT_CURSIVE = "cursive"
-        val FONTS = listOf(FONT_DEFAULT, FONT_CONDENSED, FONT_SERIF, FONT_MONOSPACE, FONT_CASUAL, FONT_CURSIVE)
+        val FONTS = listOf(
+            FONT_DEFAULT,
+            FONT_GEIST_MONO,
+            FONT_CONDENSED,
+            FONT_SERIF,
+            FONT_MONOSPACE,
+            FONT_CASUAL,
+            FONT_CURSIVE,
+        )
 
         const val PRIVACY_ALL = "all"
         const val PRIVACY_SENDER = "sender"

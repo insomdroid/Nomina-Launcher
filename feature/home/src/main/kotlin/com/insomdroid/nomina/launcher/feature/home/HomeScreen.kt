@@ -960,6 +960,15 @@ fun HomeScreen(
             preferAbove = above,
             items = buildList {
                 if (!settings.desktopLocked) {
+                    add(IconMenuItem(R.drawable.ic_wallpaper, stringResource(R.string.home_options_wallpaper)) {
+                    runCatching {
+                        context.startActivity(
+                            Intent.createChooser(Intent(Intent.ACTION_SET_WALLPAPER), null)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    }
+                })
+                if (!settings.desktopLocked) {
                     add(IconMenuItem(LauncherIcons.Widgets, stringResource(R.string.home_options_widgets)) {
                         widgetPickerPackage = null
                         showWidgetPicker = true
@@ -967,14 +976,6 @@ fun HomeScreen(
                 }
                 add(IconMenuItem(R.drawable.ic_home_settings, stringResource(R.string.home_options_settings)) {
                     onOpenSettings()
-                })
-                add(IconMenuItem(R.drawable.ic_wallpaper, stringResource(R.string.home_options_wallpaper)) {
-                    runCatching {
-                        context.startActivity(
-                            Intent.createChooser(Intent(Intent.ACTION_SET_WALLPAPER), null)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                        )
-                    }
                 })
                 // Pages: the menu was opened on the page the pager is showing.
                 val page = dragController.currentPage.coerceIn(0, uiState.pageCount - 1)

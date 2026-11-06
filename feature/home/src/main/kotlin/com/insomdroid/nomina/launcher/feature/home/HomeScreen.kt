@@ -61,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.awaitPointerEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.geometry.Offset
@@ -540,6 +541,27 @@ fun HomeScreen(
                 homeOrigin = it.positionInRoot()
                 homeWidthPx = it.size.width
             }
+            .pointerInput(settings.dockExpanded, homeOrigin) {
+                if (settings.dockExpanded) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(
+                            requireUnconsumed = false,
+                            pass = PointerEventPass.Initial,
+                        )
+                        var moved = false
+                        do {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            if ((change.position - down.position).getDistance() > viewConfiguration.touchSlop) {
+                                moved = true
+                            }
+                        } while (change.pressed)
+                        if (!moved && !dragController.isOverDock(down.position + homeOrigin)) {
+                            viewModel.setDockExpanded(false)
+                        }
+                    }
+                }
+            }
             // Root-level, Initial-pass swipe detector: a flick up/down anywhere on home (over icons,
             // folders, shortcuts or the dock — not just empty space) drives the drawer/notifications.
             .pixelHomeSwipe(
@@ -663,9 +685,6 @@ fun HomeScreen(
                     .fillMaxSize()
                     .homeWorkspacePadding(dockShown = true),
             )
-            if (settings.dockEnabled && settings.dockExpanded) {
-                Box(Modifier.fillMaxSize().clickable { viewModel.setDockExpanded(false) })
-            }
             }
 
             // Show the dock whenever it's enabled — even with no favorites yet — so a fresh install

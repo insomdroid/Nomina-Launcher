@@ -8,8 +8,6 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
@@ -39,7 +37,6 @@ internal object MonochromeIconRenderer {
     fun render(
         glyph: Drawable,
         tint: Int,
-        adaptive: Boolean,
         resources: Resources,
     ): Drawable? {
         val source = Bitmap.createBitmap(

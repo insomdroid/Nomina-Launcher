@@ -1,12 +1,12 @@
 package com.insomdroid.nomina.feature.settings
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -14,16 +14,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -36,12 +33,13 @@ import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 
 /**
- * A settings section that folds under its title. The expanded state remains owned by the settings
- * model, so the page opens the way it was left.
+ * A flat, collapsible settings section. Each category uses the same monochrome
+ * outline icon family as the rest of Nomina; expansion state remains model-owned.
  */
 @Composable
 internal fun CollapsibleSection(
     title: String,
+    @DrawableRes icon: Int,
     collapsed: Boolean,
     onToggle: (Boolean) -> Unit,
     content: @Composable ColumnScope.() -> Unit,
@@ -51,42 +49,32 @@ internal fun CollapsibleSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, bottom = 2.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .padding(top = 18.dp, bottom = 2.dp)
             .clickable(role = Role.Button) { onToggle(!collapsed) }
             .semantics { stateDescription = state }
-            .padding(vertical = 10.dp, horizontal = 4.dp),
+            .padding(horizontal = 6.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Canvas(modifier = Modifier.size(14.dp)) {
-            val dotRadius = 0.85.dp.toPx()
-            for (row in 0..2) {
-                for (column in 0..2) {
-                    drawCircle(
-                        color = p.dim,
-                        radius = dotRadius,
-                        center = Offset(
-                            x = (2.5f + column * 4.5f).dp.toPx(),
-                            y = (2.5f + row * 4.5f).dp.toPx(),
-                        ),
-                    )
-                }
-            }
-        }
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = p.dim,
+            modifier = Modifier.size(18.dp),
+        )
         Text(
             text = title.uppercase(),
             color = p.text,
-            fontSize = 13.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
-            letterSpacing = 1.1.sp,
-            modifier = Modifier.weight(1f).padding(start = 10.dp),
+            letterSpacing = 1.15.sp,
+            modifier = Modifier.weight(1f).padding(start = 12.dp),
         )
         val turn by animateFloatAsState(targetValue = if (collapsed) 0f else 180f, label = "chevron")
         Icon(
             painter = painterResource(LauncherIcons.ExpandMore),
             contentDescription = null,
             tint = p.dim,
-            modifier = Modifier.rotate(turn),
+            modifier = Modifier.size(20.dp).rotate(turn),
         )
     }
     AnimatedVisibility(

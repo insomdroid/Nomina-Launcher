@@ -139,7 +139,6 @@ import com.insomdroid.nomina.ui.component.LocalThemedIcons
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
-import com.insomdroid.nomina.ui.expressive.ExpressiveSectionTitle
 import com.insomdroid.nomina.ui.expressive.ExpressiveTheme
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 import com.insomdroid.nomina.ui.rememberHomeDragController
@@ -440,6 +439,34 @@ fun AppDrawerScreen(
     }
 }
 
+/** Quiet technical label and hairline divider used to group app-drawer search results. */
+@Composable
+private fun SearchSectionHeader(label: String) {
+    val palette = LocalExpressivePalette.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 2.dp, end = 4.dp, top = 18.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label.uppercase(),
+            color = palette.dim,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontFamily = com.insomdroid.nomina.ui.launcherTechnicalFontFamily(),
+            letterSpacing = 1.2.sp,
+        )
+        Spacer(Modifier.width(12.dp))
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(1.dp)
+                .background(palette.trackOff.copy(alpha = 0.8f)),
+        )
+    }
+}
+
 /** The test tag of the card a tap opens a drawer folder as. */
 internal const val DRAWER_FOLDER_CARD_TAG = "drawer-folder-card"
 /** Test tags of the Add-apps picker: its search field and each app row it lists. */
@@ -564,12 +591,26 @@ private fun AppDrawerContent(
             DragHandle()
             if (showSearch) {
                 val searchPalette = LocalExpressivePalette.current
-                // Nothing-inspired compact field, surfaceHi background, monochrome cursor, no underline.
+                // Compact monochrome search: a quiet magnifier, clear hierarchy and no Material underline.
                 TextField(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
-                    placeholder = { Text(stringResource(R.string.app_drawer_search_hint)) },
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.app_drawer_search_hint),
+                            fontSize = 14.sp,
+                            letterSpacing = 0.1.sp,
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = null,
+                            tint = searchPalette.dim,
+                            modifier = Modifier.size(18.dp),
+                        )
+                    },
                     trailingIcon = {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = { onQueryChange("") }) {
@@ -577,11 +618,12 @@ private fun AppDrawerContent(
                                     painter = painterResource(LauncherIcons.Close),
                                     contentDescription = stringResource(R.string.search_clear),
                                     tint = searchPalette.text,
+                                    modifier = Modifier.size(18.dp),
                                 )
                             }
                         }
                     },
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = searchPalette.surfaceHi,
                         unfocusedContainerColor = searchPalette.surfaceHi,
@@ -590,18 +632,16 @@ private fun AppDrawerContent(
                         cursorColor = searchPalette.text,
                         focusedTextColor = searchPalette.text,
                         unfocusedTextColor = searchPalette.text,
-                        // The hint follows the pill's own palette, not the drawer's text (a yellow pill on a
-                        // see-through drawer over a dark wallpaper keeps dark text while the labels are white).
                         focusedPlaceholderColor = searchPalette.dim,
                         unfocusedPlaceholderColor = searchPalette.dim,
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
                         .border(
-                            1.dp,
-                            searchPalette.trackOff.copy(alpha = 0.7f),
-                            RoundedCornerShape(8.dp),
+                            0.75.dp,
+                            searchPalette.trackOff.copy(alpha = 0.8f),
+                            RoundedCornerShape(10.dp),
                         ),
                 )
             }
@@ -758,14 +798,14 @@ private fun AppDrawerContent(
                     }
                     if (apps.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }, contentType = { "header" }) {
-                            ExpressiveSectionTitle(stringResource(R.string.search_section_apps), color = MaterialTheme.colorScheme.onSurface)
+                            SearchSectionHeader(stringResource(R.string.search_section_apps))
                         }
                         appCells(apps, badges, badgeShowCount, badgeScale, showLabels, drawerIconSize, onAppClick,
                             onAppLongClick, dragController, onDragOutStart, onDropOnHome, onDropOnDock, haptics, locked)
                     }
                     if (settingResults.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }, contentType = { "header" }) {
-                            ExpressiveSectionTitle(stringResource(R.string.search_section_settings), color = MaterialTheme.colorScheme.onSurface)
+                            SearchSectionHeader(stringResource(R.string.search_section_settings))
                         }
                         items(items = settingResults, key = { it.id }, span = { GridItemSpan(maxLineSpan) },
                             contentType = { "setting" }) { setting ->

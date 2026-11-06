@@ -45,8 +45,8 @@ val LocalThemeAllIcons = compositionLocalOf { false }
 
 /**
  * Package name of the selected third-party icon pack under this subtree ("" = none). Provided per
- * surface from the user's setting and fed into the Coil request (part of the cache key), so mapped apps
- * use the pack's icon and unmapped ones are masked to its style; overrides [LocalThemedIcons].
+ * surface from the user's setting and fed into the Coil request (part of the cache key). A mapped pack
+ * drawable wins; an unmapped app continues through the native/generated themed-icon priority chain.
  */
 val LocalIconPack = compositionLocalOf { "" }
 

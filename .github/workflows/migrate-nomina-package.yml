@@ -44,8 +44,8 @@ jobs:
 
           for file in "${files[@]}"; do
             perl -0pi -e '
-              s/org\\.arkikeskus\\.launcher/com.insomdroid.nomina/g;
-              s/Theme\\.ArkikeskusLauncher/Theme.Nomina/g;
+              s/org\.arkikeskus\.launcher/com.insomdroid.nomina/g;
+              s/Theme\.ArkikeskusLauncher/Theme.Nomina/g;
               s/ARK-launcher/Nomina/g;
             ' "$file"
           done

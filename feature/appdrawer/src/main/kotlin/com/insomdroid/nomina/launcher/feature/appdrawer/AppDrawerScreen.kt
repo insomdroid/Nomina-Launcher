@@ -573,11 +573,6 @@ private fun AppDrawerContent(
                         }
                     },
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth().border(
-                        1.dp,
-                        searchPalette.trackOff.copy(alpha = 0.7f),
-                        RoundedCornerShape(8.dp),
-                    ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = searchPalette.surfaceHi,
                         unfocusedContainerColor = searchPalette.surfaceHi,
@@ -593,7 +588,12 @@ private fun AppDrawerContent(
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .border(
+                            1.dp,
+                            searchPalette.trackOff.copy(alpha = 0.7f),
+                            RoundedCornerShape(8.dp),
+                        ),
                 )
             }
             val context = LocalContext.current

@@ -28,6 +28,13 @@ object LauncherIcons {
     @DrawableRes val Link: Int = R.drawable.ic_link
     @DrawableRes val LinkOff: Int = R.drawable.ic_link_off
     @DrawableRes val Home: Int = R.drawable.ic_home
+    @DrawableRes val Dock: Int = R.drawable.ic_dock
+    @DrawableRes val AppsGrid: Int = R.drawable.ic_apps_grid
+    @DrawableRes val Appearance: Int = R.drawable.ic_appearance
+    @DrawableRes val Gestures: Int = R.drawable.ic_gestures
+    @DrawableRes val Notifications: Int = R.drawable.ic_notifications
+    @DrawableRes val Permissions: Int = R.drawable.ic_permissions
+    @DrawableRes val Backup: Int = R.drawable.ic_backup
     @DrawableRes val Widgets: Int = R.drawable.ic_widgets
     @DrawableRes val Work: Int = R.drawable.ic_work
     @DrawableRes val Play: Int = R.drawable.ic_play_arrow

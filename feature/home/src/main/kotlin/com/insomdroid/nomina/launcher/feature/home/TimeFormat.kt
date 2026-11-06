@@ -23,7 +23,7 @@ import java.text.DateFormat
  * SimpleDateFormat that captures the time zone and the 12/24-hour pattern when it is made, so one
  * kept for long shows the old zone after a landing and the old pattern after a settings flip: it is
  * made again when the system announces a time, zone or locale change or the 12/24-hour setting
- * changes. Shared by the status bar clock and the smartspace clock, alarm and event times.
+ * changes. Shared by the smartspace clock, alarm and event times.
  */
 @Composable
 internal fun rememberTimeFormat(): DateFormat {

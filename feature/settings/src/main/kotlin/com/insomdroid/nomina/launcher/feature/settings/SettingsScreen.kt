@@ -286,6 +286,12 @@ fun SettingsScreen(
                 ) {
                     SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
                     StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 10, viewModel::setDockColumns)
+                    Text(
+                        text = stringResource(R.string.settings_dock_icons_desc),
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                    )
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)

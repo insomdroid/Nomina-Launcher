@@ -121,7 +121,6 @@ import com.insomdroid.nomina.ui.PopupAction
 import com.insomdroid.nomina.ui.R as UiR
 import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.component.PickedIcon
-import com.insomdroid.nomina.ui.component.ContactAvatar
 import com.insomdroid.nomina.ui.component.iconSizeForCell
 import com.insomdroid.nomina.ui.component.LocalAppLabelLines
 import com.insomdroid.nomina.ui.component.LocalAppLabelScale
@@ -306,7 +305,6 @@ fun AppDrawerScreen(
         showFolderNames = uiState.showFolderNames,
         calc = uiState.calc,
         settingResults = uiState.settingResults,
-        contactResults = uiState.contactResults,
         searchPending = uiState.searchPending,
         locked = uiState.desktopLocked,
         gridState = gridState,
@@ -479,7 +477,6 @@ private fun AppDrawerContent(
     calc: SearchResult.Calculation?,
     searchPending: Boolean,
     settingResults: List<SearchResult.Setting>,
-    contactResults: List<SearchResult.Contact>,
     locked: Boolean,
     gridState: LazyGridState,
     workApps: List<AppItem>,
@@ -701,20 +698,11 @@ private fun AppDrawerContent(
                             }
                         }
                     }
-                    if (contactResults.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }, contentType = { "header" }) {
-                            ExpressiveSectionTitle(stringResource(R.string.search_section_contacts), color = MaterialTheme.colorScheme.onSurface)
-                        }
-                        items(items = contactResults, key = { it.id }, span = { GridItemSpan(maxLineSpan) },
-                            contentType = { "contact" }) { contact ->
-                            ContactResultRow(contact)
-                        }
-                    }
-                    // No app, setting, contact or calculator hit: say so — a silently empty grid
+                    // No app, setting or calculator hit: say so — a silently empty grid
                     // under the search box was indistinguishable from a stuck drawer. Not while the
                     // results are still the previous query's: that flashed "No results" on the first
                     // letter of every search.
-                    if (!searchPending && calc == null && apps.isEmpty() && settingResults.isEmpty() && contactResults.isEmpty()) {
+                    if (!searchPending && calc == null && apps.isEmpty() && settingResults.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }, contentType = { "empty" }) {
                             Text(
                                 text = stringResource(R.string.search_no_results),
@@ -1427,46 +1415,5 @@ private fun CalcResultCard(calc: SearchResult.Calculation, onCopy: () -> Unit) {
         Text("${calc.expression} = ", color = p.dim, fontSize = 18.sp)
         Text(calc.result, color = p.accent, fontSize = 22.sp,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-    }
-}
-
-@Composable
-private fun ContactResultRow(contact: SearchResult.Contact) {
-    val context = LocalContext.current
-    val p = LocalExpressivePalette.current
-    val callDesc = stringResource(R.string.search_contact_call)
-    val messageDesc = stringResource(R.string.search_contact_message)
-    ExpressiveCard(onClick = {
-        runCatching {
-            context.startActivity(
-                android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(contact.lookupUri))
-                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
-            )
-        }
-    }) {
-        // Avatar is decorative here — the contact name provides the accessible label.
-        ContactAvatar(name = contact.name, photoUri = contact.photoUri)
-        Text(contact.name, color = p.text, fontSize = 16.sp,
-            modifier = Modifier.weight(1f).padding(start = 14.dp))
-        if (contact.number != null) {
-            IconButton(onClick = {
-                runCatching {
-                    context.startActivity(
-                        android.content.Intent(android.content.Intent.ACTION_DIAL,
-                            android.net.Uri.fromParts("tel", contact.number, null))
-                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
-                    )
-                }
-            }) { Icon(painter = painterResource(LauncherIcons.Call), contentDescription = callDesc, tint = p.accent) }
-            IconButton(onClick = {
-                runCatching {
-                    context.startActivity(
-                        android.content.Intent(android.content.Intent.ACTION_SENDTO,
-                            android.net.Uri.fromParts("smsto", contact.number, null))
-                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
-                    )
-                }
-            }) { Icon(painter = painterResource(LauncherIcons.Message), contentDescription = messageDesc, tint = p.accent) }
-        }
     }
 }

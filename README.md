@@ -18,7 +18,7 @@ Nomina is an independent project and is not affiliated with, sponsored by, or en
 The current source includes the following ARK-derived functionality:
 
 - Paged home screen with movable app shortcuts and drag-and-drop between pages, dock and app drawer.
-- App drawer with app search, optional contact search, system-settings shortcuts and calculator/conversion queries.
+- App drawer with app search, system-settings shortcuts and calculator/conversion queries.
 - Home-screen and app-drawer folders.
 - Android home-screen widgets, including widget placement, resizing and reconfiguration.
 - Notification dots and badges, subject to notification access.

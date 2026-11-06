@@ -757,19 +757,19 @@ fun HomeScreen(
             }
             // Permanent mini dock: camera, drawer search and the system's selected browser.
             Surface(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 2.dp),
                 color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(18.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                    modifier = Modifier.fillMaxWidth().height(36.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         painter = painterResource(android.R.drawable.ic_menu_camera),
                         contentDescription = "Camera",
-                        modifier = Modifier.size(22.dp).clickable {
+                        modifier = Modifier.size(18.dp).clickable {
                             val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
                             runCatching { context.startActivity(intent) }.onFailure {
                                 runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
@@ -780,7 +780,7 @@ fun HomeScreen(
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = "Search apps",
-                        modifier = Modifier.size(22.dp).clickable { onOpenDrawer() },
+                        modifier = Modifier.size(18.dp).clickable { onOpenDrawer() },
                         tint = Color.White,
                     )
                     Icon(

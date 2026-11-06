@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   release:
-    name: Build signed release APK and run unit tests
+    name: Build signed release APK
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
@@ -54,7 +54,7 @@ jobs:
           keyPassword=nomina-temporary-pass
           EOF
 
-      # Build the APK independently so a failing JVM test cannot prevent its upload.
+      # Build the minified release APK, then publish it as a workflow artifact.
       - name: Build minified release APK
         shell: bash
         run: ./gradlew :app:assembleRelease --stacktrace

@@ -230,6 +230,7 @@ class LauncherAppsSource @Inject constructor(
 
         fun packageEvent(vararg packageNames: String, iconsMayHaveChanged: Boolean = false) {
             packageNames.forEach { packageEventPool.add(it) }
+            packageNames.forEach(labelCache::invalidatePackage)
             // An updated/replaced package bumps its icon epoch: the epoch is in the Coil model/cache
             // key, so the changed app's icon re-fetches everywhere — including AsyncImages already on
             // screen (dock, open home page, drawer top), which only re-launch when the model changes.

@@ -1,27 +1,30 @@
 import java.util.Base64
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 
 plugins {
     id("arkikeskus.android.library")
     id("arkikeskus.android.compose")
 }
 
-android {
-    namespace = "com.insomdroid.nomina.ui"
-    testOptions.unitTests.isIncludeAndroidResources = true
-}
+abstract class GenerateLauncherFonts : DefaultTask() {
+    @get:InputDirectory
+    abstract val fontSourceDirectory: DirectoryProperty
 
-val generatedLauncherFontResources = layout.buildDirectory.dir("generated/res/launcherFonts")
-val generateLauncherFonts = tasks.register("generateLauncherFonts") {
-    val fontSourceDirectory = layout.projectDirectory.dir("src/main/font-source")
-    inputs.dir(fontSourceDirectory)
-    outputs.dir(generatedLauncherFontResources)
-    doLast {
-        val outputDirectory = generatedLauncherFontResources.get().asFile
-        outputDirectory.deleteRecursively()
-        outputDirectory.mkdirs()
-        val fontDirectory = outputDirectory.resolve("font")
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val output = outputDirectory.get().asFile
+        output.deleteRecursively()
+        val fontDirectory = output.resolve("font")
         fontDirectory.mkdirs()
-        fontSourceDirectory.asFile.listFiles()
+
+        fontSourceDirectory.get().asFile.listFiles()
             .orEmpty()
             .filter { it.isFile && it.name.endsWith(".ttf.b64") }
             .forEach { source ->
@@ -29,15 +32,30 @@ val generateLauncherFonts = tasks.register("generateLauncherFonts") {
                     .removeSuffix(".ttf.b64")
                     .lowercase()
                     .replace('-', '_')
-                val fontBytes = Base64.getDecoder().decode(source.readText().filterNot { it.isWhitespace() })
-                fontDirectory.resolve("$resourceName.ttf").writeBytes(fontBytes)
+                val bytes = Base64.getDecoder().decode(
+                    source.readText().filterNot { it.isWhitespace() },
+                )
+                fontDirectory.resolve("$resourceName.ttf").writeBytes(bytes)
             }
     }
 }
 
-android.sourceSets.getByName("main").res.srcDir(generatedLauncherFontResources)
-tasks.named("preBuild").configure {
-    dependsOn(generateLauncherFonts)
+val generateLauncherFonts = tasks.register<GenerateLauncherFonts>("generateLauncherFonts") {
+    fontSourceDirectory.set(layout.projectDirectory.dir("src/main/font-source"))
+    outputDirectory.set(layout.buildDirectory.dir("generated/res/launcherFonts"))
+}
+
+android {
+    namespace = "com.insomdroid.nomina.ui"
+    testOptions.unitTests.isIncludeAndroidResources = true
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.sources.res?.addGeneratedSourceDirectory(generateLauncherFonts) { task ->
+            task.outputDirectory
+        }
+    }
 }
 
 dependencies {

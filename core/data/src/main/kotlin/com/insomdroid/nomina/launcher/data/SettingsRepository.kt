@@ -94,7 +94,8 @@ class SettingsRepository @Inject constructor(
         // zero column count would spin firstFreeCell() in an infinite loop.
         LauncherSettings(
             dockEnabled = p[Keys.DOCK_ENABLED] ?: true,
-            dockColumns = (p[Keys.DOCK_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_COLUMNS),
+            dockColumns = (p[Keys.DOCK_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_DOCK_ITEMS),
+            dockExpanded = p[Keys.DOCK_EXPANDED] ?: true,
             homeColumns = (p[Keys.HOME_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_COLUMNS),
             homeRows = (p[Keys.HOME_ROWS] ?: 6).coerceIn(MIN_ROWS, MAX_ROWS),
             drawerColumns = (p[Keys.DRAWER_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_COLUMNS),
@@ -412,7 +413,8 @@ class SettingsRepository @Inject constructor(
     private val SEPARATORS = Regex("[\\t\\n\\r]+")
 
     suspend fun setDockEnabled(value: Boolean) = edit { it[Keys.DOCK_ENABLED] = value }
-    suspend fun setDockColumns(value: Int) = edit { it[Keys.DOCK_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_COLUMNS) }
+    suspend fun setDockColumns(value: Int) = edit { it[Keys.DOCK_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_DOCK_ITEMS) }
+    suspend fun setDockExpanded(value: Boolean) = edit { it[Keys.DOCK_EXPANDED] = value }
     suspend fun setHomeColumns(value: Int) = edit { it[Keys.HOME_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_COLUMNS) }
     suspend fun setHomeRows(value: Int) = edit { it[Keys.HOME_ROWS] = value.coerceIn(MIN_ROWS, MAX_ROWS) }
     suspend fun setDrawerColumns(value: Int) = edit { it[Keys.DRAWER_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_COLUMNS) }
@@ -703,6 +705,7 @@ class SettingsRepository @Inject constructor(
     private object Keys {
         val DOCK_ENABLED = booleanPreferencesKey("dock_enabled")
         val DOCK_COLUMNS = intPreferencesKey("dock_columns")
+        val DOCK_EXPANDED = booleanPreferencesKey("dock_expanded")
         val HOME_COLUMNS = intPreferencesKey("home_columns")
         val HOME_ROWS = intPreferencesKey("home_rows")
         val DRAWER_COLUMNS = intPreferencesKey("drawer_columns")
@@ -783,6 +786,7 @@ class SettingsRepository @Inject constructor(
         /** Valid range for the home/dock/drawer column counts (mirrors the settings steppers). */
         const val MIN_COLUMNS = 3
         const val MAX_COLUMNS = 7
+        const val MAX_DOCK_ITEMS = 10
 
         /** Valid range for an open folder's columns (mirrors the settings stepper). */
         const val MIN_FOLDER_COLUMNS = 3

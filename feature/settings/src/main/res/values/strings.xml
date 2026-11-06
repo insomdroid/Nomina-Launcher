@@ -11,8 +11,6 @@
     <string name="settings_gestures_interaction">Gestures &amp; interaction</string>
     <string name="settings_show_weather">Weather in the widget</string>
     <string name="settings_weather_app">Tap on weather opens</string>
-    <string name="settings_network_place_names">Place name from the internet</string>
-    <string name="settings_network_place_names_desc">If the phone can\'t name your town itself, look it up from BigDataCloud. The service receives your approximate location.</string>
     <string name="settings_swipe_up_drawer">Swipe up → apps</string>
     <string name="settings_swipe_down_notif">Swipe down → notifications</string>
     <string name="settings_folder_swipe_first_app">Swipe up on a folder → its first app</string>
@@ -88,7 +86,6 @@
     <string name="settings_permission_not_granted">Not granted – tap to grant</string>
     <string name="settings_permission_calendar">Calendar</string>
     <string name="settings_permission_contacts">Contacts</string>
-    <string name="settings_permission_phone">Phone state</string>
     <string name="settings_permission_location">Location</string>
     <string name="settings_drawer_search">Show search</string>
     <string name="settings_hidden_apps">Hide apps</string>
@@ -145,16 +142,11 @@
     <string name="settings_font_monospace">Monospace</string>
     <string name="settings_font_casual">Casual</string>
     <string name="settings_font_cursive">Handwriting</string>
-    <string name="settings_search">Search</string>
-    <string name="settings_search_contacts">Search contacts</string>
     <string name="settings_left_edge">Left edge</string>
     <string name="settings_left_edge_none">None</string>
     <string name="settings_left_edge_pick">Choose app</string>
     <string name="settings_close">Close</string>
     <string name="settings_lock_desktop">Lock desktop</string>
-    <string name="settings_hide_status_bar">Hide system status bar (fullscreen)</string>
-    <string name="settings_status_bar">Status bar (clock, battery, signal)</string>
-    <string name="settings_status_bar_scrim">Status bar background darkness</string>
     <string name="settings_frequent_apps">Most used at the top</string>
     <string name="settings_hide_home_apps">Hide apps that are on the home screen</string>
     <string name="settings_hide_home_apps_desc">Apps placed on the home screen, in its folders or in the dock leave the list. The search still finds them.</string>
@@ -175,16 +167,8 @@
     <string name="settings_widget_tonal">Themed backgrounds for built-in widgets</string>
     <string name="settings_widget_inset">Widget edges align with icons</string>
     <string name="settings_widget_inset_desc">Widgets keep the same side margin as app icons instead of filling their cells edge to edge. Widgets with margins of their own may look smaller.</string>
-    <string name="settings_sounds">Sounds</string>
-    <string name="settings_lock_sounds">Lock and unlock sounds</string>
-    <string name="settings_lock_sounds_desc">A sound you pick plays when the phone locks and when it unlocks — not when it is silent or on vibrate, in Do not disturb or in a call.</string>
-    <string name="settings_lock_sound">Lock sound</string>
-    <string name="settings_unlock_sound">Unlock sound</string>
     <string name="settings_sound_none">No sound</string>
     <string name="settings_sound_from_files">Choose a file</string>
-    <string name="settings_sound_from_phone">Phone\'s sounds</string>
     <string name="settings_sound_play">Play</string>
     <string name="settings_sound_picked">Picked sound</string>
-    <string name="settings_phone_sound_settings">Phone\'s sound settings</string>
-    <string name="settings_phone_sound_settings_desc">Turn off the phone\'s own screen locking sound there, so the two don\'t play together.</string>
 </resources>

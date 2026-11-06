@@ -1,0 +1,206 @@
+name: Repository cleanup and APK optimization
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/repository-cleanup.yml
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: repository-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Remove non-English resources and optimize APK configuration
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          import shutil
+
+          root = Path(".")
+          languages = {"de", "es", "fi", "fr", "pl", "pt", "ru", "sv", "tr"}
+          removed = []
+
+          for path in list(root.rglob("*")):
+              if not path.is_dir():
+                  continue
+              match = re.fullmatch(r"values-([a-z]{2})", path.name)
+              if match and match.group(1) in languages:
+                  removed.append(str(path))
+                  shutil.rmtree(path)
+
+          for path in list(root.rglob("*")):
+              if not path.is_file():
+                  continue
+              if re.search(r"\.(de|es|fi|fr|pl|pt|ru|sv|tr)\.(md|txt)$", path.name, re.I):
+                  removed.append(str(path))
+                  path.unlink()
+
+          privacy_fi = root / "PRIVACY.fi.md"
+          if privacy_fi.exists():
+              removed.append(str(privacy_fi))
+              privacy_fi.unlink()
+
+          print("Removed non-English resource paths:")
+          print("\n".join(removed) if removed else "(none)")
+
+          locale_file = root / "app/src/main/res/xml/locales_config.xml"
+          locale_file.write_text("""<?xml version="1.0" encoding="utf-8"?>
+          <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+              <locale android:name="en" />
+          </locale-config>
+          """, encoding="utf-8")
+
+          privacy = root / "PRIVACY.md"
+          if privacy.exists():
+              text = privacy.read_text(encoding="utf-8")
+              text = re.sub(r"\n\*Tämä seloste suomeksi: \[PRIVACY\.fi\.md\]\(PRIVACY\.fi\.md\)\*\n", "\n", text)
+              privacy.write_text(text, encoding="utf-8")
+
+          gradle = root / "app/build.gradle.kts"
+          text = gradle.read_text(encoding="utf-8")
+
+          old_packaging = """    // F-Droid's build server has no NDK, so AGP packages the native libraries untouched there.
+              // Keep them untouched here too, whatever NDK this machine has, so the release APK is
+              // byte-identical on both sides.
+              packaging {
+                  jniLibs {
+                      keepDebugSymbols += "**/*.so"
+                  }
+              }
+
+          """
+          if old_packaging not in text:
+              raise SystemExit("Expected native-library packaging block not found; refusing an unsafe Gradle edit.")
+          text = text.replace(old_packaging, "", 1)
+
+          old_debug = """        debug {
+                  applicationIdSuffix = ".debug"
+                  // Installed beside the release build on the test phones: a distinct app-list label keeps
+                  // its own (separate) home screen from being taken for the release one.
+                  manifestPlaceholders["appLabel"] = "Nomina debug"
+              }"""
+          new_debug = """        debug {
+                  applicationIdSuffix = ".debug"
+                  manifestPlaceholders["appLabel"] = "Nomina debug"
+                  // Keep the installable CI APK compact by removing unused code and resources.
+                  isMinifyEnabled = true
+                  isShrinkResources = true
+                  proguardFiles(
+                      getDefaultProguardFile("proguard-android-optimize.txt"),
+                      "proguard-rules.pro",
+                  )
+              }"""
+          if old_debug not in text:
+              raise SystemExit("Expected debug build type block not found; refusing an unsafe Gradle edit.")
+          text = text.replace(old_debug, new_debug, 1)
+
+          if "isShrinkResources = true" not in text:
+              text = text.replace(
+                  "        release {\n            isMinifyEnabled = true",
+                  "        release {\n            isMinifyEnabled = true\n            isShrinkResources = true",
+                  1,
+              )
+          gradle.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Replace launcher icon with an expressive geometric mark
+        shell: bash
+        run: |
+          cat > app/src/main/res/drawable/ic_launcher_foreground.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path android:fillColor="#6750A4"
+                  android:pathData="M54,16 C65,16 72,23 72,34 C72,43 65,48 54,48 C43,48 36,43 36,34 C36,23 43,16 54,16 Z" />
+              <path android:fillColor="#006A6A"
+                  android:pathData="M92,54 C92,65 85,72 74,72 C65,72 60,65 60,54 C60,43 65,36 74,36 C85,36 92,43 92,54 Z" />
+              <path android:fillColor="#BA1A1A"
+                  android:pathData="M54,92 C43,92 36,85 36,74 C36,65 43,60 54,60 C65,60 72,65 72,74 C72,85 65,92 54,92 Z" />
+              <path android:fillColor="#8C4A00"
+                  android:pathData="M16,54 C16,43 23,36 34,36 C43,36 48,43 48,54 C48,65 43,72 34,72 C23,72 16,65 16,54 Z" />
+              <path android:fillColor="#F3F0E7"
+                  android:pathData="M54,42 A12,12 0,1 0,54 66 A12,12 0,1 0,54 42 Z" />
+          </vector>
+          XML
+
+          cat > app/src/main/res/drawable/ic_launcher_monochrome.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path android:fillColor="#FFFFFFFF"
+                  android:pathData="M54,16 C65,16 72,23 72,34 C72,43 65,48 54,48 C43,48 36,43 36,34 C36,23 43,16 54,16 Z" />
+              <path android:fillColor="#FFFFFFFF"
+                  android:pathData="M92,54 C92,65 85,72 74,72 C65,72 60,65 60,54 C60,43 65,36 74,36 C85,36 92,43 92,54 Z" />
+              <path android:fillColor="#FFFFFFFF"
+                  android:pathData="M54,92 C43,92 36,85 36,74 C36,65 43,60 54,60 C65,60 72,65 72,74 C72,85 65,92 54,92 Z" />
+              <path android:fillColor="#FFFFFFFF"
+                  android:pathData="M16,54 C16,43 23,36 34,36 C43,36 48,43 48,54 C48,65 43,72 34,72 C23,72 16,65 16,54 Z" />
+              <path android:fillColor="#FFFFFFFF"
+                  android:pathData="M54,42 A12,12 0,1 0,54 66 A12,12 0,1 0,54 42 Z" />
+          </vector>
+          XML
+
+          cat > app/src/main/res/values/colors.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="splash_background">#F3F0E7</color>
+              <color name="launcher_icon_background">#F3F0E7</color>
+          </resources>
+          XML
+
+      - name: Report compact APK configuration
+        run: |
+          grep -n -A12 -B2 'debug {' app/build.gradle.kts
+          grep -n -A8 -B2 'release {' app/build.gradle.kts
+          find . -type d -name 'values-*' -print
+
+      - name: Commit cleanup
+        id: commit
+        shell: bash
+        run: |
+          rm .github/workflows/repository-cleanup.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "chore: keep English resources and optimize launcher APK"
+          git push origin main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Android CI for the resulting source
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/insomdroid/Nomina-Launcher/actions/workflows/android-ci.yml/dispatches \
+            -d '{"ref":"main"}'

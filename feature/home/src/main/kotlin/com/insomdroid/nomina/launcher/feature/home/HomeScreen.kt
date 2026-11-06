@@ -959,8 +959,7 @@ fun HomeScreen(
             anchor = anchor,
             preferAbove = above,
             items = buildList {
-                if (!settings.desktopLocked) {
-                    add(IconMenuItem(R.drawable.ic_wallpaper, stringResource(R.string.home_options_wallpaper)) {
+                add(IconMenuItem(R.drawable.ic_wallpaper, stringResource(R.string.home_options_wallpaper)) {
                     runCatching {
                         context.startActivity(
                             Intent.createChooser(Intent(Intent.ACTION_SET_WALLPAPER), null)

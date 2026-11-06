@@ -1309,7 +1309,7 @@ private fun SliderRow(
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(label)
@@ -1336,7 +1336,7 @@ private fun LabelColorRow(selected: Int, onPick: (Int) -> Unit) {
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_label_color))
@@ -1405,7 +1405,7 @@ internal fun FontRow(selected: String, onPick: (String) -> Unit) {
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_font))
@@ -1447,7 +1447,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_wallpaper))
@@ -1492,7 +1492,7 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_color))
@@ -1534,7 +1534,7 @@ internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_label_color))

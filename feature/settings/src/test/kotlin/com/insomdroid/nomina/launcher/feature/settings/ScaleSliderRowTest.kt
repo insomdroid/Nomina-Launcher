@@ -169,6 +169,6 @@ class ScaleSliderRowNarrowTest {
         }
         compose.onNodeWithText("Application icon size").assertIsDisplayed().assertWidthIsAtLeast(40.dp)
         compose.onNodeWithText("115%").assertIsDisplayed().assertWidthIsAtLeast(20.dp)
-        compose.onNodeWithText("Predeterminado 100 %").assertIsDisplayed()
+        compose.onNodeWithText("Default 100%").assertIsDisplayed()
     }
 }

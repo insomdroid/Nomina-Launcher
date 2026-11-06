@@ -27,7 +27,15 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class LauncherAppsSourceShortcutsTest {
     private val context: Application = RuntimeEnvironment.getApplication()
-    private val source = LauncherAppsSource(context, IconPackRepository(context), Provider<ImageLoader> { error("unused") })
+    private val source = LauncherAppsSource(
+        context,
+        IconPackRepository(context),
+        Provider<ImageLoader> { error("unused") },
+        AppLabelCache(object : AppLabelStore {
+            override suspend fun read(locale: String): Map<String, String> = emptyMap()
+            override suspend fun write(locale: String, labels: Map<String, String>) = Unit
+        }),
+    )
 
     @Test fun anAppChangingItsShortcutsIsReportedWithItsProfileSerial() = runTest {
         val changes = mutableListOf<Set<Pair<String, Long>>>()

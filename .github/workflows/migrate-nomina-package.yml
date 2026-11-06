@@ -39,7 +39,7 @@ jobs:
           new_package="com.insomdroid.nomina"
 
           mapfile -t files < <(
-            git grep -Il -e "$old_package" -e "Theme.ArkikeskusLauncher" -e "ARK-launcher" -- . ':!LICENSE' ':!NOTICE' || true
+            git grep -Il -e "$old_package" -e "org/arkikeskus/launcher" -e "Theme.ArkikeskusLauncher" -e "ARK-launcher" -- . ':!LICENSE' ':!NOTICE' || true
           )
 
           for file in "${files[@]}"; do
@@ -73,7 +73,7 @@ jobs:
               README.md
           fi
 
-          if git grep -n "$old_package" -- . ':!LICENSE' ':!NOTICE'; then
+          if git grep -n -e "$old_package" -e "org/arkikeskus/launcher" -- . ':!LICENSE' ':!NOTICE'; then
             echo "Old ARK package references remain outside preserved license notices." >&2
             exit 1
           fi

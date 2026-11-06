@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -181,19 +185,26 @@ fun Dock(
     }
     val hoveredSlot = remember { derivedStateOf { if (incomingOnto >= 0) incomingOnto else armedOwnOnto } }
 
-    Surface(
-        modifier = modifier
-            .onGloballyPositioned { dragController.dockBounds = it.boundsInRoot() }
-            .border(2.dp, Color.White.copy(alpha = if (highlighted) 0.8f else 0f), shape),
-        color = Color.Black.copy(alpha = backgroundAlpha),
-        shape = shape,
-    ) {
-        Row(
-            // Keep a full-height bar even when empty (no entries yet) so apps can be dragged in.
+    BoxWithConstraints(modifier = modifier) {
+        val scrollState = rememberScrollState()
+        val contentWidth = maxWidth * (maxOf(entries.size, 5).toFloat() / 5f)
+        Surface(
             modifier = Modifier
-                .heightIn(min = DOCK_ROW_MIN_HEIGHT)
-                .padding(horizontal = 8.dp, vertical = DOCK_ROW_VERTICAL_PADDING)
-                .onSizeChanged { rowWidthPx = it.width },
+                .fillMaxWidth()
+                .onGloballyPositioned { dragController.dockBounds = it.boundsInRoot() }
+                .border(2.dp, Color.White.copy(alpha = if (highlighted) 0.8f else 0f), shape),
+            color = Color.Black.copy(alpha = backgroundAlpha),
+            shape = shape,
+        ) {
+            Row(
+                // Five equally sized slots fit in the viewport; any additional slots extend the
+                // same row and are reached with a horizontal swipe. Slot indices stay absolute.
+                modifier = Modifier
+                    .heightIn(min = DOCK_ROW_MIN_HEIGHT)
+                    .horizontalScroll(scrollState)
+                    .width(contentWidth)
+                    .padding(horizontal = 8.dp, vertical = DOCK_ROW_VERTICAL_PADDING)
+                    .onSizeChanged { rowWidthPx = it.width },
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -276,6 +287,7 @@ fun Dock(
                             }
                         },
                     )
+                }
                 }
             }
         }

@@ -22,6 +22,9 @@ private val DotoDisplayFontFamily = FontFamily(
     Font(R.font.doto_rond_wght, FontWeight.Normal),
 )
 
+/** Geist Mono is reserved for technical labels and compact system data. */
+fun launcherTechnicalFontFamily(): FontFamily = GeistMonoFontFamily
+
 /** The rounded-dot Doto face is reserved for numeric clock displays, not general UI text. */
 fun launcherDisplayFontFamily(): FontFamily = DotoDisplayFontFamily
 

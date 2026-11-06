@@ -19,7 +19,7 @@ private val GeistMonoFontFamily = FontFamily(
 )
 
 private val DotoDisplayFontFamily = FontFamily(
-    Font(R.font.doto_rond, FontWeight.Normal),
+    Font(R.font.doto_rond_wght, FontWeight.Normal),
 )
 
 /** The rounded-dot Doto face is reserved for numeric clock displays, not general UI text. */

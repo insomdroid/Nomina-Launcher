@@ -95,13 +95,11 @@ palvelimelle; pyynnöt tunnistautuvat yleisluontoisella
 | `EXPAND_STATUS_BAR` | Ilmoitusten avaus alaspyyhkäisyllä |
 | `HIDE_OVERLAY_WINDOWS` | Muiden sovellusten päällä näkyvien ikkunoiden piilotus, kun toisesta sovelluksesta avatun varmuuskopion palautusikkuna on näkyvissä (Android 12+), jotta mikään peittoikkuna ei voi peittää tai huijata sitä |
 
-Kalenteri-, yhteystieto- ja puhelintilatiedot luetaan tarvittaessa yllä
-kuvattuja ominaisuuksia varten, niitä käytetään vain laitteella, eikä niitä
-koskaan tallenneta muistivälimuistia pidemmälle tai lähetetä minnekään.
-Sijaintia käsitellään laitteella samalla tavalla; ainoa laitteelta poistuva
-sijaintitieto on ~1 km:n tarkkuuteen pyöristetyt koordinaatit, jotka
-lähetetään kohdassa *Verkon käyttö* kuvatuille sää- ja
-käänteisgeokoodauspalveluille.
+Kalenteri- ja yhteystietoja luetaan tarvittaessa yllä kuvattuja ominaisuuksia
+varten. Niitä käytetään vain laitteella eikä niitä lähetetä minnekään.
+Paikannimet selvitetään laitteella. Ainoa laitteelta poistuva sijaintitieto
+on ~1 km:n tarkkuuteen pyöristetyt koordinaatit, jotka lähetetään Open-Meteolle
+kohdassa *Verkon käyttö* kuvattua sääpyyntöä varten.
 
 ## Lapset
 
@@ -114,4 +112,4 @@ ole tilejä, eikä se kerää henkilötietoja lainkaan.
 
 Tähän selosteeseen tehtävät muutokset tehdään julkisessa repositoriossa, jossa
 koko muutoshistoria on näkyvissä. Kysymykset ja ilmoitukset:
-<https://github.com/jrs8205/Nomina/issues>.
+<https://github.com/insomdroid/Nomina-Launcher/issues>.

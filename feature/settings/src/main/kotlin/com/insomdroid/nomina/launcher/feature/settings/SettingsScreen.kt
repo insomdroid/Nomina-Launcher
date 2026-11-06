@@ -231,121 +231,6 @@ fun SettingsScreen(
                 }
 
                 CollapsibleSection(
-                    title = stringResource(R.string.settings_gestures),
-                    collapsed = "gestures" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("gestures", it) },
-                ) {
-                    SwitchRow(stringResource(R.string.settings_swipe_up_drawer), s.swipeUpForDrawer, viewModel::setSwipeUp)
-                    SwitchRow(stringResource(R.string.settings_swipe_down_notif), s.swipeDownForNotifications, viewModel::setSwipeDown)
-                    SwitchRow(
-                        stringResource(R.string.settings_folder_swipe_first_app),
-                        stringResource(R.string.settings_folder_swipe_first_app_desc),
-                        s.folderSwipeOpensFirstApp,
-                        viewModel::setFolderSwipeOpensFirstApp,
-                    )
-                    val leftSwipeLabel = allApps.firstOrNull { it.key == s.leftSwipeAppKey }?.label
-                        ?: stringResource(R.string.settings_left_edge_none)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_left_edge),
-                        description = leftSwipeLabel,
-                    ) { showLeftSwipePicker = true }
-                    DoubleTapLockToggle(enabled = s.doubleTapToLock, onSetEnabled = viewModel::setDoubleTapToLock)
-                    // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
-                    // number is the real wait here and the default chip names it.
-                    val systemLongPress = rememberSystemLongPressTimeout()
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_long_press_delay),
-                        description = stringResource(R.string.settings_long_press_delay_desc),
-                        value = s.longPressScale,
-                        onValueChange = viewModel::setLongPressScale,
-                        valueRange = LongPressScale.MIN..LongPressScale.MAX,
-                        step = 0.1f,
-                        valueText = { resources.getString(R.string.settings_millis, (systemLongPress * it).roundToInt()) },
-                    )
-                }
-
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_dock),
-                    collapsed = "dock" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("dock", it) },
-                ) {
-                    SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
-                    StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 7, viewModel::setDockColumns)
-                    SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
-                    DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
-                    DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
-                    DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
-                }
-
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_drawer),
-                    collapsed = "drawer" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("drawer", it) },
-                ) {
-                    StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
-                    SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
-                    SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
-                    DrawerLabelColorRow(selected = s.drawerLabelColor, onPick = viewModel::setDrawerLabelColor)
-                    SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
-                    SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
-                    SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
-                    SwitchRow(
-                        stringResource(R.string.settings_hide_home_apps),
-                        stringResource(R.string.settings_hide_home_apps_desc),
-                        s.hideHomeAppsFromDrawer,
-                        viewModel::setHideHomeAppsFromDrawer,
-                    )
-                    SwitchRow(stringResource(R.string.settings_drawer_open_top), s.drawerOpensAtTop, viewModel::setDrawerOpensAtTop)
-                    DrawerBackdropRows(
-                        settings = s,
-                        wallpaper = drawerWallpaper,
-                        blurAvailability = rememberBlurAvailability(),
-                        actions = DrawerBackdropActions(
-                            onColor = viewModel::setDrawerBackgroundColor,
-                            onColorOpacity = viewModel::setDrawerBackgroundOpacity,
-                            onPickPicture = viewModel::importDrawerWallpaper,
-                            onClearPicture = viewModel::clearDrawerWallpaper,
-                            onPictureDim = viewModel::setDrawerPictureDim,
-                            onBlur = viewModel::setBlurBehindDrawer,
-                            onBlurStrength = viewModel::setDrawerBlurStrength,
-                        ),
-                    )
-                    DrawerIconSizeRow(s.drawerIconScale, viewModel::setDrawerIconScale)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_hidden_apps),
-                        description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
-                    ) { showHiddenManager = true }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_drawer_folders),
-                        description = pluralStringResource(
-                            R.plurals.settings_drawer_folders_count, drawerFolders.orEmpty().size, drawerFolders.orEmpty().size,
-                        ),
-                    ) { showFolderManager = true }
-                    val newFolderName = stringResource(R.string.drawer_folder_default)
-                    val folderCreatedMsg = stringResource(R.string.settings_drawer_folder_created)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_new_drawer_folder),
-                        description = stringResource(R.string.settings_new_drawer_folder_desc),
-                        trailingIcon = LauncherIcons.Add,
-                    ) {
-                        viewModel.createDrawerFolder(newFolderName)
-                        android.widget.Toast.makeText(context, folderCreatedMsg, android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                    SwitchRow(
-                        stringResource(R.string.settings_sort_drawer_folders),
-                        stringResource(R.string.settings_sort_drawer_folders_desc),
-                        s.sortDrawerFolders,
-                        viewModel::setSortDrawerFolders,
-                    )
-                    SwitchRow(
-                        stringResource(R.string.settings_mix_drawer_folders),
-                        stringResource(R.string.settings_mix_drawer_folders_desc),
-                        s.mixDrawerFolders,
-                        viewModel::setMixDrawerFolders,
-                    )
-                }
-
-                CollapsibleSection(
                     title = stringResource(R.string.settings_home),
                     collapsed = "home" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("home", it) },
@@ -403,42 +288,6 @@ fun SettingsScreen(
                             viewModel::setNetworkPlaceNames,
                         )
                     }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_notif_widget_count),
-                        description = stringResource(
-                            when (s.notificationWidgetCountStyle) {
-                                LauncherSettings.COUNT_DOT -> R.string.settings_notif_widget_count_dot
-                                LauncherSettings.COUNT_NONE -> R.string.settings_notif_widget_count_none
-                                else -> R.string.settings_notif_widget_count_number
-                            },
-                        ),
-                    ) { showCountStylePicker = true }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_people_privacy),
-                        description = stringResource(
-                            when (s.peoplePrivacy) {
-                                LauncherSettings.PRIVACY_SENDER -> R.string.settings_people_privacy_sender
-                                LauncherSettings.PRIVACY_COUNT -> R.string.settings_people_privacy_count
-                                else -> R.string.settings_people_privacy_all
-                            },
-                        ),
-                    ) { showPeoplePrivacyPicker = true }
-                    SwitchRow(
-                        stringResource(R.string.settings_people_show_apps),
-                        s.peopleShowApps,
-                        viewModel::setPeopleShowApps,
-                    )
-                    SwitchRow(
-                        stringResource(R.string.settings_people_batch),
-                        s.peopleBatchEnabled,
-                        viewModel::setPeopleBatchEnabled,
-                    )
-                    if (s.peopleBatchEnabled) {
-                        ExpressiveActionRow(
-                            label = stringResource(R.string.settings_people_batch_times),
-                            description = s.peopleBatchTimes.replace(",", ", "),
-                        ) { showBatchTimesEditor = true }
-                    }
                     StatusBarToggle(enabled = s.showStatusBar, onSetEnabled = viewModel::setShowStatusBar)
                     if (s.showStatusBar) {
                         StatusBarScrimRow(s.statusBarScrimOpacity, viewModel::setStatusBarScrimOpacity)
@@ -446,7 +295,73 @@ fun SettingsScreen(
                 }
 
                 CollapsibleSection(
-                    title = stringResource(R.string.settings_icons),
+                    title = stringResource(R.string.settings_dock),
+                    collapsed = "dock" in s.collapsedSettingsSections,
+                    onToggle = { viewModel.setSectionCollapsed("dock", it) },
+                ) {
+                    SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
+                    StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 7, viewModel::setDockColumns)
+                    SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
+                    DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
+                    DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
+                    DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
+                }
+
+                CollapsibleSection(
+                    title = stringResource(R.string.settings_drawer),
+                    collapsed = "drawer" in s.collapsedSettingsSections,
+                    onToggle = { viewModel.setSectionCollapsed("drawer", it) },
+                ) {
+                    StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
+                    SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
+                    SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
+                    DrawerLabelColorRow(selected = s.drawerLabelColor, onPick = viewModel::setDrawerLabelColor)
+                    SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
+                    SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
+                    SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
+                    SwitchRow(
+                        stringResource(R.string.settings_hide_home_apps),
+                        stringResource(R.string.settings_hide_home_apps_desc),
+                        s.hideHomeAppsFromDrawer,
+                        viewModel::setHideHomeAppsFromDrawer,
+                    )
+                    SwitchRow(stringResource(R.string.settings_drawer_open_top), s.drawerOpensAtTop, viewModel::setDrawerOpensAtTop)
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_hidden_apps),
+                        description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
+                    ) { showHiddenManager = true }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_drawer_folders),
+                        description = pluralStringResource(
+                            R.plurals.settings_drawer_folders_count, drawerFolders.orEmpty().size, drawerFolders.orEmpty().size,
+                        ),
+                    ) { showFolderManager = true }
+                    val newFolderName = stringResource(R.string.drawer_folder_default)
+                    val folderCreatedMsg = stringResource(R.string.settings_drawer_folder_created)
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_new_drawer_folder),
+                        description = stringResource(R.string.settings_new_drawer_folder_desc),
+                        trailingIcon = LauncherIcons.Add,
+                    ) {
+                        viewModel.createDrawerFolder(newFolderName)
+                        android.widget.Toast.makeText(context, folderCreatedMsg, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                    SwitchRow(
+                        stringResource(R.string.settings_sort_drawer_folders),
+                        stringResource(R.string.settings_sort_drawer_folders_desc),
+                        s.sortDrawerFolders,
+                        viewModel::setSortDrawerFolders,
+                    )
+                    SwitchRow(
+                        stringResource(R.string.settings_mix_drawer_folders),
+                        stringResource(R.string.settings_mix_drawer_folders_desc),
+                        s.mixDrawerFolders,
+                        viewModel::setMixDrawerFolders,
+                    )
+                }
+
+                CollapsibleSection(
+                    title = stringResource(R.string.settings_appearance),
                     collapsed = "icons" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("icons", it) },
                 ) {
@@ -488,6 +403,55 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_icon_pack),
                         description = iconPackName,
                     ) { showIconPackPicker = true }
+                    DrawerBackdropRows(
+                        settings = s,
+                        wallpaper = drawerWallpaper,
+                        blurAvailability = rememberBlurAvailability(),
+                        actions = DrawerBackdropActions(
+                            onColor = viewModel::setDrawerBackgroundColor,
+                            onColorOpacity = viewModel::setDrawerBackgroundOpacity,
+                            onPickPicture = viewModel::importDrawerWallpaper,
+                            onClearPicture = viewModel::clearDrawerWallpaper,
+                            onPictureDim = viewModel::setDrawerPictureDim,
+                            onBlur = viewModel::setBlurBehindDrawer,
+                            onBlurStrength = viewModel::setDrawerBlurStrength,
+                        ),
+                    )
+                    DrawerIconSizeRow(s.drawerIconScale, viewModel::setDrawerIconScale)
+                }
+
+                CollapsibleSection(
+                    title = stringResource(R.string.settings_gestures_interaction),
+                    collapsed = "gestures" in s.collapsedSettingsSections,
+                    onToggle = { viewModel.setSectionCollapsed("gestures", it) },
+                ) {
+                    SwitchRow(stringResource(R.string.settings_swipe_up_drawer), s.swipeUpForDrawer, viewModel::setSwipeUp)
+                    SwitchRow(stringResource(R.string.settings_swipe_down_notif), s.swipeDownForNotifications, viewModel::setSwipeDown)
+                    SwitchRow(
+                        stringResource(R.string.settings_folder_swipe_first_app),
+                        stringResource(R.string.settings_folder_swipe_first_app_desc),
+                        s.folderSwipeOpensFirstApp,
+                        viewModel::setFolderSwipeOpensFirstApp,
+                    )
+                    val leftSwipeLabel = allApps.firstOrNull { it.key == s.leftSwipeAppKey }?.label
+                        ?: stringResource(R.string.settings_left_edge_none)
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_left_edge),
+                        description = leftSwipeLabel,
+                    ) { showLeftSwipePicker = true }
+                    DoubleTapLockToggle(enabled = s.doubleTapToLock, onSetEnabled = viewModel::setDoubleTapToLock)
+                    // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
+                    // number is the real wait here and the default chip names it.
+                    val systemLongPress = rememberSystemLongPressTimeout()
+                    ScaleSliderRow(
+                        label = stringResource(R.string.settings_long_press_delay),
+                        description = stringResource(R.string.settings_long_press_delay_desc),
+                        value = s.longPressScale,
+                        onValueChange = viewModel::setLongPressScale,
+                        valueRange = LongPressScale.MIN..LongPressScale.MAX,
+                        step = 0.1f,
+                        valueText = { resources.getString(R.string.settings_millis, (systemLongPress * it).roundToInt()) },
+                    )
                 }
 
                 CollapsibleSection(
@@ -510,6 +474,54 @@ fun SettingsScreen(
                         showCount = s.notificationDotCount,
                         scale = s.notificationDotScale,
                     )
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_notif_widget_count),
+                        description = stringResource(
+                            when (s.notificationWidgetCountStyle) {
+                                LauncherSettings.COUNT_DOT -> R.string.settings_notif_widget_count_dot
+                                LauncherSettings.COUNT_NONE -> R.string.settings_notif_widget_count_none
+                                else -> R.string.settings_notif_widget_count_number
+                            },
+                        ),
+                    ) { showCountStylePicker = true }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_people_privacy),
+                        description = stringResource(
+                            when (s.peoplePrivacy) {
+                                LauncherSettings.PRIVACY_SENDER -> R.string.settings_people_privacy_sender
+                                LauncherSettings.PRIVACY_COUNT -> R.string.settings_people_privacy_count
+                                else -> R.string.settings_people_privacy_all
+                            },
+                        ),
+                    ) { showPeoplePrivacyPicker = true }
+                    SwitchRow(
+                        stringResource(R.string.settings_people_show_apps),
+                        s.peopleShowApps,
+                        viewModel::setPeopleShowApps,
+                    )
+                    SwitchRow(
+                        stringResource(R.string.settings_people_batch),
+                        s.peopleBatchEnabled,
+                        viewModel::setPeopleBatchEnabled,
+                    )
+                    if (s.peopleBatchEnabled) {
+                        ExpressiveActionRow(
+                            label = stringResource(R.string.settings_people_batch_times),
+                            description = s.peopleBatchTimes.replace(",", ", "),
+                        ) { showBatchTimesEditor = true }
+                    }
+                }
+
+                CollapsibleSection(
+                    title = stringResource(R.string.settings_search),
+                    collapsed = "search" in s.collapsedSettingsSections,
+                    onToggle = { viewModel.setSectionCollapsed("search", it) },
+                ) {
+                    ContactsSearchToggle(
+                        enabled = s.searchContacts,
+                        onSetEnabled = viewModel::setSearchContacts,
+                    )
+
                 }
 
                 CollapsibleSection(
@@ -524,20 +536,6 @@ fun SettingsScreen(
                         onSetEnabled = viewModel::setLockSoundsEnabled,
                         onSetSound = viewModel::setLockSound,
                     )
-                }
-
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_search),
-                    collapsed = "search" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("search", it) },
-                ) {
-                    ContactsSearchToggle(
-                        enabled = s.searchContacts,
-                        onSetEnabled = viewModel::setSearchContacts,
-                    )
-
-                    // Every permission the launcher uses, with a live granted/not-granted status
-                    // (the notif-access row moved here from the Notifications section).
                 }
 
                 CollapsibleSection(
@@ -576,7 +574,7 @@ fun SettingsScreen(
                 }
 
                 CollapsibleSection(
-                    title = stringResource(R.string.settings_backup),
+                    title = stringResource(R.string.settings_backup_restore),
                     collapsed = "backup" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("backup", it) },
                 ) {
@@ -587,38 +585,32 @@ fun SettingsScreen(
                 }
 
                 CollapsibleSection(
-                    title = stringResource(R.string.settings_updates),
+                    title = stringResource(R.string.settings_about),
                     collapsed = "updates" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("updates", it) },
                 ) {
+                    // Keep the installed app version with the other information about Nomina.
+                    val installedVersion = remember(context) { installedVersionLabel(context) }
+                    if (installedVersion != null) {
+                        Text(
+                            text = installedVersion,
+                            color = palette.dim,
+                            fontSize = 12.5.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 28.dp, bottom = 4.dp),
+                        )
+                    }
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_updates_check),
                         description = stringResource(R.string.settings_updates_check_desc),
                     ) { openLink(context, RELEASES_URL) }
-                }
-
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_feedback),
-                    collapsed = "feedback" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("feedback", it) },
-                ) {
                     FeedbackRows(onOpen = { openLink(context, it) })
+
                 }
 
-                // The installed build, last of all, so a glance here answers "which version is this"
-                // without the system's app info — and compares with the newest release above.
-                val installedVersion = remember(context) { installedVersionLabel(context) }
-                if (installedVersion != null) {
-                    Text(
-                        text = installedVersion,
-                        color = palette.dim,
-                        fontSize = 12.5.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 28.dp, bottom = 4.dp),
-                    )
-                }
+
             }
         }
 

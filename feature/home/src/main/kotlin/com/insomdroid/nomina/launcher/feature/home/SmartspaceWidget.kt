@@ -81,6 +81,7 @@ import com.insomdroid.nomina.model.AppItem
 import kotlin.math.roundToInt
 import java.util.Date
 import javax.inject.Inject
+import com.insomdroid.nomina.ui.launcherDisplayFontFamily
 import com.insomdroid.nomina.ui.themedTextStyle
 
 @HiltViewModel
@@ -256,7 +257,7 @@ internal fun SmartspaceContent(
                 TapTarget(minHeight = 0.dp, fillWidth = false, ripple = true, modifier = Modifier.fillMaxHeight(), onTap = {
                     openClockApp(context)
                 }) {
-                    Text(timeText, color = ink, style = MaterialTheme.typography.headlineMedium, maxLines = 1)
+                    Text(timeText, color = ink, style = MaterialTheme.typography.headlineMedium.copy(fontFamily = launcherDisplayFontFamily()), maxLines = 1)
                 }
                 Column(Modifier.weight(1f)) {
                     TapTarget(minHeight = lineMin, alignment = Alignment.CenterStart, ripple = true, onTap = {
@@ -364,7 +365,7 @@ internal fun SmartspaceContent(
             Text(
                 text = timeText,
                 color = widgetContentColor(),
-                style = themedTextStyle(TextStyle(fontSize = (46 * scale).sp, fontWeight = FontWeight.Medium, shadow = shadow)),
+                style = themedTextStyle(TextStyle(fontSize = (46 * scale).sp, fontWeight = FontWeight.Medium, fontFamily = launcherDisplayFontFamily(), shadow = shadow)),
                 maxLines = 1,
             )
         }

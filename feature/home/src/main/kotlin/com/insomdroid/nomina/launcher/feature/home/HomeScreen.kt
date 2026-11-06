@@ -744,7 +744,6 @@ fun HomeScreen(
                         .padding(bottom = 12.dp),
                 )
                 }
-            }
                 Box(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 2.dp),
                     contentAlignment = Alignment.Center,

@@ -8,6 +8,36 @@ android {
     testOptions.unitTests.isIncludeAndroidResources = true
 }
 
+import java.util.Base64
+
+val generatedLauncherFontResources = layout.buildDirectory.dir("generated/res/launcherFonts")
+val generateLauncherFonts = tasks.register("generateLauncherFonts") {
+    val fontSourceDirectory = layout.projectDirectory.dir("src/main/font-source")
+    inputs.dir(fontSourceDirectory)
+    outputs.dir(generatedLauncherFontResources)
+    doLast {
+        val outputDirectory = generatedLauncherFontResources.get().asFile
+        outputDirectory.deleteRecursively()
+        outputDirectory.mkdirs()
+        fontSourceDirectory.asFile.listFiles()
+            .orEmpty()
+            .filter { it.isFile && it.name.endsWith(".ttf.b64") }
+            .forEach { source ->
+                val resourceName = source.name
+                    .removeSuffix(".ttf.b64")
+                    .lowercase()
+                    .replace('-', '_')
+                val fontBytes = Base64.getDecoder().decode(source.readText().filterNot(Char::isWhitespace))
+                outputDirectory.resolve("$resourceName.ttf").writeBytes(fontBytes)
+            }
+    }
+}
+
+android.sourceSets.getByName("main").res.srcDir(generatedLauncherFontResources)
+tasks.named("preBuild").configure {
+    dependsOn(generateLauncherFonts)
+}
+
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:designsystem"))

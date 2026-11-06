@@ -57,7 +57,7 @@ fun ExpressiveCard(
     }
 }
 
-/** Accent title + dim description, with a trailing vector icon (chevron = opens a sub-screen, add =
+/** Monochrome title + dim description, with a trailing vector icon (chevron = opens a sub-screen, add =
  *  "+"); the add icon is accented, the chevron is faint. */
 @Composable
 fun ExpressiveActionRow(

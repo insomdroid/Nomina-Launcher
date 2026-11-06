@@ -1,1 +1,1 @@
-A modern, customizable home-screen launcher built with Jetpack Compose
+A minimalist Android launcher with a customizable home screen and app drawer

@@ -40,18 +40,42 @@ class MonochromeIconRendererTest {
     }
 
     @Test
-    fun rejectsTransparentArtworkThatFillsTheWholeCanvas() {
-        val pixels = IntArray(10 * 10) { 0xFFFFFFFF.toInt() }
-        pixels[0] = 0
+    fun rejectsAnEmptyTransparentCanvas() {
+        val pixels = IntArray(10 * 10)
 
         assertThat(hasUsableTransparentGlyph(pixels, 10, 10)).isFalse()
     }
 
     @Test
-    fun rejectsAnEmptyTransparentCanvas() {
-        val pixels = IntArray(10 * 10)
+    fun acceptsLargeTransparentGlyphSoItCanBeFittedIntoSafeZone() {
+        val pixels = IntArray(10 * 10) { 0xFFFFFFFF.toInt() }
+        for (index in 0 until 10) pixels[index] = 0
 
-        assertThat(hasUsableTransparentGlyph(pixels, 10, 10)).isFalse()
+        assertThat(hasUsableTransparentGlyph(pixels, 10, 10)).isTrue()
+    }
+
+    @Test
+    fun oversizedGlyphIsReducedProportionallyAndCentered() {
+        val bounds = GlyphBounds(left = 0, top = 5, right = 99, bottom = 94)
+
+        val destination = fitGlyphBounds(bounds, width = 100, height = 100)
+
+        assertThat(destination.width).isWithin(0.01f).of(72f)
+        assertThat(destination.height).isWithin(0.01f).of(64.8f)
+        assertThat(destination.left).isWithin(0.01f).of(14f)
+        assertThat(destination.top).isWithin(0.01f).of(17.6f)
+    }
+
+    @Test
+    fun alreadySmallGlyphIsNotEnlarged() {
+        val bounds = GlyphBounds(left = 20, top = 20, right = 79, bottom = 79)
+
+        val destination = fitGlyphBounds(bounds, width = 100, height = 100)
+
+        assertThat(destination.width).isWithin(0.01f).of(60f)
+        assertThat(destination.height).isWithin(0.01f).of(60f)
+        assertThat(destination.left).isWithin(0.01f).of(20f)
+        assertThat(destination.top).isWithin(0.01f).of(20f)
     }
 
     @Test

@@ -17,6 +17,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import com.insomdroid.nomina.data.AppIconFetcher
 import com.insomdroid.nomina.data.AppIconKeyer
+import com.insomdroid.nomina.data.AppLabelStore
+import com.insomdroid.nomina.data.RoomAppLabelStore
 import com.insomdroid.nomina.data.AndroidProfileSystem
 import com.insomdroid.nomina.data.AppRowResolver
 import com.insomdroid.nomina.data.CustomIconFetcher
@@ -28,6 +30,7 @@ import com.insomdroid.nomina.data.ProfileSystem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import com.insomdroid.nomina.data.local.AppLabelDao
 import com.insomdroid.nomina.data.local.HomeItemDao
 import com.insomdroid.nomina.data.local.LauncherDatabase
 import javax.inject.Singleton
@@ -53,6 +56,16 @@ private val MIGRATION_5_6 = object : Migration(5, 6) {
 private val MIGRATION_6_7 = object : Migration(6, 7) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE home_items ADD COLUMN builtinType TEXT")
+    }
+}
+
+/** v8 adds the app-label cache without touching existing home layout rows. */
+internal val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `app_labels` " +
+                "(`key` TEXT NOT NULL, `label` TEXT NOT NULL, `locale` TEXT NOT NULL, PRIMARY KEY(`key`))",
+        )
     }
 }
 
@@ -98,11 +111,15 @@ object DataModule {
             // pre-v5 dev versions (1–4, which never shipped a migration) so an old test install resets
             // instead of crashing; v5 onward is migrated, so the user's home layout survives upgrades.
             .fallbackToDestructiveMigrationFrom(dropAllTables = true, 1, 2, 3, 4)
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
             .build()
 
     @Provides
     fun provideHomeItemDao(database: LauncherDatabase): HomeItemDao = database.homeItemDao()
+
+    @Provides
+    @Singleton
+    fun provideAppLabelStore(dao: AppLabelDao): AppLabelStore = RoomAppLabelStore(dao)
 
     @Provides
     fun provideAppRowResolver(source: LauncherAppsSource): AppRowResolver = source

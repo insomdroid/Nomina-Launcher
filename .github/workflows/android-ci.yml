@@ -1,8 +1,10 @@
 name: Nomina Release APK
 
-# APK builds are intentionally manual. Normal repository uploads and commits
-# must not start a release build.
+# Build automatically whenever main changes, while keeping manual runs available.
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:

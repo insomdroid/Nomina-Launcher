@@ -1127,7 +1127,7 @@ private fun StepButton(@DrawableRes icon: Int, contentDescription: String, onCli
 }
 
 /** The dock background darkness as a percent of black, in 5 % steps with a tick of haptic feedback
- *  on each and a chip back to the default — the same slider as the status bar's. */
+ *  on each and a chip back to the default. */
 @Composable
 internal fun DockBackgroundRow(value: Float, onValueChange: (Float) -> Unit) {
     val resources = LocalResources.current

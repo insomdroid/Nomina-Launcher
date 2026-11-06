@@ -487,6 +487,8 @@ fun HomeScreen(
         dragController.dockItemCount = uiState.dockEntries.size
         dragController.dockHasSpace = settings.dockEnabled && uiState.dockEntries.size < settings.dockColumns
     }
+    var homeOrigin by remember { mutableStateOf(Offset.Zero) }
+    var homeHeightPx by remember { mutableIntStateOf(0) }
     // A drag that starts moving dismisses the menu (so the menu and drop bar never coexist).
     LaunchedEffect(dragController.moving) {
         if (dragController.moving) menuTarget = null
@@ -548,9 +550,7 @@ fun HomeScreen(
     ) {
     // This Box's top-left in root coords: the floating copy of a dock folder below is placed from the
     // finger's root position, which the drag controller publishes.
-    var homeOrigin by remember { mutableStateOf(Offset.Zero) }
     var homeWidthPx by remember { mutableIntStateOf(0) }
-    var homeHeightPx by remember { mutableIntStateOf(0) }
     Box(
         modifier = modifier
             .fillMaxSize()

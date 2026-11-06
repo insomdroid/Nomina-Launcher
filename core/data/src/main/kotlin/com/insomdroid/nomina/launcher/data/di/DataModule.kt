@@ -118,6 +118,9 @@ object DataModule {
     fun provideHomeItemDao(database: LauncherDatabase): HomeItemDao = database.homeItemDao()
 
     @Provides
+    fun provideAppLabelDao(database: LauncherDatabase): AppLabelDao = database.appLabelDao()
+
+    @Provides
     @Singleton
     fun provideAppLabelStore(dao: AppLabelDao): AppLabelStore = RoomAppLabelStore(dao)
 

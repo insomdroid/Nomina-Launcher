@@ -136,7 +136,6 @@ class SettingsViewModel @Inject constructor(
     fun setNotificationDotScale(value: Float) = update { repository.setNotificationDotScale(value) }
     fun setUseThemedIcons(value: Boolean) = update { repository.setUseThemedIcons(value) }
     fun setIconPack(pkg: String) = update { repository.setIconPackPackage(pkg) }
-    fun setSearchContacts(value: Boolean) = update { repository.setSearchContacts(value) }
 
     /** Sets (or clears, for null) the app launched by the left-edge home swipe. */
     fun setLeftSwipeAppKey(key: String?) = update { repository.setLeftSwipeAppKey(key) }
@@ -149,10 +148,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setDesktopLocked(value: Boolean) = update { repository.setDesktopLocked(value) }
     fun setDoubleTapToLock(value: Boolean) = update { repository.setDoubleTapToLock(value) }
-    fun setLockSoundsEnabled(value: Boolean) = update { repository.setLockSoundsEnabled(value) }
-    internal fun setLockSound(slot: SoundSlot, uri: String) = update {
-        if (slot == SoundSlot.Lock) repository.setLockSoundUri(uri) else repository.setUnlockSoundUri(uri)
-    }
     fun setLongPressScale(value: Float) = update { repository.setLongPressScale(value) }
 
     fun setAppLabelTextScale(value: Float) = update { repository.setAppLabelTextScale(value) }
@@ -161,17 +156,13 @@ class SettingsViewModel @Inject constructor(
     fun setAppLabelColor(argb: Int) = update { repository.setAppLabelColor(argb) }
     fun setTwoLineHomeLabels(value: Boolean) = update { repository.setTwoLineHomeLabels(value) }
     fun setTwoLineDrawerLabels(value: Boolean) = update { repository.setTwoLineDrawerLabels(value) }
-    fun setShowStatusBar(value: Boolean) = update { repository.setShowStatusBar(value) }
     fun setShowWeather(value: Boolean) = update { repository.setShowWeather(value) }
-    fun setNetworkPlaceNames(value: Boolean) = update { repository.setNetworkPlaceNames(value) }
     fun setWidgetTonalBackground(value: Boolean) = update { repository.setWidgetTonalBackground(value) }
     fun setNotificationWidgetCountStyle(value: String) = update { repository.setNotificationWidgetCountStyle(value) }
     fun setPeoplePrivacy(value: String) = update { repository.setPeoplePrivacy(value) }
     fun setPeopleShowApps(value: Boolean) = update { repository.setPeopleShowApps(value) }
     fun setPeopleBatchEnabled(value: Boolean) = update { repository.setPeopleBatchEnabled(value) }
     fun setPeopleBatchTimes(value: String) = update { repository.setPeopleBatchTimes(value) }
-    fun setHideSystemStatusBar(value: Boolean) = update { repository.setHideSystemStatusBar(value) }
-    fun setStatusBarScrimOpacity(value: Float) = update { repository.setStatusBarScrimOpacity(value) }
 
     private fun update(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

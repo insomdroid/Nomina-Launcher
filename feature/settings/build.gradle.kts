@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher.feature.settings"
+    namespace = "com.insomdroid.nomina.feature.settings"
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

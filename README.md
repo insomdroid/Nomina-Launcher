@@ -1,8 +1,8 @@
 # Nomina
 
-**Nomina is an independent Android launcher project derived from [ARK Launcher](https://github.com/jrs8205/ARK-launcher).** This repository was created by importing the ARK source into a separate repository; it is not a GitHub fork and does not retain ARK's Git history.
+**Nomina is an independent Android launcher project derived from [ARK Launcher](https://github.com/jrs8205/Nomina).** This repository was created by importing the ARK source into a separate repository; it is not a GitHub fork and does not retain ARK's Git history.
 
-Nomina is currently in its base-integration stage. The imported ARK implementation is being reviewed before Nomina's app identity and visual design are adapted. Until that work is complete, some screens, labels, package identifiers, resources and documentation still carry ARK's original identity.
+Nomina is currently in its base-integration stage. The imported ARK implementation is being reviewed before Nomina's app identity and visual design are adapted. The Android package identity is being migrated to `com.insomdroid.nomina`. Some visual elements and ARK-branded resources will remain until the Nomina redesign is complete.
 
 Nomina is an independent project and is not affiliated with, sponsored by, or endorsed by the ARK Launcher authors.
 
@@ -11,7 +11,7 @@ Nomina is an independent project and is not affiliated with, sponsored by, or en
 - ARK's multi-module Kotlin and Jetpack Compose codebase is the starting point.
 - Existing launcher capabilities are being retained as the functional foundation while Nomina-specific changes are developed.
 - The intended Nomina home-screen direction is a custom home layout with a collapsible large dock and a small dock that remains visible.
-- App identity, package name, signing configuration, and the final visual design have not yet been migrated. Do not treat the current APK as a finished Nomina release.
+- The package identity is `com.insomdroid.nomina`; release signing configuration and the final visual design remain to be completed. Do not treat the current APK as a finished Nomina release.
 
 ## Features in the imported base
 
@@ -95,6 +95,6 @@ See [LICENSE](LICENSE) and [NOTICE](NOTICE) for the complete license and attribu
 
 ## Upstream
 
-- Original project: [ARK Launcher](https://github.com/jrs8205/ARK-launcher)
+- Original project: [ARK Launcher](https://github.com/jrs8205/Nomina)
 - Original source license: Apache-2.0
 - Original upstream contributors and notices are credited in [NOTICE](NOTICE).

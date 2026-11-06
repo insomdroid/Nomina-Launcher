@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher.ui"
+    namespace = "com.insomdroid.nomina.ui"
     testOptions.unitTests.isIncludeAndroidResources = true
 }
 

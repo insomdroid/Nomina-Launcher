@@ -69,7 +69,7 @@
         android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ArkikeskusLauncher.Starting">
+        android:theme="@style/Theme.Nomina.Starting">
 
         <!-- Portrait-locked like most launchers: the home grid's fixed 6 rows don't fit a phone in
              landscape (rows/widgets would overlap). Android 12L+ ignores the lock on large screens
@@ -83,7 +83,7 @@
             android:taskAffinity=""
             android:screenOrientation="portrait"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|density|uiMode"
-            android:theme="@style/Theme.ArkikeskusLauncher.Starting">
+            android:theme="@style/Theme.Nomina.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
@@ -96,7 +96,7 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/settings_label"
-            android:theme="@style/Theme.ArkikeskusLauncher" />
+            android:theme="@style/Theme.Nomina" />
 
         <!-- Other apps' "Add to home screen" (ShortcutManager.requestPinShortcut) and "Add widget"
              (AppWidgetManager.requestPinAppWidget): declaring these actions is what makes the system
@@ -108,7 +108,7 @@
             android:exported="true"
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
-            android:theme="@style/Theme.ArkikeskusLauncher.Translucent">
+            android:theme="@style/Theme.Nomina.Translucent">
             <intent-filter>
                 <action android:name="android.content.pm.action.CONFIRM_PIN_SHORTCUT" />
                 <action android:name="android.content.pm.action.CONFIRM_PIN_APPWIDGET" />
@@ -128,7 +128,7 @@
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
             android:taskAffinity=""
-            android:theme="@style/Theme.ArkikeskusLauncher.Translucent">
+            android:theme="@style/Theme.Nomina.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

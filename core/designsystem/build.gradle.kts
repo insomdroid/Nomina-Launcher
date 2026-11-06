@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher.designsystem"
+    namespace = "com.insomdroid.nomina.designsystem"
 }
 
 dependencies {

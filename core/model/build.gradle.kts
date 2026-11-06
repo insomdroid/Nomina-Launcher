@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher.model"
+    namespace = "com.insomdroid.nomina.model"
 }
 
 dependencies {

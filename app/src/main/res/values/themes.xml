@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Transparent, wallpaper-showing launcher window. Compose draws the actual UI. -->
-    <style name="Theme.ArkikeskusLauncher" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.Nomina" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowShowWallpaper">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -13,13 +13,13 @@
          window that says so. Settings keeps the opaque theme above: a translucent Settings would leave the
          launcher started underneath, its foreground flag never reset, and the next HOME press would jump to
          the home page instead of staying on the page the user left. -->
-    <style name="Theme.ArkikeskusLauncher.Home">
+    <style name="Theme.Nomina.Home">
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <!-- See-through window for the confirmation another app's "Add to home screen" opens: the
          requesting app stays visible behind the sheet's scrim. Compose draws the sheet. -->
-    <style name="Theme.ArkikeskusLauncher.Translucent" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.Nomina.Translucent" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
@@ -29,9 +29,9 @@
     </style>
 
     <!-- Splash screen shown on cold start, then hands off to the launcher theme. -->
-    <style name="Theme.ArkikeskusLauncher.Starting" parent="Theme.SplashScreen">
+    <style name="Theme.Nomina.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
-        <item name="postSplashScreenTheme">@style/Theme.ArkikeskusLauncher.Home</item>
+        <item name="postSplashScreenTheme">@style/Theme.Nomina.Home</item>
     </style>
 </resources>

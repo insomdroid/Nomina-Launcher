@@ -2,8 +2,8 @@
 <resources>
     <string name="settings_title">Ayarlar</string>
     <string name="settings_set_default">Varsayılan başlatıcı yap</string>
-    <string name="settings_default_current">ARK-launcher varsayılan başlatıcınız</string>
-    <string name="settings_default_tap">ARK-launcher\'ı ana ekran uygulamanız yapmak için dokunun</string>
+    <string name="settings_default_current">Nomina varsayılan başlatıcınız</string>
+    <string name="settings_default_tap">Nomina\'ı ana ekran uygulamanız yapmak için dokunun</string>
     <string name="settings_gestures">Hareketler</string>
     <string name="settings_show_weather">Widget\'ta hava durumu</string>
     <string name="settings_weather_app">Hava durumuna dokunma şunu açar</string>
@@ -170,8 +170,8 @@
     <string name="settings_feedback_telegram_desc">Diğer kullanıcılarla sohbet edin — t.me/ARKlauncher</string>
     <string name="settings_feedback_reddit">Reddit topluluğu</string>
     <string name="settings_feedback_reddit_desc">Gönderiler ve tartışma — r/ArkLauncher</string>
-    <string name="settings_support_title">ARK-launcher\'ı destekle</string>
-    <string name="settings_support_text">ARK-launcher ücretsiz ve açık kaynaklıdır ve öyle kalacak. Telefonunuzu daha hoş hale getiriyorsa bana bir kahve ısmarlayabilir veya çalışmayı destekleyebilirsiniz.</string>
+    <string name="settings_support_title">Nomina\'ı destekle</string>
+    <string name="settings_support_text">Nomina ücretsiz ve açık kaynaklıdır ve öyle kalacak. Telefonunuzu daha hoş hale getiriyorsa bana bir kahve ısmarlayabilir veya çalışmayı destekleyebilirsiniz.</string>
     <string name="settings_support_github">GitHub\'da sponsor ol</string>
     <string name="settings_support_coffee">Bir kahve ısmarla</string>
     <string name="settings_support_paypal">PayPal</string>

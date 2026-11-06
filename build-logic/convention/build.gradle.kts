@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "org.arkikeskus.launcher.buildlogic"
+group = "com.insomdroid.nomina.buildlogic"
 
 java {
     toolchain {

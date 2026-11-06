@@ -5,7 +5,7 @@
         <!-- Double-tap-to-lock: bound by the system only after the user allows it in accessibility
              settings. Reads nothing — see the service class + lock_accessibility_service.xml. -->
         <service
-            android:name="org.arkikeskus.launcher.feature.home.LockAccessibilityService"
+            android:name="com.insomdroid.nomina.feature.home.LockAccessibilityService"
             android:exported="false"
             android:label="@string/lock_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">

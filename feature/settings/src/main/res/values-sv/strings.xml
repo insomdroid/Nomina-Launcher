@@ -2,8 +2,8 @@
 <resources>
     <string name="settings_title">Inställningar</string>
     <string name="settings_set_default">Ange som startskärmsapp</string>
-    <string name="settings_default_current">ARK-launcher är din startskärmsapp</string>
-    <string name="settings_default_tap">Tryck för att ange ARK-launcher som startskärmsapp</string>
+    <string name="settings_default_current">Nomina är din startskärmsapp</string>
+    <string name="settings_default_tap">Tryck för att ange Nomina som startskärmsapp</string>
     <string name="settings_gestures">Rörelser</string>
     <string name="settings_show_weather">Väder i widgeten</string>
     <string name="settings_weather_app">Tryck på vädret öppnar</string>
@@ -75,9 +75,9 @@
     <string name="settings_people_privacy_sender">Endast avsändare</string>
     <string name="settings_people_privacy_count">Endast antal</string>
     <string name="settings_people_show_apps">Widgeten Personer visar även aviseringar från andra appar</string>
-    <string name="settings_people_batch">Samlad leverans i ARK-launcher: andras meddelanden hålls kvar, fästa personer kommer fram direkt</string>
+    <string name="settings_people_batch">Samlad leverans i Nomina: andras meddelanden hålls kvar, fästa personer kommer fram direkt</string>
     <string name="settings_people_batch_times">Tider för samlad leverans</string>
-    <string name="settings_people_batch_times_hint">Tider åtskilda med kommatecken, t.ex. 08:00, 12:00, 17:00. Samlad leverans påverkar bara ARK-launchers widgetar, aviseringsprickar och eget statusfält. Androids aviseringspanel, ljud och popup-aviseringar fungerar som vanligt. Nya meddelanden från fästa personer, missade samtal och igenkända engångskoder visas direkt. Att fästa en person släpper inte fram meddelanden som redan väntar. Om du stänger av samlad leverans släpps de fram i ARK-launcher.</string>
+    <string name="settings_people_batch_times_hint">Tider åtskilda med kommatecken, t.ex. 08:00, 12:00, 17:00. Samlad leverans påverkar bara Nominas widgetar, aviseringsprickar och eget statusfält. Androids aviseringspanel, ljud och popup-aviseringar fungerar som vanligt. Nya meddelanden från fästa personer, missade samtal och igenkända engångskoder visas direkt. Att fästa en person släpper inte fram meddelanden som redan väntar. Om du stänger av samlad leverans släpps de fram i Nomina.</string>
     <string name="settings_people_batch_times_save">Spara</string>
     <string name="settings_permissions">Behörigheter</string>
     <string name="settings_permission_granted">Tillåten</string>
@@ -170,8 +170,8 @@
     <string name="settings_feedback_telegram_desc">Chatta med andra användare — t.me/ARKlauncher</string>
     <string name="settings_feedback_reddit">Reddit-gemenskap</string>
     <string name="settings_feedback_reddit_desc">Inlägg och diskussion — r/ArkLauncher</string>
-    <string name="settings_support_title">Stöd ARK-launcher</string>
-    <string name="settings_support_text">ARK-launcher är gratis och öppen källkod, och förblir så. Om den gör din telefon trevligare kan du bjuda mig på en kaffe eller sponsra arbetet.</string>
+    <string name="settings_support_title">Stöd Nomina</string>
+    <string name="settings_support_text">Nomina är gratis och öppen källkod, och förblir så. Om den gör din telefon trevligare kan du bjuda mig på en kaffe eller sponsra arbetet.</string>
     <string name="settings_support_github">Sponsra på GitHub</string>
     <string name="settings_support_coffee">Bjud på en kaffe</string>
     <string name="settings_support_paypal">PayPal</string>

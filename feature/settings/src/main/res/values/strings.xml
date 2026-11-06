@@ -2,8 +2,8 @@
 <resources>
     <string name="settings_title">Settings</string>
     <string name="settings_set_default">Set as default launcher</string>
-    <string name="settings_default_current">ARK-launcher is your default launcher</string>
-    <string name="settings_default_tap">Tap to set ARK-launcher as your home app</string>
+    <string name="settings_default_current">Nomina is your default launcher</string>
+    <string name="settings_default_tap">Tap to set Nomina as your home app</string>
     <string name="settings_gestures">Gestures</string>
     <string name="settings_show_weather">Weather in the widget</string>
     <string name="settings_weather_app">Tap on weather opens</string>
@@ -170,8 +170,8 @@
     <string name="settings_feedback_telegram_desc">Chat with other users — t.me/ARKlauncher</string>
     <string name="settings_feedback_reddit">Reddit community</string>
     <string name="settings_feedback_reddit_desc">Posts and discussion — r/ArkLauncher</string>
-    <string name="settings_support_title">Support ARK-launcher</string>
-    <string name="settings_support_text">ARK-launcher is free and open source, and stays that way. If it makes your phone nicer, you can buy me a coffee or sponsor the work.</string>
+    <string name="settings_support_title">Support Nomina</string>
+    <string name="settings_support_text">Nomina is free and open source, and stays that way. If it makes your phone nicer, you can buy me a coffee or sponsor the work.</string>
     <string name="settings_support_github">Sponsor on GitHub</string>
     <string name="settings_support_coffee">Buy me a coffee</string>
     <string name="settings_support_paypal">PayPal</string>

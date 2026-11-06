@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher.feature.home"
+    namespace = "com.insomdroid.nomina.feature.home"
     testOptions.unitTests.isIncludeAndroidResources = true
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

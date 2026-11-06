@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher.feature.appdrawer"
+    namespace = "com.insomdroid.nomina.feature.appdrawer"
     testOptions.unitTests.isIncludeAndroidResources = true
 }
 

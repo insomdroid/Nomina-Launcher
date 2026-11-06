@@ -8,7 +8,7 @@ plugins {
  * nonMinifiedRelease build of :app from its own process; it is never part of the release APK.
  */
 android {
-    namespace = "org.arkikeskus.launcher.baselineprofile"
+    namespace = "com.insomdroid.nomina.baselineprofile"
     compileSdk = 37
 
     compileOptions {

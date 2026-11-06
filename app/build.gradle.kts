@@ -16,12 +16,12 @@ val keystoreProps = Properties().apply {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher"
+    namespace = "com.insomdroid.nomina"
     testOptions.unitTests.isIncludeAndroidResources = true
 
     defaultConfig {
         manifestPlaceholders["appLabel"] = "@string/app_name"
-        applicationId = "org.arkikeskus.launcher"
+        applicationId = "com.insomdroid.nomina"
         versionCode = 69
         versionName = "1.0.2"
     }
@@ -57,7 +57,7 @@ android {
             applicationIdSuffix = ".debug"
             // Installed beside the release build on the test phones: a distinct app-list label keeps
             // its own (separate) home screen from being taken for the release one.
-            manifestPlaceholders["appLabel"] = "ARK-launcher debug"
+            manifestPlaceholders["appLabel"] = "Nomina debug"
         }
         release {
             isMinifyEnabled = true
@@ -85,7 +85,7 @@ androidComponents {
         for (name in listOf("nonMinifiedRelease", "benchmarkRelease")) {
             extension.buildTypes.findByName(name)?.apply {
                 applicationIdSuffix = ".bench"
-                manifestPlaceholders["appLabel"] = "ARK-launcher bench"
+                manifestPlaceholders["appLabel"] = "Nomina bench"
             }
         }
     }

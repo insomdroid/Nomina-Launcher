@@ -1,14 +1,14 @@
-# ARK-launcherin tietosuojaseloste
+# Nominain tietosuojaseloste
 
-*Päivitetty: 26.10.2026 · koskee ARK-launcherin versiota 0.9.3 ja uudempia
-([version 0.9.2 seloste](https://github.com/jrs8205/ARK-launcher/blob/v0.9.2/PRIVACY.fi.md))*
+*Päivitetty: 26.10.2026 · koskee Nominain versiota 0.9.3 ja uudempia
+([version 0.9.2 seloste](https://github.com/jrs8205/Nomina/blob/v0.9.2/PRIVACY.fi.md))*
 
 *This policy in English: [PRIVACY.md](PRIVACY.md)*
 
-ARK-launcher on ilmainen, avoimen lähdekoodin Android-kotinäyttö (Apache 2.0).
+Nomina on ilmainen, avoimen lähdekoodin Android-kotinäyttö (Apache 2.0).
 Tämä seloste kuvaa tarkalleen, mitä tietoja sovellus käsittelee. Lähdekoodi on
 julkinen, joten jokaisen väitteen voi tarkistaa itse:
-<https://github.com/jrs8205/ARK-launcher>.
+<https://github.com/jrs8205/Nomina>.
 
 ## Lyhyt versio
 
@@ -86,7 +86,7 @@ latauksia.
 Kumpikaan pyyntö ei sisällä tilitietoja, evästeitä tai mainostunnisteita.
 Kuten kaikki internet-liikenne, ne väistämättä paljastavat IP-osoitteesi
 palvelimelle; pyynnöt tunnistautuvat yleisluontoisella
-`ARK-launcher/<versio>`-User-Agent-otsakkeella, jossa ei ole laitetietoja.
+`Nomina/<versio>`-User-Agent-otsakkeella, jossa ei ole laitetietoja.
 
 ## Luvat
 
@@ -115,7 +115,7 @@ käänteisgeokoodauspalveluille.
 
 ## Lapset
 
-ARK-launcher on yleiskäyttöinen apuohjelma, jossa ei ole omaa sisältöä,
+Nomina on yleiskäyttöinen apuohjelma, jossa ei ole omaa sisältöä,
 mainoksia eikä ostoja. Sitä ei ole suunnattu lapsille, eikä se tietoisesti
 kerää henkilötietoja lapsilta — eikä keneltäkään muultakaan: sovelluksessa ei
 ole tilejä, eikä se kerää henkilötietoja lainkaan.
@@ -124,4 +124,4 @@ ole tilejä, eikä se kerää henkilötietoja lainkaan.
 
 Tähän selosteeseen tehtävät muutokset tehdään julkisessa repositoriossa, jossa
 koko muutoshistoria on näkyvissä. Kysymykset ja ilmoitukset:
-<https://github.com/jrs8205/ARK-launcher/issues>.
+<https://github.com/jrs8205/Nomina/issues>.

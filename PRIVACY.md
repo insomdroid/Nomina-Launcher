@@ -1,14 +1,14 @@
-# ARK-launcher Privacy Policy
+# Nomina Privacy Policy
 
-*Last updated: 2026-10-26 · applies to ARK-launcher v0.9.3 and later
-([v0.9.2 policy](https://github.com/jrs8205/ARK-launcher/blob/v0.9.2/PRIVACY.md))*
+*Last updated: 2026-10-26 · applies to Nomina v0.9.3 and later
+([v0.9.2 policy](https://github.com/jrs8205/Nomina/blob/v0.9.2/PRIVACY.md))*
 
 *Tämä seloste suomeksi: [PRIVACY.fi.md](PRIVACY.fi.md)*
 
-ARK-launcher is a free, open-source Android home-screen launcher (Apache 2.0).
+Nomina is a free, open-source Android home-screen launcher (Apache 2.0).
 This policy describes exactly what data the app handles. The source code is
 public, so every claim here can be verified:
-<https://github.com/jrs8205/ARK-launcher>.
+<https://github.com/jrs8205/Nomina>.
 
 ## The short version
 
@@ -77,7 +77,7 @@ checks or downloads.
 Neither request carries account information, cookies or advertising
 identifiers. Like all internet traffic they necessarily reveal your IP address
 to the server; the requests identify themselves with a generic
-`ARK-launcher/<version>` User-Agent that contains no device details.
+`Nomina/<version>` User-Agent that contains no device details.
 
 ## Permissions
 
@@ -104,7 +104,7 @@ weather and reverse-geocoding services described under *Network use*.
 
 ## Children
 
-ARK-launcher is a general-purpose utility with no content of its own, no ads
+Nomina is a general-purpose utility with no content of its own, no ads
 and no purchases. It is not directed at children, and it does not knowingly
 collect personal data from children — or from anyone else: the app has no
 accounts and collects no personal data at all.
@@ -113,4 +113,4 @@ accounts and collects no personal data at all.
 
 Changes to this policy are made in the public repository, where the full
 history is visible. Questions and reports:
-<https://github.com/jrs8205/ARK-launcher/issues>.
+<https://github.com/jrs8205/Nomina/issues>.

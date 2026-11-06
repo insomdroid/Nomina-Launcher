@@ -2,8 +2,8 @@
 <resources>
     <string name="settings_title">Asetukset</string>
     <string name="settings_set_default">Aseta oletuslauncheriksi</string>
-    <string name="settings_default_current">ARK-launcher on oletuslauncherisi</string>
-    <string name="settings_default_tap">Napauta asettaaksesi ARK-launcherin oletukseksi</string>
+    <string name="settings_default_current">Nomina on oletuslauncherisi</string>
+    <string name="settings_default_tap">Napauta asettaaksesi Nominain oletukseksi</string>
     <string name="settings_gestures">Eleet</string>
     <string name="settings_show_weather">Sää widgetissä</string>
     <string name="settings_weather_app">Sään napautus avaa</string>
@@ -170,8 +170,8 @@
     <string name="settings_feedback_telegram_desc">Keskustele muiden käyttäjien kanssa — t.me/ARKlauncher</string>
     <string name="settings_feedback_reddit">Reddit-yhteisö</string>
     <string name="settings_feedback_reddit_desc">Julkaisut ja keskustelu — r/ArkLauncher</string>
-    <string name="settings_support_title">Tue ARK-launcheria</string>
-    <string name="settings_support_text">ARK-launcher on ilmainen ja avointa lähdekoodia, ja pysyy sellaisena. Jos se tekee puhelimestasi mukavamman, voit tarjota minulle kahvin tai sponsoroida työtä.</string>
+    <string name="settings_support_title">Tue Nominaia</string>
+    <string name="settings_support_text">Nomina on ilmainen ja avointa lähdekoodia, ja pysyy sellaisena. Jos se tekee puhelimestasi mukavamman, voit tarjota minulle kahvin tai sponsoroida työtä.</string>
     <string name="settings_support_github">Sponsoroi GitHubissa</string>
     <string name="settings_support_coffee">Tarjoa kahvi</string>
     <string name="settings_support_paypal">PayPal</string>

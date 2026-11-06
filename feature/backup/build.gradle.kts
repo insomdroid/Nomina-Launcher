@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "org.arkikeskus.launcher.feature.backup"
+    namespace = "com.insomdroid.nomina.feature.backup"
     testOptions.unitTests.isIncludeAndroidResources = true
 }
 

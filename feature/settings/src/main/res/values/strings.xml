@@ -137,7 +137,8 @@
     <string name="settings_label_color">Label text color</string>
     <string name="settings_font">Font</string>
     <string name="settings_font_desc">For everything the launcher draws itself; widgets keep their own.</string>
-    <string name="settings_font_default">Default</string>
+    <string name="settings_font_default">Geist</string>
+    <string name="settings_font_geist_mono">Geist Mono</string>
     <string name="settings_font_condensed">Condensed</string>
     <string name="settings_font_serif">Serif</string>
     <string name="settings_font_monospace">Monospace</string>

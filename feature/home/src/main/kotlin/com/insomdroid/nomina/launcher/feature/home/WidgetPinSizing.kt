@@ -37,20 +37,18 @@ internal class SystemWidgetBinder(context: Context) : WidgetBinder {
 }
 
 /**
- * What the workspace's height depends on besides the screen and the grid's counts: the themed status
- * bar above it (and whether the system bar is hidden, behind it or not), the dock below it with its
- * labels' height (0 without), the user's icon scale (the dock's icons, and so its row, grow with it)
- * and the number of its icons where that changes the row's height (0 where it doesn't), and the
- * page dots' row inside it (0 without dots). A cell measured with other chrome is not this home
- * screen's — unless only the dots differ, whose row is known.
+ * What the workspace's height depends on besides the screen and the grid's counts: the native
+ * system-bar and display-cutout insets above it, the dock below it with its labels' height (0 without),
+ * the user's icon scale (the dock's icons, and so its row, grow with it) and the number of its icons
+ * where that changes the row's height (0 where it doesn't), and the page dots' row inside it
+ * (0 without dots). A cell measured with other chrome is not this home screen's — unless only the
+ * dots differ, whose row is known.
  */
 internal data class WorkspaceChrome(
     val dock: Boolean,
     val dockLabelsDp: Float,
     val dockIcons: Int,
     val iconScale: Float,
-    val statusBar: Boolean,
-    val systemStatusBarHidden: Boolean,
     val pageDotsDp: Float,
     /** Widgets keep an icon's margin inside their cells (the setting; WidgetInset.kt). */
     val widgetInsets: Boolean = false,
@@ -76,9 +74,6 @@ internal fun workspaceChrome(settings: LauncherSettings, pageCount: Int, fontSca
         // default scale the row's least height holds even the largest (52 + 2 × 10 = 72).
         dockIcons = if (dockLabelsDp > 0f || settings.iconScale > 1f) dockIcons else 0,
         iconScale = settings.iconScale,
-        statusBar = settings.showStatusBar,
-        // Its own setting: with the themed bar off, a shown system bar pads the workspace instead.
-        systemStatusBarHidden = settings.hideSystemStatusBar,
         pageDotsDp = if (settings.showPageIndicator && pageCount > 1) pageDotsRowHeight(settings.homePageMarker).value else 0f,
         dockBottomSpacingDp = if (settings.dockEnabled) settings.dockBottomSpacing.toFloat() else 0f,
         widgetInsets = settings.widgetEdgesAlignWithIcons,
@@ -90,9 +85,8 @@ internal fun workspaceChrome(settings: LauncherSettings, pageCount: Int, fontSca
 }
 
 /**
- * The window the home screen lays out in, in dp: the display area, the status and navigation bars
- * (their sizes whether or not they show right now) and the camera cutout — its deepest inset on any
- * edge, and the vertical centre of a top one ([topCutoutRect]) when it has one.
+ * The window the home screen lays out in, in dp: the display area, native status/navigation bars,
+ * and the display cutout. [cutoutDp] is the deepest inset on any edge; [cutoutTopDp] is its top inset.
  */
 internal data class HomeWindow(
     val widthDp: Float,
@@ -100,11 +94,18 @@ internal data class HomeWindow(
     val statusBarDp: Float = 0f,
     val navigationBarDp: Float = 0f,
     val cutoutDp: Float = 0f,
-    val cutoutCenterDp: Float? = null,
+    val cutoutTopDp: Float = 0f,
 ) {
     /** The same display held upright, for a phone's home screen (locked upright) seen from an app on
-     *  its side: the bars and the cutout sit on other edges there, so the largest of them stand in. */
-    fun upright() = HomeWindow(heightDp, widthDp, maxOf(statusBarDp, cutoutDp), navigationBarDp, cutoutDp)
+     *  its side: the bars and cutout sit on other edges there, so the largest inset stands in. */
+    fun upright() = HomeWindow(
+        widthDp = heightDp,
+        heightDp = widthDp,
+        statusBarDp = maxOf(statusBarDp, cutoutDp),
+        navigationBarDp = navigationBarDp,
+        cutoutDp = cutoutDp,
+        cutoutTopDp = cutoutDp,
+    )
 }
 
 /** The window [activity] shows in as a [HomeWindow]: the home screen's own, as it is always full
@@ -122,7 +123,7 @@ internal fun homeWindowOf(activity: Activity): HomeWindow? = runCatching {
         statusBarDp = bars.top / density,
         navigationBarDp = maxOf(navigation.bottom, navigation.left, navigation.right) / density,
         cutoutDp = maxOf(cutout.top, cutout.left, cutout.right, cutout.bottom) / density,
-        cutoutCenterDp = topCutoutRect(insets.displayCutout)?.let { it.exactCenterY() / density },
+        cutoutTopDp = cutout.top / density,
     )
 }.getOrNull()
 
@@ -234,7 +235,7 @@ class HomeCellSize {
             } else {
                 shown
             }
-            val gridHeightDp = home.heightDp - statusZoneDp(chrome, home) - 2 * WORKSPACE_VERTICAL_PADDING.value -
+            val gridHeightDp = home.heightDp - statusZoneDp(home) - 2 * WORKSPACE_VERTICAL_PADDING.value -
                 chrome.pageDotsDp - dockZoneDp(chrome, home, onePixelDp = 1f / context.resources.displayMetrics.density)
             return CellSizeDp(
                 home.widthDp / settings.homeColumns.coerceAtLeast(1),
@@ -242,23 +243,8 @@ class HomeCellSize {
             ).withInsets(chrome)
         }
 
-        /** What HomeScreen's column gives the status bar above the workspace. */
-        private fun statusZoneDp(chrome: WorkspaceChrome, home: HomeWindow): Float = when {
-            // No themed bar: the workspace keeps clear of the system's, unless that is hidden.
-            !chrome.statusBar -> if (chrome.systemStatusBarHidden) 0f else home.statusBarDp
-            // The themed bar under the system's: that bar's height, then the glyphs and the fade.
-            !chrome.systemStatusBarHidden -> home.statusBarDp + STATUS_BAR_TALLEST.value
-            // In the system bar's place: at least the cutout's band, the glyphs dropped level with the
-            // camera's centre (at most the band's bottom when where it falls isn't known).
-            else -> {
-                val drop = if (home.cutoutDp <= 0f) {
-                    0f
-                } else {
-                    ((home.cutoutCenterDp ?: home.cutoutDp) - STATUS_MAIN_LINE.value / 2).coerceAtLeast(0f)
-                }
-                maxOf(home.cutoutDp, STATUS_ZONE_MIN.value, drop + STATUS_BAR_TALLEST.value)
-            }
-        }
+        /** The workspace always stays below the native system status bar and any top cutout. */
+        private fun statusZoneDp(home: HomeWindow): Float = maxOf(home.statusBarDp, home.cutoutTopDp)
 
         /** What HomeScreen's column gives the dock below the workspace: its row (the icons at their
          *  largest — their nominal size at the user's icon scale, before the slots cap them — and a

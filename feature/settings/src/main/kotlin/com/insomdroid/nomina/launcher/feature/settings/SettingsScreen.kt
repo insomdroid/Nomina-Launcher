@@ -1310,7 +1310,7 @@ private fun SliderRow(
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).border(1.dp, p.trackOff.copy(alpha = 0.55f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(label)
@@ -1335,7 +1335,7 @@ private fun LabelColorRow(selected: Int, onPick: (Int) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {
@@ -1404,7 +1404,7 @@ internal fun FontRow(selected: String, onPick: (String) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {
@@ -1446,7 +1446,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
     }
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {
@@ -1491,7 +1491,7 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {
@@ -1533,7 +1533,7 @@ internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {

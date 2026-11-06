@@ -40,7 +40,7 @@ jobs:
             exit 1
           fi
           yes | "$sdkmanager_path" --licenses || true
-          "$sdkmanager_path" "platforms;android-37"
+          "$sdkmanager_path" --channel=3 "platforms;android-37"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4

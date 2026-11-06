@@ -1,37 +1,48 @@
 package com.insomdroid.nomina.ui
 
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.DeviceFontFamilyName
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import com.insomdroid.nomina.model.LauncherSettings
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.material3.LocalTextStyle
 
-/** Android's condensed sans, by its system family name (every Android ships it). */
+private val GeistFontFamily = FontFamily(
+    Font(R.font.geist_regular, FontWeight.Normal),
+    Font(R.font.geist_semibold, FontWeight.SemiBold),
+)
+
+private val GeistMonoFontFamily = FontFamily(
+    Font(R.font.geistmono_regular, FontWeight.Normal),
+)
+
+private val DotoDisplayFontFamily = FontFamily(
+    Font(R.font.doto_rond, FontWeight.Normal),
+)
+
+/** The rounded-dot Doto face is reserved for numeric clock displays, not general UI text. */
+fun launcherDisplayFontFamily(): FontFamily = DotoDisplayFontFamily
+
 private val CondensedFontFamily = FontFamily(Font(DeviceFontFamilyName("sans-serif-condensed")))
-
-/** Android's casual hand-drawn face ("Coming Soon" on AOSP), by its system family name. */
 private val CasualFontFamily = FontFamily(Font(DeviceFontFamilyName("casual")))
 
-/**
- * The font family for a [LauncherSettings.fontFamily] key: the device families Android ships, so
- * nothing is bundled and the APK stays the size it is; an unknown key is the default sans.
- */
+/** The selected family for launcher-owned text. The legacy "default" key now resolves to Geist. */
 fun launcherFontFamily(key: String): FontFamily = when (key) {
+    LauncherSettings.FONT_DEFAULT -> GeistFontFamily
+    LauncherSettings.FONT_GEIST_MONO -> GeistMonoFontFamily
     LauncherSettings.FONT_CONDENSED -> CondensedFontFamily
     LauncherSettings.FONT_SERIF -> FontFamily.Serif
     LauncherSettings.FONT_MONOSPACE -> FontFamily.Monospace
     LauncherSettings.FONT_CASUAL -> CasualFontFamily
     LauncherSettings.FONT_CURSIVE -> FontFamily.Cursive
-    else -> FontFamily.Default
+    else -> GeistFontFamily
 }
 
 /**
- * [style] on top of the theme's text style. A Text given a style of its own replaces [LocalTextStyle] wholesale, so
- * the font the user chose (the theme's typography, [launcherFontFamily]) would fall back to the platform's default;
- * merged, the font stays and [style]'s own fields -- size, weight, shadow, platform options -- win. Every text the
- * launcher draws with a style of its own (the clock, the status bar, the built-in widgets) goes through this.
+ * Merge a local style over the theme's text style so the user's chosen family remains in effect.
+ * Explicit style fields such as size and weight still take precedence.
  */
 @Composable
 fun themedTextStyle(style: TextStyle): TextStyle = LocalTextStyle.current.merge(style)

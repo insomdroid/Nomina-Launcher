@@ -15,8 +15,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect changed files
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      tests: ${{ steps.filter.outputs.tests }}
+      run_all: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect application and test changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          base: main
+          filters: |
+            app:
+              - 'app/src/main/**'
+              - 'app/build.gradle.kts'
+              - 'app/proguard-rules.pro'
+              - 'core/**/src/main/**'
+              - 'core/**/build.gradle.kts'
+              - 'feature/**/src/main/**'
+              - 'feature/**/build.gradle.kts'
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle/**'
+              - 'build-logic/**'
+              - 'gradle.properties'
+              - 'gradlew'
+              - 'gradlew.bat'
+            tests:
+              - '**/src/test/**'
+              - '**/src/androidTest/**'
+
   build-debug:
     name: Build debug APK
+    needs: changes
+    if: needs.changes.outputs.app == 'true' || needs.changes.outputs.run_all == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -51,6 +91,29 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+  unit-tests:
+    name: Run unit tests
+    needs: changes
+    if: needs.changes.outputs.app == 'true' || needs.changes.outputs.tests == 'true' || needs.changes.outputs.run_all == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
 
       - name: Run unit tests
         run: ./gradlew :app:testDebugUnitTest :core:data:testDebugUnitTest :core:model:testDebugUnitTest :core:ui:testDebugUnitTest :feature:appdrawer:testDebugUnitTest :feature:backup:testDebugUnitTest :feature:home:testDebugUnitTest :feature:settings:testDebugUnitTest --stacktrace

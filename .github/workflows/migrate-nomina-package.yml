@@ -52,7 +52,7 @@ jobs:
 
           while IFS= read -r -d '' old_dir; do
             parent="${old_dir%/org/arkikeskus}"
-            mkdir -p "$parent/com"
+            mkdir -p "$parent/com/insomdroid"
             git mv "$old_dir" "$parent/com/insomdroid/nomina"
           done < <(find . -type d -path '*/org/arkikeskus' -print0)
 

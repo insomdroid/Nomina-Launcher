@@ -34,6 +34,10 @@ class AppLabelMigrationTest {
                 home.getJSONArray("indices").getJSONObject(0).getString("createSql")
                     .replace("${'$'}{TABLE_NAME}", home.getString("tableName")),
             )
+            val setupQueries = schema.getJSONArray("setupQueries")
+            for (index in 0 until setupQueries.length()) {
+                db.execSQL(setupQueries.getString(index))
+            }
             db.execSQL(
                 "INSERT INTO home_items (containerId, folderName, packageName, className, userSerial, " +
                     "shortcutId, page, cellX, cellY, spanX, spanY) " +

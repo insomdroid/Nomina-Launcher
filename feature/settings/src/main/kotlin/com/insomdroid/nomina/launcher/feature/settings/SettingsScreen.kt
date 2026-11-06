@@ -285,7 +285,7 @@ fun SettingsScreen(
                     onToggle = { viewModel.setSectionCollapsed("dock", it) },
                 ) {
                     SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
-                    StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 7, viewModel::setDockColumns)
+                    StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 10, viewModel::setDockColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)

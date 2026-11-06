@@ -1388,6 +1388,7 @@ internal fun fontChipTag(key: String): String = "font-$key"
 
 /** The name of a font choice, in its own words. */
 private fun fontNameRes(key: String): Int = when (key) {
+    LauncherSettings.FONT_GEIST_MONO -> R.string.settings_font_geist_mono
     LauncherSettings.FONT_CONDENSED -> R.string.settings_font_condensed
     LauncherSettings.FONT_SERIF -> R.string.settings_font_serif
     LauncherSettings.FONT_MONOSPACE -> R.string.settings_font_monospace
@@ -1396,7 +1397,7 @@ private fun fontNameRes(key: String): Int = when (key) {
     else -> R.string.settings_font_default
 }
 
-/** The launcher's font (a Telegram request after 0.9.9): six families Android ships, each chip set in its
+/** The launcher's font (a Telegram request after 0.9.9): seven families, each chip set in its
  *  own face so the choice can be seen before it is made. Widgets keep their own fonts. */
 @Composable
 internal fun FontRow(selected: String, onPick: (String) -> Unit) {

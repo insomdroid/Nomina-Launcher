@@ -75,7 +75,7 @@ fun ExpressiveActionRow(
         Icon(
             painter = painterResource(trailingIcon),
             contentDescription = null,
-            tint = if (trailingIcon == LauncherIcons.Add) p.accent else p.faint,
+            tint = if (trailingIcon == LauncherIcons.Add) p.text else p.faint,
             modifier = Modifier.size(18.dp),
         )
     }

@@ -8,9 +8,6 @@
     <!-- Read the active network transport for the Smartspace status line. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Optional: contact matching for the People widget; requested at runtime. -->
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-
     <!-- Optional: the smartspace widget's next-calendar-event row; requested at runtime from the
          widget itself. Clock + date work without it. -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />

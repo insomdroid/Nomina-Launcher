@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 /** Monochrome system surfaces; red is reserved for errors and critical status signals. */
 internal val LightColorScheme = lightColorScheme(
     primary = Color(0xFF171717),
-    onPrimary = Color(0xFF090909),
+    onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFE5E5E5),
     onPrimaryContainer = Color(0xFF171717),
     secondary = Color(0xFF555555),
@@ -34,7 +34,7 @@ internal val LightColorScheme = lightColorScheme(
 
 internal val DarkColorScheme = darkColorScheme(
     primary = Color(0xFFF1F1F1),
-    onPrimary = Color(0xFFFFFFFF),
+    onPrimary = Color(0xFF090909),
     primaryContainer = Color(0xFF3A3A3A),
     onPrimaryContainer = Color(0xFFF1F1F1),
     secondary = Color(0xFFBDBDBD),

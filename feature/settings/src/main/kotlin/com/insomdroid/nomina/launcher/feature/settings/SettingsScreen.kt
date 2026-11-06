@@ -1308,7 +1308,7 @@ private fun SliderRow(
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {

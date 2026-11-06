@@ -14,6 +14,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -68,7 +69,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawCircle
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
@@ -98,6 +101,7 @@ import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
 import com.insomdroid.nomina.ui.component.LocalThemedIcons
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.launcherFontFamily
+import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
@@ -201,7 +205,25 @@ fun SettingsScreen(
         }
 
         Surface(modifier = modifier.fillMaxSize(), color = palette.bg) {
-            Column(
+            Box(modifier = Modifier.fillMaxSize()) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val spacing = 120.dp.toPx()
+                    val radius = 0.7.dp.toPx()
+                    var y = spacing / 2f
+                    while (y < size.height) {
+                        var x = spacing / 2f
+                        while (x < size.width) {
+                            drawCircle(
+                                color = palette.faint.copy(alpha = if (isSystemInDarkTheme()) 0.16f else 0.12f),
+                                radius = radius,
+                                center = Offset(x, y),
+                            )
+                            x += spacing
+                        }
+                        y += spacing
+                    }
+                }
+                Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .safeDrawingPadding()
@@ -210,12 +232,20 @@ fun SettingsScreen(
                     .padding(bottom = 24.dp),
             ) {
                 Text(
+                    text = "N O M I N A  /  SYSTEM",
+                    color = palette.faint,
+                    fontSize = 9.sp,
+                    fontFamily = launcherTechnicalFontFamily(),
+                    letterSpacing = 1.4.sp,
+                    modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
+                )
+                Text(
                     text = stringResource(R.string.settings_title),
                     color = palette.text,
                     fontSize = 34.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-0.3).sp,
-                    modifier = Modifier.padding(start = 6.dp, top = 10.dp, bottom = 6.dp),
+                    modifier = Modifier.padding(start = 6.dp, top = 0.dp, bottom = 6.dp),
                 )
 
                 CollapsibleSection(
@@ -530,6 +560,7 @@ fun SettingsScreen(
                 }
 
 
+                }
             }
         }
 

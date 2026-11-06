@@ -447,22 +447,26 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun `collapsed settings sections start empty, toggle per section and restore from a backup`() = runTest {
+    fun `settings sections start collapsed on fresh install, toggle per section and restore from a backup`() = runTest {
         val repo = newRepository()
-        assertThat(repo.settings.first().collapsedSettingsSections).isEmpty()
+        val allSections = setOf(
+            "home", "dock", "drawer", "icons", "gestures", "notifications", "permissions", "backup", "updates",
+        )
+        assertThat(repo.settings.first().collapsedSettingsSections).containsExactlyElementsIn(allSections)
 
-        repo.setSettingsSectionCollapsed("dock", true)
-        repo.setSettingsSectionCollapsed("icons", true)
-        assertThat(repo.settings.first().collapsedSettingsSections).containsExactly("dock", "icons")
         repo.setSettingsSectionCollapsed("dock", false)
-        assertThat(repo.settings.first().collapsedSettingsSections).containsExactly("icons")
-        assertThat(repo.exportRaw()["collapsed_settings_sections"]).isEqualTo("icons")
+        repo.setSettingsSectionCollapsed("icons", false)
+        val remainingCollapsed = allSections - setOf("dock", "icons")
+        assertThat(repo.settings.first().collapsedSettingsSections).containsExactlyElementsIn(remainingCollapsed)
+        repo.setSettingsSectionCollapsed("dock", true)
+        val expectedCollapsed = remainingCollapsed + "dock"
+        assertThat(repo.settings.first().collapsedSettingsSections).containsExactlyElementsIn(expectedCollapsed)
+        assertThat(repo.exportRaw()["collapsed_settings_sections"]).isEqualTo(expectedCollapsed.joinToString(","))
 
         val restored = newRepository()
         restored.importRaw(mapOf("collapsed_settings_sections" to "home,drawer"))
         assertThat(restored.settings.first().collapsedSettingsSections).containsExactly("home", "drawer")
     }
-
     @Test
     fun `blurBehindDrawer defaults to false, round-trips and restores from a backup`() = runTest {
         val repo = newRepository()

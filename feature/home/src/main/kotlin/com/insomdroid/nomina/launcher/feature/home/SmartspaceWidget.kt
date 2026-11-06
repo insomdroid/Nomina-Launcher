@@ -310,7 +310,8 @@ internal fun SmartspaceContent(
         ) {
             TapTarget(
                 onTap = agendaAction,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f, fill = false),
+                fillWidth = false,
                 interactionSource = noIndication,
                 alignment = Alignment.CenterStart,
             ) {

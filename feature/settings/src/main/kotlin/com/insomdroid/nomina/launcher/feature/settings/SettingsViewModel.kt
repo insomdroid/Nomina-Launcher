@@ -135,7 +135,14 @@ class SettingsViewModel @Inject constructor(
     fun setNotificationDotCount(value: Boolean) = update { repository.setNotificationDotCount(value) }
     fun setNotificationDotScale(value: Float) = update { repository.setNotificationDotScale(value) }
     fun setUseThemedIcons(value: Boolean) = update { repository.setUseThemedIcons(value) }
-    fun setIconPack(pkg: String) = update { repository.setIconPackPackage(pkg) }
+    fun setIconPack(pkg: String) {
+        // Persist immediately; warm the selected pack off-main at the same time. Icon requests
+        // share the repository's in-flight parse rather than parsing appfilter.xml per app.
+        update { repository.setIconPackPackage(pkg) }
+        if (pkg.isNotBlank()) {
+            viewModelScope.launch(Dispatchers.IO) { iconPackRepository.get(pkg) }
+        }
+    }
 
     /** Sets (or clears, for null) the app launched by the left-edge home swipe. */
     fun setLeftSwipeAppKey(key: String?) = update { repository.setLeftSwipeAppKey(key) }

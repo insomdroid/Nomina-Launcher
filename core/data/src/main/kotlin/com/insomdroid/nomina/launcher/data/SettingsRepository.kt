@@ -84,7 +84,7 @@ class SettingsRepository @Inject constructor(
                             Keys.HOME_PAGE.name, Keys.HOME_PAGE_COUNT.name ->
                                 it.toLong().coerceIn(0L, HomeLayoutRepository.MAX_PAGES.toLong()).toInt()
                             // An ARGB colour arrives as the signed Int's Long, or its unsigned form: wrap.
-                            Keys.APP_LABEL_COLOR.name, Keys.DRAWER_BACKGROUND_COLOR.name, Keys.DRAWER_LABEL_COLOR.name -> it.toInt()
+                            Keys.APP_LABEL_COLOR.name, Keys.DRAWER_BACKGROUND_COLOR.name, Keys.DRAWER_LABEL_COLOR.name, Keys.DOCK_LABEL_COLOR.name -> it.toInt()
                             else -> it.toLong().coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
                         }
                     }

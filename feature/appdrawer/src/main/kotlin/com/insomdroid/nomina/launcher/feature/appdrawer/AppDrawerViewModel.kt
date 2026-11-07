@@ -188,7 +188,11 @@ class AppDrawerViewModel @Inject constructor(
             showScrubber = settings.showDrawerScrubber,
             backgroundOpacity = settings.drawerBackgroundOpacity,
             backgroundColor = settings.drawerBackgroundColor,
-            labelColor = settings.drawerLabelColor,
+            labelColor = when (settings.drawerLabelColorMode) {
+                LauncherSettings.LABEL_COLOR_FOLLOW_HOME -> settings.appLabelColor
+                LauncherSettings.LABEL_COLOR_CUSTOM -> settings.drawerLabelColor
+                else -> null
+            },
             pictureDim = settings.drawerPictureDim,
             blurBehindDrawer = settings.blurBehindDrawer,
             drawerBlurStrength = settings.drawerBlurStrength,
@@ -200,7 +204,7 @@ class AppDrawerViewModel @Inject constructor(
             iconPackPackage = settings.iconPackPackage,
             desktopLocked = settings.desktopLocked,
             showFrequentApps = settings.showFrequentApps,
-            appLabelTextScale = settings.appLabelTextScale,
+            appLabelTextScale = settings.drawerLabelTextScale,
             iconScale = settings.drawerIconScale,
             twoLineLabels = settings.twoLineDrawerLabels,
             drawerOpensAtTop = settings.drawerOpensAtTop,

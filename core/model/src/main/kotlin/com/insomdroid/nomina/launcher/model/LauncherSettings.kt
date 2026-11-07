@@ -133,12 +133,6 @@ data class LauncherSettings(
      *  [PRIVACY_ALL] = sender + message text, [PRIVACY_SENDER] = sender only, [PRIVACY_COUNT] = the
      *  tile colors and counts but shows no text at all (pinned people keep their user-chosen name). */
     val peoplePrivacy: String = PRIVACY_ALL,
-    /** Hold messages from people who aren't pinned and deliver them in batches at [peopleBatchTimes]
-     *  in launcher surfaces only. Android notifications remain active so new messages from pinned
-     *  people and one-time codes can bypass the batch. Missed calls always come through. */
-    val peopleBatchEnabled: Boolean = false,
-    /** Comma-separated "HH:mm" delivery times for the batch; see BatchSchedule. */
-    val peopleBatchTimes: String = DEFAULT_BATCH_TIMES,
     /** Also show notifications that aren't from a person in the people widget, grouped by app. */
     val peopleShowApps: Boolean = true,
     /** The page the launcher opens on and the HOME button returns to (0 = the leftmost). */
@@ -168,8 +162,6 @@ data class LauncherSettings(
         const val PRIVACY_ALL = "all"
         const val PRIVACY_SENDER = "sender"
         const val PRIVACY_COUNT = "count"
-
-        const val DEFAULT_BATCH_TIMES = "08:00,12:00,17:00"
 
         /** [dockBackgroundOpacity] out of the box: a light tint that sets the dock off the wallpaper. */
         const val DEFAULT_DOCK_BACKGROUND = 0.35f

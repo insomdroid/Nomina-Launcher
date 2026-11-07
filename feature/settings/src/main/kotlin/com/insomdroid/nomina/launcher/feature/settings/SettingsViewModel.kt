@@ -170,8 +170,6 @@ class SettingsViewModel @Inject constructor(
     fun setNotificationWidgetCountStyle(value: String) = update { repository.setNotificationWidgetCountStyle(value) }
     fun setPeoplePrivacy(value: String) = update { repository.setPeoplePrivacy(value) }
     fun setPeopleShowApps(value: Boolean) = update { repository.setPeopleShowApps(value) }
-    fun setPeopleBatchEnabled(value: Boolean) = update { repository.setPeopleBatchEnabled(value) }
-    fun setPeopleBatchTimes(value: String) = update { repository.setPeopleBatchTimes(value) }
 
     private fun update(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

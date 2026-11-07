@@ -63,6 +63,9 @@ class SettingsRepository @Inject constructor(
         // the right type is left alone; a wrong-typed number is converted (the read clamps it); a
         // value that is not a number at all is dropped so the default applies.
         dataStore.edit { p ->
+            p.remove(booleanPreferencesKey("people_batch_enabled"))
+            p.remove(stringPreferencesKey("people_batch_times"))
+            p.remove(stringPreferencesKey("people_held_notifications"))
             val stored = p.asMap()
             for (name in FLOAT_KEYS) {
                 val raw = stored[floatPreferencesKey(name)] ?: continue
@@ -163,17 +166,12 @@ class SettingsRepository @Inject constructor(
                 if (it == LauncherSettings.PRIVACY_SENDER || it == LauncherSettings.PRIVACY_COUNT) it
                 else LauncherSettings.PRIVACY_ALL
             },
-            peopleBatchEnabled = p[Keys.PEOPLE_BATCH_ENABLED] ?: false,
             peopleShowApps = p[Keys.PEOPLE_SHOW_APPS] ?: true,
             homePage = (p[Keys.HOME_PAGE] ?: 0).coerceIn(0, HomeLayoutRepository.MAX_PAGES),
             homePageCount = (p[Keys.HOME_PAGE_COUNT] ?: 0).coerceIn(0, HomeLayoutRepository.MAX_PAGES),
-            peopleBatchTimes = (p[Keys.PEOPLE_BATCH_TIMES] ?: LauncherSettings.DEFAULT_BATCH_TIMES)
-                .let { BatchSchedule.parse(it) }
-                .let { if (it.isEmpty()) LauncherSettings.DEFAULT_BATCH_TIMES else BatchSchedule.format(it) },
         )
     }
 
-    suspend fun setPeopleBatchEnabled(value: Boolean) = edit { it[Keys.PEOPLE_BATCH_ENABLED] = value }
     /** The page HOME returns to and the explicit page count, in one settings snapshot (the page
      *  menu's operations own both; see WorkspacePageOperations). */
     suspend fun setHomePages(home: Int, count: Int) = edit {
@@ -182,29 +180,6 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun setPeopleShowApps(value: Boolean) = edit { it[Keys.PEOPLE_SHOW_APPS] = value }
-
-    /** Batch delivery times; normalized through [BatchSchedule], falling back to the default when
-     *  nothing parses so the batch can never silently hold messages forever. */
-    suspend fun setPeopleBatchTimes(raw: String) = edit { p ->
-        val parsed = BatchSchedule.parse(raw)
-        p[Keys.PEOPLE_BATCH_TIMES] = if (parsed.isEmpty()) LauncherSettings.DEFAULT_BATCH_TIMES else BatchSchedule.format(parsed)
-    }
-
-    // --- People widget: local batch deadlines (also reads legacy Android snoozes) -------------
-    // "key\tdeliverAtEpochMs" per line. Device-local: a notification key means nothing elsewhere.
-
-    /** Notification key → local delivery time. Notification text is never persisted. */
-    val heldNotifications: Flow<Map<String, Long>> = dataStore.data.map { p ->
-        p[Keys.PEOPLE_HELD]?.split("\n")?.filter { it.isNotEmpty() }?.mapNotNull { line ->
-            val i = line.indexOf('\t')
-            val until = if (i > 0) line.substring(i + 1).toLongOrNull() else null
-            if (until == null) null else line.substring(0, i) to until
-        }?.toMap() ?: emptyMap()
-    }
-
-    suspend fun setHeldNotifications(held: Map<String, Long>) = edit { p ->
-        p[Keys.PEOPLE_HELD] = held.entries.joinToString("\n") { (k, v) -> k.replace(SEPARATORS, " ") + "\t" + v }
-    }
 
     // --- People widget aliases ("this notification name is the same person") --------------------
     // One link per line: "aliasKey\ttargetKey" (both PeopleGrouping.personKey values).
@@ -636,7 +611,6 @@ class SettingsRepository @Inject constructor(
             val onboardingDone = prefs[Keys.ONBOARDING_DONE]
             val reminderDismissed = prefs[Keys.DEFAULT_REMINDER_DISMISSED]
             val firstRunFresh = prefs[Keys.FIRST_RUN_FRESH]
-            val heldNotifications = prefs[Keys.PEOPLE_HELD]
             // Device-local usage stats aren't in the backup (see exportRaw) — preserve this device's.
             val appUsage = prefs[stringPreferencesKey(AppUsageRepository.USAGE_KEY)]
             // Gallery images are files on this phone (not in a backup): keep them for the apps, the
@@ -673,7 +647,6 @@ class SettingsRepository @Inject constructor(
             if (onboardingDone != null) prefs[Keys.ONBOARDING_DONE] = onboardingDone
             if (reminderDismissed != null) prefs[Keys.DEFAULT_REMINDER_DISMISSED] = reminderDismissed
             if (firstRunFresh != null) prefs[Keys.FIRST_RUN_FRESH] = firstRunFresh
-            if (heldNotifications != null) prefs[Keys.PEOPLE_HELD] = heldNotifications
             if (appUsage != null) prefs[stringPreferencesKey(AppUsageRepository.USAGE_KEY)] = appUsage
             for ((name, images) in localImages) {
                 if (images.isEmpty()) continue
@@ -784,10 +757,7 @@ class SettingsRepository @Inject constructor(
         val PEOPLE_PRIVACY = stringPreferencesKey("people_privacy")
         val PINNED_PEOPLE = stringPreferencesKey("pinned_people")
         val PEOPLE_ALIASES = stringPreferencesKey("people_aliases")
-        val PEOPLE_BATCH_ENABLED = booleanPreferencesKey("people_batch_enabled")
-        val PEOPLE_BATCH_TIMES = stringPreferencesKey("people_batch_times")
         val PEOPLE_SHOW_APPS = booleanPreferencesKey("people_show_apps")
-        val PEOPLE_HELD = stringPreferencesKey("people_held_notifications")
         val HOME_PAGE = intPreferencesKey("home_page")
         val HOME_PAGE_COUNT = intPreferencesKey("home_page_count")
     }
@@ -844,7 +814,7 @@ class SettingsRepository @Inject constructor(
             "dock_enabled", "show_drawer_search", "swipe_up_drawer", "swipe_down_notif", "folder_swipe_first_app",
             "hide_home_apps_from_drawer", "widget_inset_like_icons",
             "show_dock_labels", "show_home_labels", "show_drawer_labels", "show_page_indicator",
-            "two_line_home_labels", "two_line_drawer_labels", "people_batch_enabled", "people_show_apps",
+            "two_line_home_labels", "two_line_drawer_labels", "people_show_apps",
             "show_home_folder_names", "show_drawer_folder_names", "mix_drawer_folders", "blur_behind_drawer",
             "theme_all_icons", "show_notif_dots", "notif_dot_count", "use_themed_icons",
             "desktop_locked", "double_tap_lock", "show_frequent_apps", "drawer_opens_at_top",
@@ -854,7 +824,7 @@ class SettingsRepository @Inject constructor(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
             "notif_widget_count_style", "icon_pack_package", "left_swipe_app_key", "weather_app_key", "home_page_marker",
             "page_switch_speed", "collapsed_settings_sections", "font_family",
-            "people_privacy", "pinned_people", "people_aliases", "people_batch_times",
+            "people_privacy", "pinned_people", "people_aliases",
             "custom_icons", "folder_icons", "shortcut_icons",
         )
 
@@ -917,7 +887,7 @@ class SettingsRepository @Inject constructor(
             "drive_failure_count", "local_last_backup_time",
             "drive_interval_days", "drive_wifi_only", "drive_charging_only",
             "auto_update_enabled", "update_last_check", "update_last_notified_version",
-            "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications",
+            "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications", "people_batch_enabled", "people_batch_times",
             "default_reminder_dismissed",
             // Legacy settings from removed features must not reappear in backups or be restored.
             "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",

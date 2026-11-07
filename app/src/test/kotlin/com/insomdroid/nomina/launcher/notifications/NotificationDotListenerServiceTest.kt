@@ -16,11 +16,7 @@ import android.service.notification.NotificationListenerService.RankingMap
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.emptyPreferences
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -30,7 +26,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import com.insomdroid.nomina.data.NotificationBadgeRepository
 import com.insomdroid.nomina.data.PersonEntry
-import com.insomdroid.nomina.data.SettingsRepository
 import org.junit.Before
 import org.junit.After
 import org.junit.Test
@@ -59,25 +54,11 @@ class NotificationDotListenerServiceTest {
         service = NotificationDotListenerService()
         ReflectionHelpers.callInstanceMethod<Unit>(service, "attachBaseContext", from(Context::class.java, context))
         service.badgeRepository = NotificationBadgeRepository()
-        service.settingsRepository = SettingsRepository(object : DataStore<Preferences> {
-            override val data = MutableStateFlow(emptyPreferences())
-            override suspend fun updateData(transform: suspend (Preferences) -> Preferences): Preferences =
-                transform(data.value).also { data.value = it }
-        })
     }
 
     @After fun tearDown() {
         service.onDestroy()
         Dispatchers.resetMain()
-    }
-
-    private fun enableBatch() {
-        ReflectionHelpers.setField(service, "connected", true)
-        ReflectionHelpers.setField(service, "heldLoaded", true)
-        ReflectionHelpers.setField(service, "settingsReady", true)
-        ReflectionHelpers.setField(service, "batchEnabled", true)
-        val time = java.time.LocalTime.now()
-        ReflectionHelpers.setField(service, "batchTimes", listOf((time.hour * 60 + time.minute + 60) % 1440))
     }
 
     private fun post(notification: StatusBarNotification) {
@@ -119,82 +100,8 @@ class NotificationDotListenerServiceTest {
         assertThat(entry.count).isEqualTo(1)
     }
 
-    @Test fun mailKeepsCodeSubjectForBatchDecision() {
-        val email = sbn(NotificationCompat.Builder(context, "mail").setCategory(Notification.CATEGORY_EMAIL)
-            .setContentTitle("Sender").setContentText("Your verification code is 123456")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("This code expires in 10 minutes")).build())
-        enableBatch()
-        ReflectionHelpers.callInstanceMethod<Unit>(service, "holdForBatch", from(StatusBarNotification::class.java, email))
-        assertThat(person(email)!!.title).isEqualTo("Your verification code is 123456")
-        assertThat(ReflectionHelpers.getField<Map<String, Long>>(service, "heldUntil")).isEmpty()
-    }
-
-    @Test fun batchingDoesNotLoseHeadsUpSignalOrOnlyAlertOnceBookkeeping() {
-        val pending = PendingIntent.getActivity(context, 0, Intent("test.open"), PendingIntent.FLAG_IMMUTABLE)
-        val notification = sbn(NotificationCompat.Builder(context, "chat")
-            .setCategory(Notification.CATEGORY_MESSAGE).setContentTitle("Anna").setContentText("Hello")
-            .setFullScreenIntent(pending, true).setOnlyAlertOnce(true).build())
-        enableBatch()
-        post(notification)
-        val first = service.badgeRepository.headsUp.value
-        assertThat(first).isGreaterThan(0L)
-        assertThat(service.badgeRepository.people.value.single().held).isTrue()
-        assertThat(ReflectionHelpers.getField<Set<String>>(service, "alertedKeys")).contains(notification.key)
-        service.onNotificationPosted(notification)
-        assertThat(service.badgeRepository.headsUp.value).isEqualTo(first)
-    }
-
-    @Test fun sameKeyUpdateFromNewlyPinnedPersonIsDeliveredAndStaysActiveInAndroid() {
-        enableBatch()
-        val first = chat(true)
-        post(first)
-        assertThat(service.badgeRepository.people.value.single().held).isTrue()
-        assertThat(service.badgeRepository.icons.value).isEmpty()
-        assertThat(service.activeNotifications.map { it.key }).contains(first.key)
-        ReflectionHelpers.setField(service, "vipKeys", setOf("anna"))
-        // A pin alone leaves the old message waiting.
-        ReflectionHelpers.callInstanceMethod<Unit>(service, "refresh")
-        assertThat(service.badgeRepository.people.value.single().held).isTrue()
-        post(chat(true, true))
-        assertThat(service.badgeRepository.people.value.single().held).isFalse()
-        assertThat(service.badgeRepository.icons.value).hasSize(1)
-    }
-
-    @Test fun expiredLocalHoldDeliversOnWakeWithoutAnotherNotification() {
-        enableBatch()
-        val first = chat(true)
-        post(first)
-        val held = ReflectionHelpers.getField<MutableMap<String, Long>>(service, "heldUntil")
-        held[first.key] = System.currentTimeMillis() - 1
-        ReflectionHelpers.getField<BroadcastReceiver>(service, "timeReceiver")
-            .onReceive(context, Intent(Intent.ACTION_SCREEN_ON))
-        assertThat(service.badgeRepository.people.value.single().held).isFalse()
-        assertThat(service.badgeRepository.icons.value).hasSize(1)
-        assertThat(held).isEmpty()
-    }
-
-    /** The shape a community post takes on Android 16+: a big picture offloaded to a content URI,
-     *  null picture / large-icon keys, two plain actions, no category. */
-    private fun bigPicture(title: String, text: String, id: Int): StatusBarNotification {
-        val open = PendingIntent.getActivity(context, id, Intent("test.open"), PendingIntent.FLAG_IMMUTABLE)
-        val notification = NotificationCompat.Builder(context, "notifications")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title).setContentText(text).setAutoCancel(true).setContentIntent(open)
-            .addAction(0, "Go to community", open).addAction(0, "Turn off updates", open)
-            .setStyle(NotificationCompat.BigPictureStyle()
-                .bigPicture(android.graphics.drawable.Icon.createWithContentUri("content://com.android.bitmapoffload/bitmaps/$id")))
-            .build()
-        notification.extras.putParcelable(Notification.EXTRA_PICTURE, null)
-        notification.extras.putParcelable(Notification.EXTRA_LARGE_ICON, null)
-        return StatusBarNotification(
-            "news.app", "news.app", 0, "tag-$id", 1000, 0, 0, notification, Process.myUserHandle(), System.currentTimeMillis(),
-        )
-    }
-
     @Test fun bigPictureAppNotificationsBecomeOneAppTile() {
         ReflectionHelpers.setField(service, "connected", true)
-        ReflectionHelpers.setField(service, "heldLoaded", true)
-        ReflectionHelpers.setField(service, "settingsReady", true)
         val first = bigPicture("Now in r/SEO", "Why does the favicon not show?", 1)
         val second = bigPicture("Now in r/android_beta", "Crash when entering the pin code", 2)
         assertThat(person(first)).isNull()
@@ -207,7 +114,6 @@ class NotificationDotListenerServiceTest {
     }
 
     @Test fun packageChangeRefreshesMailClassificationWithoutReconnecting() = runTest {
-        enableBatch()
         val notification = sbn(NotificationCompat.Builder(context, "mail")
             .setContentTitle("Sender").setContentText("Subject").build())
         assertThat(person(notification)).isNull()

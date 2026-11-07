@@ -164,7 +164,8 @@ class SettingsRepository @Inject constructor(
             dockLabelColor = p[Keys.DOCK_LABEL_COLOR],
             dockLabelColorFollowsHome = p[Keys.DOCK_LABEL_COLOR] == null,
             drawerLabelColor = p[Keys.DRAWER_LABEL_COLOR],
-            drawerLabelColorMode = (p[Keys.DRAWER_LABEL_COLOR_MODE] ?: LauncherSettings.LABEL_COLOR_FOLLOW_HOME)
+            drawerLabelColorMode = (p[Keys.DRAWER_LABEL_COLOR_MODE]
+                ?: if (p[Keys.DRAWER_LABEL_COLOR] != null) LauncherSettings.LABEL_COLOR_CUSTOM else LauncherSettings.LABEL_COLOR_FOLLOW_HOME)
                 .let { if (it in setOf(LauncherSettings.LABEL_COLOR_FOLLOW_HOME, LauncherSettings.LABEL_COLOR_AUTOMATIC, LauncherSettings.LABEL_COLOR_CUSTOM)) it else LauncherSettings.LABEL_COLOR_FOLLOW_HOME },
             showWeather = p[Keys.SHOW_WEATHER] ?: true,
             widgetTonalBackground = p[Keys.WIDGET_TONAL_BACKGROUND] ?: false,

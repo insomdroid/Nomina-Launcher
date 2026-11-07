@@ -378,25 +378,13 @@ fun SettingsScreen(
                     collapsed = "icons" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("icons", it) },
                 ) {
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_label_size),
-                        value = s.appLabelTextScale,
-                        onValueChange = viewModel::setAppLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_icon_size),
-                        value = s.iconScale,
-                        onValueChange = viewModel::setIconScale,
-                        valueRange = 0.8f..1.3f,
-                        valueText = percentText,
-                    )
-                    LabelColorRow(selected = s.appLabelColor, onPick = viewModel::setAppLabelColor)
-                    DrawerLabelColorRow(selected = s.drawerLabelColor, onPick = viewModel::setDrawerLabelColor)
-                    DrawerIconSizeRow(s.drawerIconScale, viewModel::setDrawerIconScale)
-                    FontRow(selected = s.fontFamily, onPick = viewModel::setFontFamily)
-                    // Themed (monochrome) icons need the adaptive-icon monochrome API (Android 13+).
+                    SettingsGroupLabel(stringResource(R.string.settings_app_icons_group))
+                    val iconPackName = iconPacks.firstOrNull { it.packageName == s.iconPackPackage }?.label
+                        ?: stringResource(R.string.settings_icon_pack_system)
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_icon_pack),
+                        description = iconPackName,
+                    ) { showIconPackPicker = true }
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                         SwitchRow(
                             stringResource(R.string.settings_themed_icons),
@@ -412,12 +400,87 @@ fun SettingsScreen(
                             )
                         }
                     }
-                    val iconPackName = iconPacks.firstOrNull { it.packageName == s.iconPackPackage }?.label
-                        ?: stringResource(R.string.settings_icon_pack_system)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_icon_pack),
-                        description = iconPackName,
-                    ) { showIconPackPicker = true }
+                    ScaleSliderRow(
+                        label = stringResource(R.string.settings_home_icon_size),
+                        value = s.iconScale,
+                        onValueChange = viewModel::setIconScale,
+                        valueRange = 0.8f..1.3f,
+                        valueText = percentText,
+                    )
+                    FollowHomeScaleRow(
+                        label = stringResource(R.string.settings_dock_icon_size),
+                        value = s.dockIconScale,
+                        followsHome = s.dockIconScaleFollowsHome,
+                        onFollowHome = { viewModel.setDockIconScale(null) },
+                        onCustom = { viewModel.setDockIconScale(s.dockIconScale) },
+                        onValueChange = viewModel::setDockIconScale,
+                        valueRange = 0.8f..1.3f,
+                        valueText = percentText,
+                    )
+                    FollowHomeScaleRow(
+                        label = stringResource(R.string.settings_drawer_icon_size),
+                        value = s.drawerIconScale,
+                        followsHome = s.drawerIconScaleFollowsHome,
+                        onFollowHome = { viewModel.setDrawerIconScale(null) },
+                        onCustom = { viewModel.setDrawerIconScale(s.drawerIconScale) },
+                        onValueChange = viewModel::setDrawerIconScale,
+                        valueRange = 0.8f..1.3f,
+                        valueText = percentText,
+                    )
+
+                    SettingsGroupLabel(stringResource(R.string.settings_typography_group))
+                    FontRow(selected = s.fontFamily, onPick = viewModel::setFontFamily)
+                    ScaleSliderRow(
+                        label = stringResource(R.string.settings_home_label_size),
+                        value = s.appLabelTextScale,
+                        onValueChange = viewModel::setAppLabelTextScale,
+                        valueRange = 0.8f..1.6f,
+                        valueText = percentText,
+                    )
+                    FollowHomeScaleRow(
+                        label = stringResource(R.string.settings_dock_label_size),
+                        value = s.dockLabelTextScale,
+                        followsHome = s.dockLabelTextScaleFollowsHome,
+                        onFollowHome = { viewModel.setDockLabelTextScale(null) },
+                        onCustom = { viewModel.setDockLabelTextScale(s.dockLabelTextScale) },
+                        onValueChange = viewModel::setDockLabelTextScale,
+                        valueRange = 0.8f..1.6f,
+                        valueText = percentText,
+                    )
+                    FollowHomeScaleRow(
+                        label = stringResource(R.string.settings_drawer_label_size),
+                        value = s.drawerLabelTextScale,
+                        followsHome = s.drawerLabelTextScaleFollowsHome,
+                        onFollowHome = { viewModel.setDrawerLabelTextScale(null) },
+                        onCustom = { viewModel.setDrawerLabelTextScale(s.drawerLabelTextScale) },
+                        onValueChange = viewModel::setDrawerLabelTextScale,
+                        valueRange = 0.8f..1.6f,
+                        valueText = percentText,
+                    )
+                    LabelColorRow(
+                        label = stringResource(R.string.settings_home_label_color),
+                        selected = s.appLabelColor,
+                        onPick = viewModel::setAppLabelColor,
+                    )
+                    FollowHomeColorRow(
+                        label = stringResource(R.string.settings_dock_label_color),
+                        followsHome = s.dockLabelColorFollowsHome,
+                        selected = s.dockLabelColor ?: s.appLabelColor,
+                        onFollowHome = { viewModel.setDockLabelColor(null) },
+                        onCustom = { viewModel.setDockLabelColor(s.dockLabelColor ?: s.appLabelColor) },
+                        onPick = viewModel::setDockLabelColor,
+                    )
+                    DrawerLabelColorModeRow(
+                        mode = s.drawerLabelColorMode,
+                        onPick = viewModel::setDrawerLabelColorMode,
+                    )
+                    if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
+                        LabelColorRow(
+                            label = stringResource(R.string.settings_drawer_label_color),
+                            selected = s.drawerLabelColor ?: s.appLabelColor,
+                            onPick = viewModel::setDrawerLabelColor,
+                        )
+                    }
                 }
 
                 CollapsibleSection(
@@ -1262,10 +1325,147 @@ private fun SliderRow(
     }
 }
 
+@Composable
+private fun SettingsGroupLabel(text: String) {
+    val p = LocalExpressivePalette.current
+    Text(
+        text = text.uppercase(),
+        color = p.dim,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 1.2.sp,
+        modifier = Modifier.padding(start = 6.dp, top = 12.dp, bottom = 8.dp),
+    )
+}
+
+@Composable
+private fun FollowHomeScaleRow(
+    label: String,
+    value: Float,
+    followsHome: Boolean,
+    onFollowHome: () -> Unit,
+    onCustom: () -> Unit,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    valueText: (Float) -> String,
+) {
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi,
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = p.shadow,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+    ) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
+            RowLabel(label)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 10.dp)) {
+                FilterChip(
+                    selected = followsHome,
+                    onClick = onFollowHome,
+                    label = { Text(stringResource(R.string.settings_follow_home)) },
+                )
+                FilterChip(
+                    selected = !followsHome,
+                    onClick = onCustom,
+                    label = { Text(stringResource(R.string.settings_custom)) },
+                )
+            }
+            if (!followsHome) {
+                ScaleSliderRow(
+                    label = label,
+                    value = value,
+                    onValueChange = onValueChange,
+                    valueRange = valueRange,
+                    valueText = valueText,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FollowHomeColorRow(
+    label: String,
+    followsHome: Boolean,
+    selected: Int,
+    onFollowHome: () -> Unit,
+    onCustom: () -> Unit,
+    onPick: (Int) -> Unit,
+) {
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi,
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = p.shadow,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+    ) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
+            RowLabel(label)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 10.dp)) {
+                FilterChip(
+                    selected = followsHome,
+                    onClick = onFollowHome,
+                    label = { Text(stringResource(R.string.settings_follow_home)) },
+                )
+                FilterChip(
+                    selected = !followsHome,
+                    onClick = onCustom,
+                    label = { Text(stringResource(R.string.settings_custom)) },
+                )
+            }
+            if (!followsHome) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier.padding(top = 14.dp).horizontalScroll(rememberScrollState()),
+                ) {
+                    COLOR_SWATCHES.forEach { color ->
+                        ColorSwatch(argb = color, selected = color == selected, onClick = { onPick(color) })
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DrawerLabelColorModeRow(mode: String, onPick: (String) -> Unit) {
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi,
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = p.shadow,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+    ) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
+            RowLabel(stringResource(R.string.settings_drawer_label_color))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 10.dp).horizontalScroll(rememberScrollState()),
+            ) {
+                FilterChip(
+                    selected = mode == LauncherSettings.LABEL_COLOR_FOLLOW_HOME,
+                    onClick = { onPick(LauncherSettings.LABEL_COLOR_FOLLOW_HOME) },
+                    label = { Text(stringResource(R.string.settings_follow_home)) },
+                )
+                FilterChip(
+                    selected = mode == LauncherSettings.LABEL_COLOR_AUTOMATIC,
+                    onClick = { onPick(LauncherSettings.LABEL_COLOR_AUTOMATIC) },
+                    label = { Text(stringResource(R.string.settings_color_automatic)) },
+                )
+                FilterChip(
+                    selected = mode == LauncherSettings.LABEL_COLOR_CUSTOM,
+                    onClick = { onPick(LauncherSettings.LABEL_COLOR_CUSTOM) },
+                    label = { Text(stringResource(R.string.settings_custom)) },
+                )
+            }
+        }
+    }
+}
+
 /** Row of preset label-color swatches for the home-surface app labels (home/dock/folders). The
  *  selected swatch gets an accent ring; every swatch has a faint outline so white reads on the card. */
 @Composable
-private fun LabelColorRow(selected: Int, onPick: (Int) -> Unit) {
+private fun LabelColorRow(label: String, selected: Int, onPick: (Int) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
@@ -1274,7 +1474,7 @@ private fun LabelColorRow(selected: Int, onPick: (Int) -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
-            RowLabel(stringResource(R.string.settings_label_color))
+            RowLabel(label)
             Spacer(Modifier.height(14.dp))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(14.dp),

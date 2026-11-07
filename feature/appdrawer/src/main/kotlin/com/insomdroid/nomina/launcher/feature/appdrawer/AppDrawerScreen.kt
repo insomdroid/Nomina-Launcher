@@ -946,8 +946,8 @@ private fun DrawerFolderTile(
             Text(
                 text = folder.name,
                 color = drawerLabelColor(LocalDrawerLabelColor.current, MaterialTheme.colorScheme.onSurface),
-                fontSize = 11.sp,
-                lineHeight = 13.sp,
+                fontSize = 11.sp * LocalAppLabelScale.current,
+                lineHeight = 13.sp * LocalAppLabelScale.current,
                 maxLines = LocalAppLabelLines.current,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,

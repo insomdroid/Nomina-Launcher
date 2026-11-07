@@ -124,7 +124,7 @@
     <string name="settings_themed_icons">Themed icons (Monochrome)</string>
     <string name="settings_icon_pack">Icon pack</string>
     <string name="settings_icon_pack_system">System default</string>
-    <string name="settings_icon_pack_desc">Apps not included in a pack use the launcher’s normal icon fallback.</string>
+    <string name="settings_icon_pack_desc">Unmapped apps fall back to Themed icons or their original app icon.</string>
     <string name="settings_label_size">Label text size</string>
     <string name="settings_home_label_size">Home label size</string>
     <string name="settings_dock_label_size">Dock label size</string>

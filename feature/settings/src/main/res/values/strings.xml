@@ -119,12 +119,24 @@
         <item quantity="other">%d apps</item>
     </plurals>
     <string name="settings_icons">Icons</string>
-    <string name="settings_themed_icons">Themed icons (Material You)</string>
+    <string name="settings_app_icons_group">App icons</string>
+    <string name="settings_typography_group">Typography</string>
+    <string name="settings_themed_icons">Themed icons (Monochrome)</string>
     <string name="settings_icon_pack">Icon pack</string>
     <string name="settings_icon_pack_system">System default</string>
+    <string name="settings_icon_pack_desc">Apps not included in a pack use the launcher’s normal icon fallback.</string>
     <string name="settings_label_size">Label text size</string>
-    <string name="settings_icon_size">Icon size (home screen and dock)</string>
-    <string name="settings_drawer_icon_size">Icon size</string>
+    <string name="settings_home_label_size">Home label size</string>
+    <string name="settings_dock_label_size">Dock label size</string>
+    <string name="settings_drawer_label_size">App Drawer label size</string>
+    <string name="settings_home_icon_size">Home icon size</string>
+    <string name="settings_dock_icon_size">Dock icon size</string>
+    <string name="settings_drawer_icon_size">App Drawer icon size</string>
+    <string name="settings_follow_home">Follow Home</string>
+    <string name="settings_custom">Custom</string>
+    <string name="settings_home_label_color">Home label color</string>
+    <string name="settings_dock_label_color">Dock label color</string>
+    <string name="settings_drawer_label_color">App Drawer label color</string>
     <string name="settings_percent">%1$d%%</string>
     <string name="settings_dp">%1$d dp</string>
     <string name="settings_millis">%1$d ms</string>

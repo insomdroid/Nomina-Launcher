@@ -149,13 +149,23 @@ class SettingsRepository @Inject constructor(
             themeAllIcons = p[Keys.THEME_ALL_ICONS] ?: false,
             appLabelTextScale = (p[Keys.APP_LABEL_SCALE] ?: 1.0f).coerceIn(MIN_LABEL_SCALE, MAX_LABEL_SCALE),
             iconScale = (p[Keys.ICON_SCALE] ?: 1.0f).coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE),
-            // Unset, the drawer follows home's scale (the one slider before 0.9.8).
+            dockIconScale = (p[Keys.DOCK_ICON_SCALE] ?: p[Keys.ICON_SCALE] ?: 1.0f).coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE),
+            dockIconScaleFollowsHome = p[Keys.DOCK_ICON_SCALE] == null,
             drawerIconScale = (p[Keys.DRAWER_ICON_SCALE] ?: p[Keys.ICON_SCALE] ?: 1.0f).coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE),
+            drawerIconScaleFollowsHome = p[Keys.DRAWER_ICON_SCALE] == null,
+            dockLabelTextScale = (p[Keys.DOCK_LABEL_SCALE] ?: p[Keys.APP_LABEL_SCALE] ?: 1.0f).coerceIn(MIN_LABEL_SCALE, MAX_LABEL_SCALE),
+            dockLabelTextScaleFollowsHome = p[Keys.DOCK_LABEL_SCALE] == null,
+            drawerLabelTextScale = (p[Keys.DRAWER_LABEL_SCALE] ?: p[Keys.APP_LABEL_SCALE] ?: 1.0f).coerceIn(MIN_LABEL_SCALE, MAX_LABEL_SCALE),
+            drawerLabelTextScaleFollowsHome = p[Keys.DRAWER_LABEL_SCALE] == null,
             longPressScale = (p[Keys.LONG_PRESS_SCALE] ?: 1.0f).coerceIn(MIN_LONG_PRESS_SCALE, MAX_LONG_PRESS_SCALE),
             twoLineHomeLabels = p[Keys.TWO_LINE_HOME_LABELS] ?: false,
             twoLineDrawerLabels = p[Keys.TWO_LINE_DRAWER_LABELS] ?: true,
             appLabelColor = p[Keys.APP_LABEL_COLOR] ?: 0xFFFFFFFF.toInt(),
+            dockLabelColor = p[Keys.DOCK_LABEL_COLOR],
+            dockLabelColorFollowsHome = p[Keys.DOCK_LABEL_COLOR] == null,
             drawerLabelColor = p[Keys.DRAWER_LABEL_COLOR],
+            drawerLabelColorMode = (p[Keys.DRAWER_LABEL_COLOR_MODE] ?: LauncherSettings.LABEL_COLOR_FOLLOW_HOME)
+                .let { if (it in setOf(LauncherSettings.LABEL_COLOR_FOLLOW_HOME, LauncherSettings.LABEL_COLOR_AUTOMATIC, LauncherSettings.LABEL_COLOR_CUSTOM)) it else LauncherSettings.LABEL_COLOR_FOLLOW_HOME },
             showWeather = p[Keys.SHOW_WEATHER] ?: true,
             widgetTonalBackground = p[Keys.WIDGET_TONAL_BACKGROUND] ?: false,
             widgetEdgesAlignWithIcons = p[Keys.WIDGET_INSET_LIKE_ICONS] ?: false,
@@ -489,24 +499,49 @@ class SettingsRepository @Inject constructor(
     suspend fun setAppLabelTextScale(value: Float) =
         edit { it[Keys.APP_LABEL_SCALE] = value.coerceIn(MIN_LABEL_SCALE, MAX_LABEL_SCALE) }
 
-    /** Size multiplier for app icons on home, the dock and home folders (clamped to the slider's range). */
     suspend fun setIconScale(value: Float) =
         edit { it[Keys.ICON_SCALE] = value.coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE) }
 
-    /** Size multiplier for the app drawer's icons (clamped to the slider's range); once set, the drawer
-     *  no longer follows [setIconScale]. */
-    suspend fun setDrawerIconScale(value: Float) =
-        edit { it[Keys.DRAWER_ICON_SCALE] = value.coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE) }
+    suspend fun setDockIconScale(value: Float?) = edit {
+        if (value == null) it.remove(Keys.DOCK_ICON_SCALE)
+        else it[Keys.DOCK_ICON_SCALE] = value.coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE)
+    }
+
+    suspend fun setDrawerIconScale(value: Float?) = edit {
+        if (value == null) it.remove(Keys.DRAWER_ICON_SCALE)
+        else it[Keys.DRAWER_ICON_SCALE] = value.coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE)
+    }
+
+    suspend fun setDockLabelTextScale(value: Float?) = edit {
+        if (value == null) it.remove(Keys.DOCK_LABEL_SCALE)
+        else it[Keys.DOCK_LABEL_SCALE] = value.coerceIn(MIN_LABEL_SCALE, MAX_LABEL_SCALE)
+    }
+
+    suspend fun setDrawerLabelTextScale(value: Float?) = edit {
+        if (value == null) it.remove(Keys.DRAWER_LABEL_SCALE)
+        else it[Keys.DRAWER_LABEL_SCALE] = value.coerceIn(MIN_LABEL_SCALE, MAX_LABEL_SCALE)
+    }
 
     /** Multiplier on the system long-press timeout (clamped to the slider's range). */
     suspend fun setLongPressScale(value: Float) =
         edit { it[Keys.LONG_PRESS_SCALE] = value.coerceIn(MIN_LONG_PRESS_SCALE, MAX_LONG_PRESS_SCALE) }
 
-    /** ARGB color for the home-surface app icon labels. */
     suspend fun setAppLabelColor(argb: Int) = edit { it[Keys.APP_LABEL_COLOR] = argb }
-    /** ARGB colour of the app drawer's grid labels; null clears back to the automatic black or white. */
+
+    suspend fun setDockLabelColor(argb: Int?) = edit {
+        if (argb == null) it.remove(Keys.DOCK_LABEL_COLOR) else it[Keys.DOCK_LABEL_COLOR] = argb
+    }
+
     suspend fun setDrawerLabelColor(argb: Int?) = edit {
         if (argb == null) it.remove(Keys.DRAWER_LABEL_COLOR) else it[Keys.DRAWER_LABEL_COLOR] = argb
+    }
+
+    suspend fun setDrawerLabelColorMode(mode: String) = edit {
+        it[Keys.DRAWER_LABEL_COLOR_MODE] = mode.takeIf {
+            it == LauncherSettings.LABEL_COLOR_FOLLOW_HOME ||
+                it == LauncherSettings.LABEL_COLOR_AUTOMATIC ||
+                it == LauncherSettings.LABEL_COLOR_CUSTOM
+        } ?: LauncherSettings.LABEL_COLOR_FOLLOW_HOME
     }
 
     /** Lets home-screen labels wrap onto a second line (apps, folders, shortcuts; not the dock). */
@@ -742,11 +777,16 @@ class SettingsRepository @Inject constructor(
         val THEME_ALL_ICONS = booleanPreferencesKey("theme_all_icons")
         val LOCAL_LAST_BACKUP = longPreferencesKey("local_last_backup_time")
         val APP_LABEL_SCALE = floatPreferencesKey("app_label_scale")
+        val DOCK_LABEL_SCALE = floatPreferencesKey("dock_label_scale")
+        val DRAWER_LABEL_SCALE = floatPreferencesKey("drawer_label_scale")
         val ICON_SCALE = floatPreferencesKey("icon_scale")
+        val DOCK_ICON_SCALE = floatPreferencesKey("dock_icon_scale")
         val DRAWER_ICON_SCALE = floatPreferencesKey("drawer_icon_scale")
         val LONG_PRESS_SCALE = floatPreferencesKey("long_press_scale")
         val APP_LABEL_COLOR = intPreferencesKey("app_label_color")
+        val DOCK_LABEL_COLOR = intPreferencesKey("dock_label_color")
         val DRAWER_LABEL_COLOR = intPreferencesKey("drawer_label_color")
+        val DRAWER_LABEL_COLOR_MODE = stringPreferencesKey("drawer_label_color_mode")
         val TWO_LINE_HOME_LABELS = booleanPreferencesKey("two_line_home_labels")
         val TWO_LINE_DRAWER_LABELS = booleanPreferencesKey("two_line_drawer_labels")
         val SHOW_WEATHER = booleanPreferencesKey("show_weather")
@@ -799,12 +839,12 @@ class SettingsRepository @Inject constructor(
 
         /** Preference keys whose value must be restored as Float (JSON loses the Int/Float distinction). */
         val FLOAT_KEYS = setOf(
-            "dock_opacity", "drawer_opacity", "notif_dot_scale", "app_label_scale", "icon_scale", "drawer_icon_scale",
+            "dock_opacity", "drawer_opacity", "notif_dot_scale", "app_label_scale", "dock_label_scale", "drawer_label_scale", "icon_scale", "dock_icon_scale", "drawer_icon_scale",
             "long_press_scale", "drawer_blur_strength", "drawer_picture_dim",
         )
         val INT_KEYS = setOf(
             "dock_columns", "dock_bottom_spacing", "home_columns", "home_rows", "drawer_columns", "app_label_color",
-            "home_page", "home_page_count", "folder_columns", "drawer_background_color", "drawer_label_color",
+            "home_page", "home_page_count", "folder_columns", "drawer_background_color", "drawer_label_color", "dock_label_color",
         )
 
         /** Known boolean/string preference keys. importRaw writes a known key ONLY with its
@@ -823,7 +863,7 @@ class SettingsRepository @Inject constructor(
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
             "notif_widget_count_style", "icon_pack_package", "left_swipe_app_key", "weather_app_key", "home_page_marker",
-            "page_switch_speed", "collapsed_settings_sections", "font_family",
+            "page_switch_speed", "collapsed_settings_sections", "font_family", "drawer_label_color_mode",
             "people_privacy", "pinned_people", "people_aliases",
             "custom_icons", "folder_icons", "shortcut_icons",
         )

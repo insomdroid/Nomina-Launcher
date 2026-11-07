@@ -327,7 +327,6 @@ fun SettingsScreen(
                     StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
-                    DrawerLabelColorRow(selected = s.drawerLabelColor, onPick = viewModel::setDrawerLabelColor)
                     SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
                     SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
                     SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
@@ -374,7 +373,7 @@ fun SettingsScreen(
                 }
 
                 CollapsibleSection(
-                    title = stringResource(R.string.settings_appearance),
+                    title = stringResource(R.string.settings_icons_typography),
                     icon = LauncherIcons.Appearance,
                     collapsed = "icons" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("icons", it) },
@@ -394,6 +393,8 @@ fun SettingsScreen(
                         valueText = percentText,
                     )
                     LabelColorRow(selected = s.appLabelColor, onPick = viewModel::setAppLabelColor)
+                    DrawerLabelColorRow(selected = s.drawerLabelColor, onPick = viewModel::setDrawerLabelColor)
+                    DrawerIconSizeRow(s.drawerIconScale, viewModel::setDrawerIconScale)
                     FontRow(selected = s.fontFamily, onPick = viewModel::setFontFamily)
                     // Themed (monochrome) icons need the adaptive-icon monochrome API (Android 13+).
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -417,6 +418,14 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_icon_pack),
                         description = iconPackName,
                     ) { showIconPackPicker = true }
+                }
+
+                CollapsibleSection(
+                    title = stringResource(R.string.settings_wallpaper_background),
+                    icon = LauncherIcons.Widgets,
+                    collapsed = "wallpaper" in s.collapsedSettingsSections,
+                    onToggle = { viewModel.setSectionCollapsed("wallpaper", it) },
+                ) {
                     DrawerBackdropRows(
                         settings = s,
                         wallpaper = drawerWallpaper,
@@ -431,7 +440,6 @@ fun SettingsScreen(
                             onBlurStrength = viewModel::setDrawerBlurStrength,
                         ),
                     )
-                    DrawerIconSizeRow(s.drawerIconScale, viewModel::setDrawerIconScale)
                 }
 
                 CollapsibleSection(

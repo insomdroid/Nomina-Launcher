@@ -38,6 +38,7 @@ import com.insomdroid.nomina.model.AppItem
 import com.insomdroid.nomina.model.CustomIcon
 import com.insomdroid.nomina.model.SearchResult
 import com.insomdroid.nomina.model.SearchResults
+import com.insomdroid.nomina.model.LauncherSettings
 import com.insomdroid.nomina.ui.AppLaunch
 import com.insomdroid.nomina.ui.DockTarget
 import com.insomdroid.nomina.ui.HomeDragController

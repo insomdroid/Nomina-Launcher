@@ -94,14 +94,18 @@ data class LauncherSettings(
      *  still finds them (a Telegram request after 0.9.7, opt-in). */
     val hideHomeAppsFromDrawer: Boolean = false,
     /** Size multiplier for app icon labels across home/dock/drawer/folders (1.0 = the default 11sp). */
+    /** Home label size is the base value; Dock and Drawer can follow it or use their own value. */
     val appLabelTextScale: Float = 1.0f,
-    /** Size multiplier for app icons across home/dock/drawer/folders (1.0 = each surface's nominal size;
-     *  the cell still caps the result). */
+    /** Home icon size is the base value; Dock and Drawer can follow it or use their own value. */
     val iconScale: Float = 1.0f,
-    /** Size multiplier for the app drawer's icons (its tiles and folder cards), apart from [iconScale] which
-     *  sizes home, the dock and home folders. Unset it follows [iconScale], so the single slider of versions
-     *  before 0.9.8 keeps looking the same (a Telegram request). */
+    val dockIconScale: Float = 1.0f,
+    val dockIconScaleFollowsHome: Boolean = true,
     val drawerIconScale: Float = 1.0f,
+    val drawerIconScaleFollowsHome: Boolean = true,
+    val dockLabelTextScale: Float = 1.0f,
+    val dockLabelTextScaleFollowsHome: Boolean = true,
+    val drawerLabelTextScale: Float = 1.0f,
+    val drawerLabelTextScaleFollowsHome: Boolean = true,
     /** Multiplier on the system long-press timeout before an icon's menu opens or it can be moved
      *  (1.0 = the system's own delay, 0.5–2.0). */
     val longPressScale: Float = 1.0f,
@@ -111,13 +115,12 @@ data class LauncherSettings(
     /** Let app-drawer labels (apps, folders, the "most used" row) wrap onto a second line — the
      *  drawer's long-standing look, so this defaults on. */
     val twoLineDrawerLabels: Boolean = true,
-    /** ARGB color for app icon labels on the home surfaces (home/dock/folders); default white. The
-     *  app drawer keeps its theme color for readability over its solid background. */
+    /** Home label colour is the base; Dock and Drawer can follow it or use their own colour. */
     val appLabelColor: Int = 0xFFFFFFFF.toInt(),
-    /** ARGB colour for the app drawer's grid labels (apps and folders), or null for the automatic black or white
-     *  the drawer picks by what it looks like (see [drawerBackgroundColor]); the owner's 1.0.1 ask, the choice
-     *  home's labels have. */
+    val dockLabelColor: Int? = null,
+    val dockLabelColorFollowsHome: Boolean = true,
     val drawerLabelColor: Int? = null,
+    val drawerLabelColorMode: String = LABEL_COLOR_FOLLOW_HOME,
     /** Show the current weather (Open-Meteo; needs a location permission) in the smartspace widget. */
     val showWeather: Boolean = true,
     /** Count indicator of the built-in notifications widget: [COUNT_NUMBER], [COUNT_DOT] or [COUNT_NONE]. */
@@ -152,6 +155,10 @@ data class LauncherSettings(
         const val SPEED_NORMAL = "normal"
         const val SPEED_FAST = "fast"
         const val SPEED_FASTEST = "fastest"
+
+        const val LABEL_COLOR_FOLLOW_HOME = "follow_home"
+        const val LABEL_COLOR_AUTOMATIC = "automatic"
+        const val LABEL_COLOR_CUSTOM = "custom"
 
         /** Launcher text families. The legacy default key now uses the bundled Geist UI face. */
         const val FONT_DEFAULT = "default"

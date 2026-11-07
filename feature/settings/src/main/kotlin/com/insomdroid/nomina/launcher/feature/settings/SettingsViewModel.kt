@@ -160,9 +160,14 @@ class SettingsViewModel @Inject constructor(
     fun setLongPressScale(value: Float) = update { repository.setLongPressScale(value) }
 
     fun setAppLabelTextScale(value: Float) = update { repository.setAppLabelTextScale(value) }
+    fun setDockLabelTextScale(value: Float?) = update { repository.setDockLabelTextScale(value) }
+    fun setDrawerLabelTextScale(value: Float?) = update { repository.setDrawerLabelTextScale(value) }
     fun setIconScale(value: Float) = update { repository.setIconScale(value) }
-    fun setDrawerIconScale(value: Float) = update { repository.setDrawerIconScale(value) }
+    fun setDockIconScale(value: Float?) = update { repository.setDockIconScale(value) }
+    fun setDrawerIconScale(value: Float?) = update { repository.setDrawerIconScale(value) }
     fun setAppLabelColor(argb: Int) = update { repository.setAppLabelColor(argb) }
+    fun setDockLabelColor(argb: Int?) = update { repository.setDockLabelColor(argb) }
+    fun setDrawerLabelColorMode(mode: String) = update { repository.setDrawerLabelColorMode(mode) }
     fun setTwoLineHomeLabels(value: Boolean) = update { repository.setTwoLineHomeLabels(value) }
     fun setTwoLineDrawerLabels(value: Boolean) = update { repository.setTwoLineDrawerLabels(value) }
     fun setShowWeather(value: Boolean) = update { repository.setShowWeather(value) }

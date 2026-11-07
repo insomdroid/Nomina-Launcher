@@ -472,7 +472,12 @@ fun SettingsScreen(
                     )
                     DrawerLabelColorModeRow(
                         mode = s.drawerLabelColorMode,
-                        onPick = viewModel::setDrawerLabelColorMode,
+                        onPick = { mode ->
+                            viewModel.setDrawerLabelColorMode(mode)
+                            if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.drawerLabelColor == null) {
+                                viewModel.setDrawerLabelColor(s.appLabelColor)
+                            }
+                        },
                     )
                     if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
                         LabelColorRow(
@@ -766,6 +771,12 @@ private fun IconPackPicker(
                     .heightIn(max = 420.dp)
                     .verticalScroll(rememberScrollState()),
             ) {
+                Text(
+                    text = stringResource(R.string.settings_icon_pack_desc),
+                    color = p.dim,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -777,7 +788,9 @@ private fun IconPackPicker(
                         stringResource(R.string.settings_icon_pack_system),
                         color = if (selected.isBlank()) p.text else p.dim,
                         fontSize = 16.sp,
+                        modifier = Modifier.weight(1f),
                     )
+                    if (selected.isBlank()) Text("✓", color = p.text, fontSize = 18.sp)
                 }
                 packs.forEach { pack ->
                     Row(
@@ -791,7 +804,9 @@ private fun IconPackPicker(
                             pack.label,
                             color = if (selected == pack.packageName) p.text else p.dim,
                             fontSize = 16.sp,
+                            modifier = Modifier.weight(1f),
                         )
+                        if (selected == pack.packageName) Text("✓", color = p.text, fontSize = 18.sp)
                     }
                 }
             }

@@ -882,17 +882,24 @@ fun HomeScreen(
                     ?: uiState.entries.filterIsInstance<PlacedFolder>().firstOrNull { it.id == id }
             }
         if (liftedDockFolder != null) {
-            LiftedFolderImage(
-                folder = liftedDockFolder,
-                finger = { dragController.rootPosition - homeOrigin },
-                iconScale = settings.iconScale,
-                // The label's room: a grid cell's width (the workspace spans the host edge to edge).
-                tileWidth = with(LocalDensity.current) { (homeWidthPx / settings.homeColumns.coerceAtLeast(1)).toDp() },
-                // The copy looks like the tile it left: with its label on home, without in the dock.
-                showLabel = liftedFolderSource == DragSource.Home && settings.showHomeLabels,
-                showName = settings.showHomeFolderNames,
-                labelColor = Color(settings.appLabelColor),
-            )
+            CompositionLocalProvider(
+                LocalAppLabelScale provides if (liftedFolderSource == DragSource.Dock) settings.dockLabelTextScale else settings.appLabelTextScale,
+            ) {
+                LiftedFolderImage(
+                    folder = liftedDockFolder,
+                    finger = { dragController.rootPosition - homeOrigin },
+                    iconScale = if (liftedFolderSource == DragSource.Dock) settings.dockIconScale else settings.iconScale,
+                    // The label's room: a grid cell's width (the workspace spans the host edge to edge).
+                    tileWidth = with(LocalDensity.current) { (homeWidthPx / settings.homeColumns.coerceAtLeast(1)).toDp() },
+                    // The copy looks like the tile it left: with its label on home, without in the dock.
+                    showLabel = liftedFolderSource == DragSource.Home && settings.showHomeLabels,
+                    showName = settings.showHomeFolderNames,
+                    labelColor = Color(
+                        if (liftedFolderSource == DragSource.Dock) settings.dockLabelColor ?: settings.appLabelColor
+                        else settings.appLabelColor,
+                    ),
+                )
+            }
         }
 
         // The open folder: a card in this window (so a drag can leave it for the home surfaces),

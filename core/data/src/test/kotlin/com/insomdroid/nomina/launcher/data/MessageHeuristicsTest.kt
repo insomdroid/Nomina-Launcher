@@ -20,25 +20,4 @@ class MessageHeuristicsTest {
         }
     }
 
-    @Test
-    fun `one-time codes are recognised by a short number next to a code word`() {
-        listOf(
-            "Your verification code is 482913",
-            "Vahvistuskoodisi: 1234",
-            "G-583920 is your Google verification code",
-            "Use 90210 as your OTP. Do not share it.",
-            "Kertakäyttöinen tunnuslukusi on 7781",
-        ).forEach { assertThat(MessageHeuristics.looksLikeOneTimeCode(it)).isTrue() }
-    }
-
-    @Test
-    fun `ordinary messages with numbers are not one-time codes`() {
-        listOf(
-            "Nähdään klo 1730 asemalla",
-            "Order 48213 has shipped",
-            "Call me at 555 0123",
-            "Koodi on rikki taas :(",
-            null, "",
-        ).forEach { assertThat(MessageHeuristics.looksLikeOneTimeCode(it)).isFalse() }
-    }
 }

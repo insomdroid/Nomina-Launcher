@@ -13,6 +13,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
@@ -728,6 +731,20 @@ fun HomeScreen(
             )
             }
 
+            // Keep the chevron and compact dock in one smooth transition when the dock closes.
+            val chevronOffsetY by animateDpAsState(
+                targetValue = if (settings.dockExpanded) 0.dp else (-24).dp,
+                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+            )
+            val chevronRotation by animateFloatAsState(
+                targetValue = if (settings.dockExpanded) 0f else 180f,
+                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+            )
+            val miniDockOffsetY by animateDpAsState(
+                targetValue = if (settings.dockExpanded) 0.dp else (-16).dp,
+                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+            )
+
             // The chevron stays above the expanded dock in both states.
             if (settings.dockEnabled) {
                 Box(
@@ -737,8 +754,8 @@ fun HomeScreen(
                     Canvas(
                         modifier = Modifier
                             .size(24.dp)
-                            .offset(y = if (settings.dockExpanded) 0.dp else (-24).dp)
-                            .graphicsLayer { rotationZ = if (settings.dockExpanded) 0f else 180f }
+                            .offset(y = chevronOffsetY)
+                            .graphicsLayer { rotationZ = chevronRotation }
                             .semantics {
                                 contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock"
                             }
@@ -806,7 +823,7 @@ fun HomeScreen(
                     .width(124.dp)
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 0.dp, bottom = 12.dp)
-                    .offset(y = if (settings.dockExpanded) 0.dp else (-16).dp)
+                    .offset(y = miniDockOffsetY)
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
                 color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
                 shape = RoundedCornerShape(18.dp),

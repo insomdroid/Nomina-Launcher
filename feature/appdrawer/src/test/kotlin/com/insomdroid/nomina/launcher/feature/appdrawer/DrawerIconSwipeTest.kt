@@ -46,13 +46,22 @@ class DrawerIconSwipeTest {
     private val app = AppItem(
         packageName = "com.mail", className = "mail.Main", user = Process.myUserHandle(), userSerial = 0, label = "Mail",
     )
+    private val scrollApps = listOf(app) + (1..11).map { index ->
+        AppItem(
+            packageName = "com.test.app$index",
+            className = "app$index.Main",
+            user = Process.myUserHandle(),
+            userSerial = 0,
+            label = "App $index",
+        )
+    }
     private var clicks = 0
     private var longClicks = 0
     private var longPress = 0L
     private lateinit var pager: PagerState
     private val dragController = HomeDragController()
 
-    private fun compose() {
+    private fun compose(apps: List<AppItem> = listOf(app)) {
         compose.setContent {
             pager = rememberPagerState { 2 }
             longPress = LocalViewConfiguration.current.longPressTimeoutMillis
@@ -65,7 +74,7 @@ class DrawerIconSwipeTest {
                 if (page == 0) {
                     LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxSize()) {
                         appCells(
-                            apps = listOf(app), badges = emptyMap(), badgeShowCount = true, badgeScale = 1f,
+                            apps = apps, badges = emptyMap(), badgeShowCount = true, badgeScale = 1f,
                             showLabels = true, iconSize = 56.dp, onAppClick = { clicks++ }, onAppLongClick = { _, _ -> longClicks++ },
                             dragController = dragController, onDragOutStart = {}, onDropOnHome = { _, _, _, _ -> },
                             onDropOnDock = { _, _ -> }, haptics = haptics, locked = false,
@@ -111,6 +120,21 @@ class DrawerIconSwipeTest {
             repeat(steps) { moveBy(Offset(-stepPx, 0f), delayMillis = stepMs) }
             up()
         }
+    }
+
+    @Test fun aDiagonalGridScrollThatEndsOverAnotherColumnDoesNotLaunchAnApp() {
+        compose(apps = scrollApps)
+        compose.waitForIdle()
+
+        compose.onNodeWithText("Mail").performTouchInput {
+            down(center)
+            repeat(24) { moveBy(Offset(6f, -8f), delayMillis = 8) }
+            up()
+        }
+        compose.waitForIdle()
+
+        assertThat(clicks).isEqualTo(0)
+        assertThat(pager.currentPage).isEqualTo(0)
     }
 
     @Test fun aSidewaysFlickThatStartsOnAnIconTurnsThePageAndDoesNotLaunch() {

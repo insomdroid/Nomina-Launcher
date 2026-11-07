@@ -1434,14 +1434,29 @@ private fun DrawerAppCell(
                                 outcome = 2
                                 return@withTimeoutOrNull
                             }
+                            // A scroll parent can consume the UP event in its Main pass,
+                            // after this child has seen it. Check consumption before considering
+                            // a tap, then inspect the Final pass so a release claimed by the grid
+                            // or pager can never launch the app under the finger.
+                            if (c.isConsumed) {
+                                outcome = 2
+                                return@withTimeoutOrNull
+                            }
                             if (!c.pressed) {
-                                outcome = 1
+                                awaitPointerEvent(PointerEventPass.Final)
+                                outcome = if (
+                                    c.isConsumed ||
+                                    abs(c.position.x - down.position.x) > slop ||
+                                    abs(c.position.y - down.position.y) > slop ||
+                                    !IconPress.staysOnIcon(c.position, size, slop)
+                                ) 2 else 1
+                                if (outcome == 1) c.consume()
                                 return@withTimeoutOrNull
                             }
                             // Don't consume: let the LazyGrid scroll a quick drag. Vertical travel
                             // past the slop is that scroll; a sideways roll ends the hold once
                             // the finger leaves the icon.
-                            if (c.isConsumed ||
+                            if (
                                 abs(c.position.y - down.position.y) > slop ||
                                 !IconPress.staysOnIcon(c.position, size, slop)
                             ) {

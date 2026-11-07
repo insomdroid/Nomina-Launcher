@@ -789,6 +789,10 @@ fun HomeScreen(
                     enter = slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(220)) + fadeIn(tween(180)),
                     exit = slideOutVertically(targetOffsetY = { it / 2 }, animationSpec = tween(180)) + fadeOut(tween(140)),
                 ) {
+                    CompositionLocalProvider(
+                        LocalIconScale provides settings.dockIconScale,
+                        LocalAppLabelScale provides settings.dockLabelTextScale,
+                    ) {
                     Dock(
                         entries = uiState.dockEntries,
                         badges = badges,
@@ -796,7 +800,7 @@ fun HomeScreen(
                         badgeScale = badgeScale,
                         showLabels = settings.showDockLabels,
                         showFolderNames = settings.showHomeFolderNames,
-                        labelColor = Color(settings.appLabelColor),
+                        labelColor = Color(settings.dockLabelColor ?: settings.appLabelColor),
                         backgroundAlpha = settings.dockBackgroundOpacity,
                         locked = settings.desktopLocked,
                         dragController = dragController,
@@ -815,6 +819,7 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp),
                     )
+                    }
                 }
             }
             // Compact Nothing-inspired mini dock: camera, app search and browser.

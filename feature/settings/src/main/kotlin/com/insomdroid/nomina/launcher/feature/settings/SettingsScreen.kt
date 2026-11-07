@@ -1365,35 +1365,37 @@ private fun FollowHomeScaleRow(
     valueText: (Float) -> String,
 ) {
     val p = LocalExpressivePalette.current
-    Surface(
-        color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
-        shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
-    ) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
-            RowLabel(label)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 10.dp)) {
-                FilterChip(
-                    selected = followsHome,
-                    onClick = onFollowHome,
-                    label = { Text(stringResource(R.string.settings_follow_home)) },
-                )
-                FilterChip(
-                    selected = !followsHome,
-                    onClick = onCustom,
-                    label = { Text(stringResource(R.string.settings_custom)) },
-                )
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
+        Surface(
+            color = p.surfaceHi,
+            shape = RoundedCornerShape(20.dp),
+            shadowElevation = p.shadow,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
+                RowLabel(label)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 10.dp)) {
+                    FilterChip(
+                        selected = followsHome,
+                        onClick = onFollowHome,
+                        label = { Text(stringResource(R.string.settings_follow_home)) },
+                    )
+                    FilterChip(
+                        selected = !followsHome,
+                        onClick = onCustom,
+                        label = { Text(stringResource(R.string.settings_custom)) },
+                    )
+                }
             }
-            if (!followsHome) {
-                ScaleSliderRow(
-                    label = label,
-                    value = value,
-                    onValueChange = onValueChange,
-                    valueRange = valueRange,
-                    valueText = valueText,
-                )
-            }
+        }
+        if (!followsHome) {
+            ScaleSliderRow(
+                label = label,
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = valueRange,
+                valueText = valueText,
+            )
         }
     }
 }

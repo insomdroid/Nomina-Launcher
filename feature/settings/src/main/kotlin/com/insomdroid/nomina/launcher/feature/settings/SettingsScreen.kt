@@ -784,12 +784,18 @@ private fun IconPackPicker(
                         .padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        stringResource(R.string.settings_icon_pack_system),
-                        color = if (selected.isBlank()) p.text else p.dim,
-                        fontSize = 16.sp,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.settings_icon_pack_system),
+                            color = if (selected.isBlank()) p.text else p.dim,
+                            fontSize = 16.sp,
+                        )
+                        Text(
+                            stringResource(R.string.settings_icon_pack_system_desc),
+                            color = p.dim,
+                            fontSize = 11.sp,
+                        )
+                    }
                     if (selected.isBlank()) Text("✓", color = p.text, fontSize = 18.sp)
                 }
                 packs.forEach { pack ->

@@ -26,21 +26,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.insomdroid.nomina.data.BatchDelivery
-import com.insomdroid.nomina.data.BatchSchedule
 import com.insomdroid.nomina.data.MessageHeuristics
 import com.insomdroid.nomina.data.NotificationBadgeRepository
 import com.insomdroid.nomina.data.PeopleGrouping
 import com.insomdroid.nomina.data.PersonEntry
 import com.insomdroid.nomina.data.PersonEventKind
 import com.insomdroid.nomina.data.ReplyAction
-import com.insomdroid.nomina.data.SettingsRepository
 import com.insomdroid.nomina.data.StatusNotification
 import javax.inject.Inject
 
@@ -60,9 +53,6 @@ import javax.inject.Inject
  * - **People tiles** take only conversation-like notifications (messages, calls, mail — see
  *   [personEntry]) and reduce each to its sender, newest text and quick actions; the repository
  *   groups them by person across apps.
- * - **Batch delivery** (opt-in) keeps the launcher's dots and status icons quiet until delivery;
- *   people tiles show "waiting". Android notifications stay active, so updates to the same key
- *   still arrive here and can bypass the batch for pinned people, missed calls and one-time codes.
  *
  * Requires the user to grant notification access (Settings → Notifications → Device & app
  * notifications); until then the system never binds this service.
@@ -73,32 +63,12 @@ class NotificationDotListenerService : NotificationListenerService() {
     @Inject
     lateinit var badgeRepository: NotificationBadgeRepository
 
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
-
-    /** Lives while the listener is connected; carries the batch settings + pins into [holdForBatch]. */
-    private var settingsJob: Job? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-
-    @Volatile private var batchEnabled = false
-    @Volatile private var batchTimes: List<Int> = emptyList()
-    /** Person keys that always come through: pinned people and the aliases that merge into them. */
-    @Volatile private var vipKeys: Set<String> = emptySet()
 
     /** Packages that handle mailto: links — the mail clients. Their notifications carry the sender
      *  as the title and the subject as the text, but almost none set CATEGORY_EMAIL (Gmail doesn't),
      *  so the app being a mail client is the signal. Re-read on connect and package changes. */
     @Volatile private var mailPackages: Set<String> = emptySet()
-
-    /** Local delivery deadlines, including legacy snoozes made by earlier beta versions. */
-    private val heldUntil = HashMap<String, Long>()
-    private var heldLoaded = false
-    private var settingsReady = false
-
-    private fun persistHeld() {
-        val snapshot = HashMap(heldUntil)
-        scope.launch { runCatching { settingsRepository.setHeldNotifications(snapshot) } }
-    }
 
     private val userManager by lazy { getSystemService(UserManager::class.java) }
 
@@ -109,7 +79,6 @@ class NotificationDotListenerService : NotificationListenerService() {
     private val handler = Handler(Looper.getMainLooper())
     private var snapshotRetriesLeft = 0
     private val retryRefresh = Runnable { refresh() }
-    private val deliverBatch = Runnable { refreshWithRetries() }
     private var connected = false
     private var packageRefreshJob: Job? = null
     private var receiverRegistered = false
@@ -119,19 +88,11 @@ class NotificationDotListenerService : NotificationListenerService() {
             refreshMailPackages()
         }
     }
-    private val timeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (heldUntil.isNotEmpty()) refreshWithRetries()
-        }
-    }
-
     private companion object {
         const val TAG = "NotifDots"
         const val MAX_SNAPSHOT_RETRIES = 2
         const val SNAPSHOT_RETRY_DELAY_MS = 500L
 
-        /** Grace period for legacy snoozes to reappear before deleting stale bookkeeping. */
-        const val RELEASE_SLACK_MS = 60_000L
     }
 
     /** Refresh now, allowing a bounded number of delayed retries if the snapshot read fails —
@@ -147,7 +108,6 @@ class NotificationDotListenerService : NotificationListenerService() {
         super.onListenerConnected()
         Log.d(TAG, "listener connected")
         connected = true
-        settingsReady = false
         badgeRepository.registerCanceller { key -> runCatching { cancelNotification(key) } }
         if (!receiverRegistered) {
             val filter = IntentFilter().apply {
@@ -158,34 +118,9 @@ class NotificationDotListenerService : NotificationListenerService() {
                 addDataScheme("package")
             }
             ContextCompat.registerReceiver(this, packageReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-            ContextCompat.registerReceiver(this, timeReceiver, IntentFilter().apply {
-                addAction(Intent.ACTION_TIME_CHANGED)
-                addAction(Intent.ACTION_TIMEZONE_CHANGED)
-                addAction(Intent.ACTION_SCREEN_ON)
-            }, ContextCompat.RECEIVER_NOT_EXPORTED)
             receiverRegistered = true
         }
         mailPackages = queryMailPackages()
-        settingsJob?.cancel()
-        settingsJob = scope.launch {
-            if (!heldLoaded) {
-                val saved = runCatching { settingsRepository.heldNotifications.first() }.getOrDefault(emptyMap())
-                for ((k, v) in saved) heldUntil.putIfAbsent(k, v)
-                heldLoaded = true
-            }
-            combine(
-                settingsRepository.settings, settingsRepository.pinnedPeople, settingsRepository.peopleAliases,
-            ) { s, pinned, aliases ->
-                val pins = pinned.map { it.key }.toSet()
-                Triple(s.peopleBatchEnabled, BatchSchedule.parse(s.peopleBatchTimes), pins + aliases.filterValues { it in pins }.keys)
-            }.distinctUntilChanged().onEach { (enabled, times, vips) ->
-                batchEnabled = enabled
-                batchTimes = times
-                vipKeys = vips
-                settingsReady = true
-                refreshWithRetries()
-            }.collect {}
-        }
         refreshWithRetries()
     }
 
@@ -193,10 +128,7 @@ class NotificationDotListenerService : NotificationListenerService() {
         super.onListenerDisconnected()
         connected = false
         handler.removeCallbacks(retryRefresh)
-        handler.removeCallbacks(deliverBatch)
         stopPackageRefresh()
-        settingsJob?.cancel()
-        settingsJob = null
         badgeRepository.clearCanceller()
         badgeRepository.setBadges(emptyMap())
         badgeRepository.setIcons(emptyList())
@@ -213,27 +145,11 @@ class NotificationDotListenerService : NotificationListenerService() {
         // repo so the home screen can blank the themed bar for that window (the reveal isn't dispatched
         // as an inset, so this is the only app-observable signal — see the audit note in StatusBar).
         if (sbn != null && isHeadsUpWorthy(sbn) && shouldAlert(sbn)) badgeRepository.notifyHeadsUp()
-        if (sbn != null && settingsReady) holdForBatch(sbn)
         refreshWithRetries()
-    }
-
-    /** Keep the notification active in Android so every new message can be checked for exceptions. */
-    private fun holdForBatch(sbn: StatusBarNotification) {
-        val now = System.currentTimeMillis()
-        val previous = heldUntil[sbn.key]
-        val entry = runCatching { personEntry(sbn, 0L, currentRanking, Ranking()) }.getOrNull()
-        val until = BatchDelivery.holdUntil(
-            entry, previous, now, batchEnabled, vipKeys, BatchSchedule.nextDelivery(now, batchTimes),
-        )
-        if (until == null) heldUntil.remove(sbn.key) else heldUntil[sbn.key] = until
-        if (until != previous) persistHeld()
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?, rankingMap: RankingMap?, reason: Int) {
         if (sbn != null) alertedKeys.remove(sbn.key)
-        // A user snoozing an already-held notification leaves its deadline intact. Only a real
-        // removal (dismissed or cancelled by the app) forgets it.
-        if (sbn != null && reason != REASON_SNOOZED && heldUntil.remove(sbn.key) != null) persistHeld()
         refreshWithRetries()
     }
 
@@ -247,7 +163,7 @@ class NotificationDotListenerService : NotificationListenerService() {
     }
 
     private fun refresh() {
-        if (!connected || !heldLoaded) return
+        if (!connected) return
         val active = runCatching { activeNotifications }.getOrNull()
         if (active == null) {
             // A transient Binder failure: keep the last good snapshot (a stale removal self-heals on
@@ -266,15 +182,6 @@ class NotificationDotListenerService : NotificationListenerService() {
         val visual = LinkedHashMap<String, StatusNotification>()
         val openable = HashMap<String, StatusNotification>()
         val people = ArrayList<PersonEntry>()
-        val now = System.currentTimeMillis()
-        val activeKeys = active.filterNotNull().map { it.key }.toSet()
-        val released = heldUntil.filter { (key, until) ->
-            settingsReady && key in activeKeys && (!batchEnabled || now >= until)
-        }
-        if (released.isNotEmpty()) {
-            released.keys.forEach(heldUntil::remove)
-            persistHeld()
-        }
         for (sbn in active) {
             if (sbn == null) continue
             val serial = runCatching { userManager?.getSerialNumberForUser(sbn.user) }.getOrNull() ?: 0L
@@ -283,12 +190,10 @@ class NotificationDotListenerService : NotificationListenerService() {
             // other real (icon-worthy, not ongoing) notification becomes an app-grouped entry.
             val person = runCatching { personEntry(sbn, serial, ranking, tmp) }.getOrNull()
             when {
-                person != null -> people.add(person.copy(heldUntil = heldUntil[sbn.key] ?: 0L))
+                person != null -> people.add(person)
                 isIconWorthy(sbn) && (sbn.notification.flags and Notification.FLAG_ONGOING_EVENT) == 0 ->
                     runCatching { appEntry(sbn, serial) }.getOrNull()?.let(people::add)
             }
-            // Only launcher surfaces wait. Android's shade, sound and heads-up remain unchanged.
-            if (sbn.key in heldUntil) continue
             // Dots: strict badge-worthy filter (meaningful home-icon badges).
             if (isBadgeWorthy(sbn, ranking, tmp)) {
                 counts[key] = (counts[key] ?: 0) + 1
@@ -334,33 +239,7 @@ class NotificationDotListenerService : NotificationListenerService() {
                 )
             }.sortedByDescending { it.postTime },
         )
-        // Migration: earlier betas snoozed in Android. Those existing snoozes cannot be released
-        // through the public listener API; keep showing them until Android delivers them.
-        if (heldUntil.isNotEmpty()) {
-            val snoozed = runCatching { snoozedNotifications }.getOrNull().orEmpty().filterNotNull()
-            val snoozedKeys = snoozed.map { it.key }.toSet()
-            for (sbn in snoozed) {
-                if (sbn.key in activeKeys) continue
-                val until = heldUntil[sbn.key] ?: continue
-                val serial = runCatching { userManager?.getSerialNumberForUser(sbn.user) }.getOrNull() ?: 0L
-                val entry = runCatching { personEntry(sbn, serial, ranking, tmp) }.getOrNull() ?: continue
-                people.add(entry.copy(heldUntil = until))
-            }
-            // Forget entries whose notification is gone for good (delivered and then dismissed, or
-            // cancelled by its app while snoozed), so the persisted map doesn't grow forever.
-            val stale = heldUntil.filter { (k, until) -> k !in activeKeys && k !in snoozedKeys && now > until + RELEASE_SLACK_MS }
-            if (stale.isNotEmpty()) {
-                stale.keys.forEach { heldUntil.remove(it) }
-                persistHeld()
-            }
-        }
         badgeRepository.setPeople(PeopleGrouping.group(people))
-        handler.removeCallbacks(deliverBatch)
-        if (settingsReady) {
-            heldUntil.filterKeys { it in activeKeys }.values.minOrNull()?.let { until ->
-                handler.postDelayed(deliverBatch, (until - now).coerceAtLeast(1L))
-            }
-        }
     }
 
     /**
@@ -532,7 +411,6 @@ class NotificationDotListenerService : NotificationListenerService() {
         packageRefreshJob = null
         if (receiverRegistered) {
             unregisterReceiver(packageReceiver)
-            unregisterReceiver(timeReceiver)
             receiverRegistered = false
         }
     }

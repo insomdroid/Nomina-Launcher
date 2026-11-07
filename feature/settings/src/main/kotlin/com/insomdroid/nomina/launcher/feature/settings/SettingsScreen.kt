@@ -800,12 +800,20 @@ private fun IconPackPicker(
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            pack.label,
-                            color = if (selected == pack.packageName) p.text else p.dim,
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1f),
-                        )
+                        Column(
+                            modifier = Modifier.weight(1f).padding(vertical = 2.dp),
+                        ) {
+                            Text(
+                                pack.label,
+                                color = if (selected == pack.packageName) p.text else p.dim,
+                                fontSize = 16.sp,
+                            )
+                            Text(
+                                pack.packageName,
+                                color = p.dim,
+                                fontSize = 11.sp,
+                            )
+                        }
                         if (selected == pack.packageName) Text("✓", color = p.text, fontSize = 18.sp)
                     }
                 }

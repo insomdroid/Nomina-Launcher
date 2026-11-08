@@ -41,6 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -75,6 +78,7 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
+import com.insomdroid.nomina.ui.launcherDisplayFontFamily
 import androidx.core.content.ContextCompat
 import com.insomdroid.nomina.ui.themedTextStyle
 
@@ -288,8 +292,28 @@ internal fun SmartspaceContent(
         lineHeight = 12.sp,
         fontWeight = FontWeight.Medium,
     )
+    val timeLine = remember(timeText, timeZoneText) {
+        buildAnnotatedString {
+            withStyle(SpanStyle(fontFamily = launcherDisplayFontFamily())) {
+                append(timeText.uppercase(Locale.getDefault()))
+            }
+            append(" ${timeZoneText.uppercase(Locale.getDefault())}")
+        }
+    }
     val batteryLine = remember(deviceStatus.batteryText, deviceStatus.networkText) {
-        "${deviceStatus.batteryText} · ${deviceStatus.networkText}"
+        buildAnnotatedString {
+            val battery = deviceStatus.batteryText.uppercase(Locale.getDefault())
+            val numberStart = battery.lastIndexOf(' ').let { if (it >= 0) it + 1 else 0 }
+            if (numberStart in battery.indices && battery.substring(numberStart).any(Char::isDigit)) {
+                append(battery.substring(0, numberStart))
+                withStyle(SpanStyle(fontFamily = launcherDisplayFontFamily())) {
+                    append(battery.substring(numberStart))
+                }
+            } else {
+                append(battery)
+            }
+            append(" · ${deviceStatus.networkText.uppercase(Locale.getDefault())}")
+        }
     }
 
     Column(
@@ -317,7 +341,7 @@ internal fun SmartspaceContent(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "$timeText $timeZoneText".uppercase(Locale.getDefault()),
+                    text = timeLine,
                     color = ink,
                     style = themedTextStyle(dateTimeStyle),
                     maxLines = 1,
@@ -373,7 +397,7 @@ internal fun SmartspaceContent(
         }
 
         Text(
-            text = batteryLine.uppercase(Locale.getDefault()),
+            text = batteryLine,
             color = ink.copy(alpha = 0.92f),
             style = themedTextStyle(dateTimeStyle),
             maxLines = 1,

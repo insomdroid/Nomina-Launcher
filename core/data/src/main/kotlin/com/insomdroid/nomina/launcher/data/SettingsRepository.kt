@@ -124,8 +124,13 @@ class SettingsRepository @Inject constructor(
                 if (it == LauncherSettings.SPEED_FAST || it == LauncherSettings.SPEED_FASTEST) it else LauncherSettings.SPEED_NORMAL
             },
             fontFamily = (p[Keys.FONT_FAMILY] ?: LauncherSettings.FONT_DEFAULT).let {
-                if (it in LauncherSettings.FONTS) it else LauncherSettings.FONT_DEFAULT
+                if (it in LauncherSettings.FONTS && (it != LauncherSettings.FONT_CUSTOM || !p[Keys.CUSTOM_FONT_PATH].isNullOrBlank())) it else LauncherSettings.FONT_DEFAULT
             },
+            customFontPath = p[Keys.CUSTOM_FONT_PATH].orEmpty(),
+            iconShape = (p[Keys.ICON_SHAPE] ?: LauncherSettings.ICON_SHAPE_SYSTEM).let {
+                if (it in LauncherSettings.ICON_SHAPES) it else LauncherSettings.ICON_SHAPE_SYSTEM
+            },
+            autoResizeIcons = p[Keys.AUTO_RESIZE_ICONS] ?: true,
             infiniteScroll = p[Keys.INFINITE_SCROLL] ?: true,
             defaultReminderDismissed = p[Keys.DEFAULT_REMINDER_DISMISSED] ?: false,
             showNotificationDots = p[Keys.SHOW_NOTIF_DOTS] ?: true,
@@ -431,7 +436,14 @@ class SettingsRepository @Inject constructor(
     suspend fun setPageSwitchSpeed(speed: String) = edit { it[Keys.PAGE_SWITCH_SPEED] = speed }
 
     /** The launcher's font, one of [LauncherSettings.FONTS]; anything else reads back as the default. */
-    suspend fun setFontFamily(font: String) = edit { it[Keys.FONT_FAMILY] = font }
+    suspend fun setFontFamily(font: String) = edit {
+        it[Keys.FONT_FAMILY] = if (font in LauncherSettings.FONTS) font else LauncherSettings.FONT_DEFAULT
+    }
+    suspend fun setCustomFontPath(path: String) = edit { it[Keys.CUSTOM_FONT_PATH] = path } 
+    suspend fun setIconShape(shape: String) = edit {
+        it[Keys.ICON_SHAPE] = if (shape in LauncherSettings.ICON_SHAPES) shape else LauncherSettings.ICON_SHAPE_SYSTEM
+    }
+    suspend fun setAutoResizeIcons(value: Boolean) = edit { it[Keys.AUTO_RESIZE_ICONS] = value }
     suspend fun setInfiniteScroll(value: Boolean) = edit { it[Keys.INFINITE_SCROLL] = value }
     suspend fun setShowNotificationDots(value: Boolean) = edit { it[Keys.SHOW_NOTIF_DOTS] = value }
     suspend fun setNotificationDotCount(value: Boolean) = edit { it[Keys.NOTIF_DOT_COUNT] = value }
@@ -746,6 +758,9 @@ class SettingsRepository @Inject constructor(
         val HOME_PAGE_MARKER = stringPreferencesKey("home_page_marker")
         val PAGE_SWITCH_SPEED = stringPreferencesKey("page_switch_speed")
         val FONT_FAMILY = stringPreferencesKey("font_family")
+        val CUSTOM_FONT_PATH = stringPreferencesKey("custom_font_path")
+        val ICON_SHAPE = stringPreferencesKey("icon_shape")
+        val AUTO_RESIZE_ICONS = booleanPreferencesKey("auto_resize_icons")
         val INFINITE_SCROLL = booleanPreferencesKey("infinite_scroll")
         val FOLDER_SWIPE_FIRST_APP = booleanPreferencesKey("folder_swipe_first_app")
         val HIDE_HOME_APPS_FROM_DRAWER = booleanPreferencesKey("hide_home_apps_from_drawer")

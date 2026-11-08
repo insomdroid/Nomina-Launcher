@@ -819,7 +819,7 @@ fun HomeScreen(
             // Compact Nothing-inspired mini dock: camera, app search and browser.
             Surface(
                 modifier = Modifier
-                    .width(124.dp)
+                    .width(108.dp)
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 0.dp, bottom = 12.dp)
                     .offset(y = miniDockOffsetY)

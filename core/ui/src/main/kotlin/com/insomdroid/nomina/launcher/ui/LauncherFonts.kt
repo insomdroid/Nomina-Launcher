@@ -6,6 +6,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import android.graphics.Typeface
+import java.io.File
 import com.insomdroid.nomina.model.LauncherSettings
 
 private val GeistFontFamily = FontFamily(
@@ -22,14 +24,18 @@ private val DotoDisplayFontFamily = FontFamily(
 )
 
 /** Geist Mono is reserved for technical labels and compact system data. */
-fun launcherTechnicalFontFamily(): FontFamily = GeistMonoFontFamily
+fun launcherTechnicalFontFamily(): FontFamily = GeistFontFamily
 
 /** The rounded-dot Doto face is reserved for numeric clock displays, not general UI text. */
-fun launcherDisplayFontFamily(): FontFamily = DotoDisplayFontFamily
+fun launcherDisplayFontFamily(): FontFamily = GeistFontFamily
 
 /** The selected family for launcher-owned text. Removed legacy choices resolve safely to Geist. */
-fun launcherFontFamily(key: String): FontFamily =
-    if (key == LauncherSettings.FONT_GEIST_MONO) GeistMonoFontFamily else GeistFontFamily
+fun launcherFontFamily(key: String, customFontPath: String = ""): FontFamily =
+    if (key == LauncherSettings.FONT_CUSTOM && customFontPath.isNotBlank()) {
+        runCatching { FontFamily(Typeface.createFromFile(File(customFontPath))) }.getOrDefault(GeistFontFamily)
+    } else {
+        GeistFontFamily
+    }
 
 /**
  * Merge a local style over the theme's text style so the user's chosen family remains in effect.

@@ -866,7 +866,7 @@ fun HomeScreen(
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
                 color = (if (miniDockUsesLightBackground) Color.White else Color.Black).copy(alpha = 0.25f),
                 shape = RoundedCornerShape(18.dp),
-                shadowElevation = 6.dp,
+                shadowElevation = 0.dp,
             ) {
                 Row(
                     modifier = Modifier

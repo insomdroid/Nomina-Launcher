@@ -2,7 +2,6 @@ package com.insomdroid.nomina.feature.settings
 
 import android.app.Application
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -18,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
-/** The two approved font families are offered and the selected one is marked. */
+/** Geist is the only bundled font; custom fonts are imported separately from TTF files. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = Application::class, qualifiers = "en")
 class FontRowTest {
@@ -31,24 +30,25 @@ class FontRowTest {
         compose.waitForIdle()
     }
 
-    @Test fun onlyGeistFamiliesAreOfferedAndTheDefaultIsMarked() {
+    @Test fun onlyGeistIsOfferedAsTheBundledFont() {
         show(LauncherSettings.FONT_DEFAULT)
         compose.onNodeWithText(res.getString(R.string.settings_font)).assertIsDisplayed()
-        LauncherSettings.FONTS.forEach { compose.onNodeWithTag(fontChipTag(it)).performScrollTo().assertIsDisplayed() }
         compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().assertIsSelected()
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_GEIST_MONO)).performScrollTo().assertIsNotSelected()
-        assertThat(LauncherSettings.FONTS).hasSize(2)
+        compose.onNodeWithText(res.getString(R.string.settings_font_import)).assertIsDisplayed()
+        assertThat(LauncherSettings.FONTS).containsExactly(
+            LauncherSettings.FONT_DEFAULT,
+            LauncherSettings.FONT_CUSTOM,
+        ).inOrder()
     }
 
-    @Test fun aChipPicksGeistMono() {
-        show(LauncherSettings.FONT_DEFAULT)
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_GEIST_MONO)).performScrollTo().performClick()
-        assertThat(picked).containsExactly(LauncherSettings.FONT_GEIST_MONO)
+    @Test fun tappingGeistSelectsTheBundledFont() {
+        show(LauncherSettings.FONT_CUSTOM)
+        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().performClick()
+        assertThat(picked).containsExactly(LauncherSettings.FONT_DEFAULT)
     }
 
     @Test fun aLegacyStoredChoiceIsShownAsGeist() {
         show("serif")
         compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().assertIsSelected()
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_GEIST_MONO)).performScrollTo().assertIsNotSelected()
     }
 }

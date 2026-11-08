@@ -36,7 +36,7 @@ fun PickedIcon(
         return
     }
     AsyncImage(
-        model = CustomIconImage(icon, epoch),
+        model = CustomIconImage(icon, epoch, LocalAutoResizeIcons.current),
         contentDescription = contentDescription,
         modifier = modifier.size(size).clip(launcherIconShape(LocalIconShape.current)),
         onError = { failed = true },

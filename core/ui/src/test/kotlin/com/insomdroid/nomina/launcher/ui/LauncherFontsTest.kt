@@ -4,7 +4,6 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
 import com.google.common.truth.Truth.assertThat
 import com.insomdroid.nomina.designsystem.theme.withFontFamily
-import com.insomdroid.nomina.model.LauncherSettings
 import org.junit.Test
 
 /** Geist is the only bundled family; custom fonts require a validated imported file. */
@@ -14,9 +13,9 @@ class LauncherFontsTest {
             LauncherSettings.FONT_DEFAULT,
             LauncherSettings.FONT_CUSTOM,
         ).inOrder()
-        assertThat(launcherFontFamily(LauncherSettings.FONT_DEFAULT)).isNotEqualTo(FontFamily.Default)
-        assertThat(launcherFontFamily(LauncherSettings.FONT_GEIST_MONO)).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
-        assertThat(launcherFontFamily(LauncherSettings.FONT_CUSTOM)).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
+        assertThat(launcherFontFamily()).isNotEqualTo(FontFamily.Default)
+        assertThat(launcherFontFamily(LauncherSettings.FONT_GEIST_MONO)).isEqualTo(launcherFontFamily())
+        assertThat(launcherFontFamily(LauncherSettings.FONT_CUSTOM)).isEqualTo(launcherFontFamily())
         listOf("condensed", "serif", "monospace", "casual", "cursive", "unknown").forEach { legacy ->
             assertThat(launcherFontFamily(legacy)).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
         }

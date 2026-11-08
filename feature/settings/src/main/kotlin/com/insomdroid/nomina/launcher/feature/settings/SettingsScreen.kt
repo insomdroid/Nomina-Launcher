@@ -101,8 +101,6 @@ import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
 import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
 import com.insomdroid.nomina.ui.component.LocalThemedIcons
 import com.insomdroid.nomina.ui.component.NotificationBadge
-import com.insomdroid.nomina.ui.launcherFontFamily
-import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
@@ -116,16 +114,12 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val s by viewModel.settings.collectAsStateWithLifecycle()
-    val fontImportError by viewModel.fontImportError.collectAsStateWithLifecycle()
     val drawerWallpaper by viewModel.drawerWallpaperPicture.collectAsStateWithLifecycle()
     val allApps by viewModel.apps.collectAsStateWithLifecycle()
     val hiddenKeys by viewModel.hiddenKeys.collectAsStateWithLifecycle()
     val drawerFolders by viewModel.drawerFolders.collectAsStateWithLifecycle()
     val iconPacks by viewModel.iconPacks.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val fontPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) viewModel.importFont(uri)
-    }
     val resources = context.resources
     // Size multipliers read as whole percents, so 100 is the default and the number is easy to come back to.
     val percentText: (Float) -> String = { resources.getString(R.string.settings_percent, scalePercent(it)) }
@@ -241,7 +235,6 @@ fun SettingsScreen(
                     text = "N O M I N A  /  SYSTEM",
                     color = palette.faint,
                     fontSize = 9.sp,
-                    fontFamily = launcherTechnicalFontFamily(),
                     letterSpacing = 1.4.sp,
                     modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
                 )
@@ -442,15 +435,6 @@ fun SettingsScreen(
                         valueText = percentText,
                     )
 
-                    SettingsGroupLabel(stringResource(R.string.settings_typography_group))
-                    FontRow(
-                        selected = s.fontFamily,
-                        hasCustomFont = s.customFontPath.isNotBlank(),
-                        error = fontImportError,
-                        onPick = viewModel::setFontFamily,
-                        onImport = { fontPicker.launch(arrayOf("font/ttf", "application/x-font-ttf", "application/octet-stream")) },
-                        onRemove = viewModel::removeCustomFont,
-                    )
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_home_label_size),
                         value = s.appLabelTextScale,
@@ -1596,64 +1580,6 @@ internal fun IconShapeRow(selected: String, onPick: (String) -> Unit) {
                         modifier = Modifier.testTag(iconShapeChipTag(key)),
                     )
                 }
-            }
-        }
-    }
-}
-
-/** Geist is the only bundled family; importing a TTF adds one device-local custom choice. */
-@Composable
-internal fun FontRow(
-    selected: String,
-    onPick: (String) -> Unit,
-    hasCustomFont: Boolean = false,
-    error: String? = null,
-    onImport: () -> Unit = {},
-    onRemove: () -> Unit = {},
-) {
-    val p = LocalExpressivePalette.current
-    Surface(
-        color = p.surfaceHi,
-        shape = RoundedCornerShape(8.dp),
-        shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            .border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
-            RowLabel(stringResource(R.string.settings_font))
-            Text(stringResource(R.string.settings_font_desc), color = p.dim, fontSize = 12.5.sp)
-            Spacer(Modifier.height(10.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                FilterChip(
-                    selected = selected != LauncherSettings.FONT_CUSTOM || !hasCustomFont,
-                    onClick = { onPick(LauncherSettings.FONT_DEFAULT) },
-                    label = { Text(stringResource(R.string.settings_font_default), fontFamily = launcherFontFamily(LauncherSettings.FONT_DEFAULT)) },
-                    modifier = Modifier.testTag(fontChipTag(LauncherSettings.FONT_DEFAULT)),
-                )
-                if (hasCustomFont) {
-                    Text(
-                        stringResource(R.string.settings_font_custom_active),
-                        color = p.text,
-                        fontSize = 12.5.sp,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onImport) {
-                    Text(stringResource(R.string.settings_font_import), color = p.text)
-                }
-                if (hasCustomFont) {
-                    TextButton(onClick = onRemove) {
-                        Text(stringResource(R.string.settings_font_remove), color = p.text)
-                    }
-                }
-            }
-            if (error != null) {
-                Text(error, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
             }
         }
     }

@@ -196,27 +196,34 @@ fun Dock(
                 .fillMaxWidth()
                 .onGloballyPositioned { dragController.dockBounds = it.boundsInRoot() }
                 .border(2.dp, Color.White.copy(alpha = if (highlighted) 0.8f else 0f), shape),
-            color = Color.Black.copy(alpha = backgroundAlpha),
+            color = Color.Black.copy(alpha = backgroundAlpha.coerceIn(0f, 1f)),
             shape = shape,
-            shadowElevation = 9.dp,
+            // A zero-opacity dock must not leave a shadow that still reads as a background.
+            shadowElevation = if (backgroundAlpha > 0f) 9.dp else 0.dp,
         ) {
             Row(
                 // Five equally sized slots fit in the viewport; any additional slots extend the
                 // same row and are reached with a horizontal swipe. Slot indices stay absolute.
                 modifier = Modifier
-                    .drawBehind {
-                        drawRoundRect(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.White.copy(alpha = 0.16f),
-                                    Color.White.copy(alpha = 0.055f),
-                                    Color.White.copy(alpha = 0.015f),
-                                    Color.Black.copy(alpha = 0.10f),
-                                ),
-                            ),
-                            cornerRadius = CornerRadius(30.dp.toPx()),
-                        )
-                    }
+                    .then(
+                        if (backgroundAlpha > 0f) {
+                            Modifier.drawBehind {
+                                drawRoundRect(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.White.copy(alpha = 0.16f),
+                                            Color.White.copy(alpha = 0.055f),
+                                            Color.White.copy(alpha = 0.015f),
+                                            Color.Black.copy(alpha = 0.10f),
+                                        ),
+                                    ),
+                                    cornerRadius = CornerRadius(30.dp.toPx()),
+                                )
+                            }
+                        } else {
+                            Modifier
+                        },
+                    )
                     .heightIn(min = DOCK_ROW_MIN_HEIGHT)
                     .horizontalScroll(scrollState)
                     .width(contentWidth)

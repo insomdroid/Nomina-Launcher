@@ -867,14 +867,14 @@ class SettingsRepository @Inject constructor(
             "show_dock_labels", "show_home_labels", "show_drawer_labels", "show_page_indicator",
             "two_line_home_labels", "two_line_drawer_labels", "people_show_apps",
             "show_home_folder_names", "show_drawer_folder_names", "mix_drawer_folders", "blur_behind_drawer",
-            "theme_all_icons", "show_notif_dots", "notif_dot_count", "use_themed_icons",
+            "theme_all_icons", "show_notif_dots", "notif_dot_count", "use_themed_icons", "auto_resize_icons",
             "desktop_locked", "double_tap_lock", "show_frequent_apps", "drawer_opens_at_top",
             "sort_drawer_folders", "show_weather", "widget_tonal_background", "infinite_scroll",
         )
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
             "notif_widget_count_style", "icon_pack_package", "weather_app_key", "home_page_marker",
-            "page_switch_speed", "collapsed_settings_sections", "font_family", "drawer_label_color_mode",
+            "page_switch_speed", "collapsed_settings_sections", "font_family", "icon_shape", "drawer_label_color_mode",
             "people_privacy", "pinned_people", "people_aliases",
             "custom_icons", "folder_icons", "shortcut_icons",
         )
@@ -939,7 +939,7 @@ class SettingsRepository @Inject constructor(
             "drive_interval_days", "drive_wifi_only", "drive_charging_only",
             "auto_update_enabled", "update_last_check", "update_last_notified_version",
             "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications", "people_batch_enabled", "people_batch_times",
-            "default_reminder_dismissed", "left_swipe_app_key",
+            "default_reminder_dismissed", "left_swipe_app_key", "custom_font_path",
             // Legacy settings from removed features must not reappear in backups or be restored.
             "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",
             "hide_system_status_bar", "status_bar_scrim", "lock_sound_uri", "unlock_sound_uri",

@@ -114,7 +114,7 @@ class SettingsRepository @Inject constructor(
             showDrawerLabels = p[Keys.SHOW_DRAWER_LABELS] ?: true,
             showHomeFolderNames = p[Keys.SHOW_HOME_FOLDER_NAMES] ?: true,
             showDrawerFolderNames = p[Keys.SHOW_DRAWER_FOLDER_NAMES] ?: true,
-            dockBackgroundOpacity = (p[Keys.DOCK_OPACITY] ?: 0.35f).coerceIn(0f, 1f),
+            dockBackgroundOpacity = (p[Keys.DOCK_OPACITY] ?: LauncherSettings.DEFAULT_DOCK_BACKGROUND).coerceIn(0f, 1f),
             dockBottomSpacing = (p[Keys.DOCK_BOTTOM_SPACING] ?: 0).coerceIn(0, LauncherSettings.MAX_DOCK_BOTTOM_SPACING),
             drawerBackgroundOpacity = (p[Keys.DRAWER_OPACITY] ?: LauncherSettings.DEFAULT_DRAWER_BACKGROUND).coerceIn(0f, 1f),
             showPageIndicator = p[Keys.SHOW_PAGE_INDICATOR] ?: true,

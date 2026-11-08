@@ -787,7 +787,7 @@ fun HomeScreen(
                 ) {
                     Canvas(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(20.dp)
                             .offset(y = chevronOffsetY)
                             .graphicsLayer { rotationZ = chevronRotation }
                             .semantics {
@@ -799,18 +799,19 @@ fun HomeScreen(
                         // down when expanded, up when collapsed.
                         val centerX = size.width / 2f
                         val centerY = size.height / 2f
-                        val halfWidth = 6.dp.toPx()
-                        val halfHeight = 4.dp.toPx()
-                        val strokeWidth = 1.8.dp.toPx()
+                        val halfWidth = 4.5.dp.toPx()
+                        val halfHeight = 3.dp.toPx()
+                        val strokeWidth = 1.6.dp.toPx()
+                        val chevronColor = if (miniDockUsesLightBackground) Color.Black else Color.White
                         drawLine(
-                            color = Color.White,
+                            color = chevronColor,
                             start = Offset(centerX - halfWidth, centerY - halfHeight),
                             end = Offset(centerX, centerY + halfHeight),
                             strokeWidth = strokeWidth,
                             cap = androidx.compose.ui.graphics.StrokeCap.Round,
                         )
                         drawLine(
-                            color = Color.White,
+                            color = chevronColor,
                             start = Offset(centerX, centerY + halfHeight),
                             end = Offset(centerX + halfWidth, centerY - halfHeight),
                             strokeWidth = strokeWidth,

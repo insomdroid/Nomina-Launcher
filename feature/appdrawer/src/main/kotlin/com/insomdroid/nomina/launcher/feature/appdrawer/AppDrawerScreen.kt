@@ -536,10 +536,11 @@ private fun AppDrawerContent(
         object : NestedScrollConnection {
             private var pulling = false
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // While pulling, an upward scroll re-opens the drawer rather than scrolling the list.
+                // A reversed gesture ends pull-to-close. Do not keep consuming upward deltas:
+                // once the grid is back at its top, that stale state can swallow the next scroll.
                 if (pulling && available.y < 0f) {
-                    onDrawerDrag(available.y)
-                    return available
+                    pulling = false
+                    return Offset.Zero
                 }
                 return Offset.Zero
             }
@@ -730,20 +731,22 @@ private fun AppDrawerContent(
                                 val progress = (
                                     state.firstVisibleItemIndex.toFloat() / currentMaxScroll
                                 ).coerceIn(0f, 1f)
-                                val thumbHeight = 28.dp.toPx().coerceAtMost(size.height)
+                                val trackHeight = size.height * 0.58f
+                                val trackTop = (size.height - trackHeight) / 2f
+                                val thumbHeight = 24.dp.toPx().coerceAtMost(trackHeight)
                                 val thumbWidth = 2.dp.toPx()
                                 val centerX = size.width / 2f
                                 drawLine(
                                     color = scrubberPalette.trackOff,
-                                    start = Offset(centerX, 0f),
-                                    end = Offset(centerX, size.height),
+                                    start = Offset(centerX, trackTop),
+                                    end = Offset(centerX, trackTop + trackHeight),
                                     strokeWidth = 1.dp.toPx(),
                                 )
                                 drawRoundRect(
                                     color = scrubberPalette.accent,
                                     topLeft = Offset(
                                         centerX - thumbWidth / 2f,
-                                        (size.height - thumbHeight) * progress,
+                                        trackTop + (trackHeight - thumbHeight) * progress,
                                     ),
                                     size = Size(thumbWidth, thumbHeight),
                                     cornerRadius = CornerRadius(2.dp.toPx()),

@@ -34,7 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -195,11 +198,25 @@ fun Dock(
                 .border(2.dp, Color.White.copy(alpha = if (highlighted) 0.8f else 0f), shape),
             color = Color.Black.copy(alpha = backgroundAlpha),
             shape = shape,
+            shadowElevation = 9.dp,
         ) {
             Row(
                 // Five equally sized slots fit in the viewport; any additional slots extend the
                 // same row and are reached with a horizontal swipe. Slot indices stay absolute.
                 modifier = Modifier
+                    .drawBehind {
+                        drawRoundRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.16f),
+                                    Color.White.copy(alpha = 0.055f),
+                                    Color.White.copy(alpha = 0.015f),
+                                    Color.Black.copy(alpha = 0.10f),
+                                ),
+                            ),
+                            cornerRadius = CornerRadius(30.dp.toPx()),
+                        )
+                    }
                     .heightIn(min = DOCK_ROW_MIN_HEIGHT)
                     .horizontalScroll(scrollState)
                     .width(contentWidth)

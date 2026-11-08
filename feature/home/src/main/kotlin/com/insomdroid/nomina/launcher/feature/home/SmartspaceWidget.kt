@@ -301,7 +301,7 @@ internal fun SmartspaceContent(
             } else {
                 append(battery)
             }
-            append("  " + deviceStatus.networkText)
+            append(" · " + deviceStatus.networkText)
         }
     }
 

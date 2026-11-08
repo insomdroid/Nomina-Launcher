@@ -123,10 +123,6 @@ class SettingsRepository @Inject constructor(
             pageSwitchSpeed = (p[Keys.PAGE_SWITCH_SPEED] ?: LauncherSettings.SPEED_NORMAL).let {
                 if (it == LauncherSettings.SPEED_FAST || it == LauncherSettings.SPEED_FASTEST) it else LauncherSettings.SPEED_NORMAL
             },
-            fontFamily = (p[Keys.FONT_FAMILY] ?: LauncherSettings.FONT_DEFAULT).let {
-                if (it in LauncherSettings.FONTS && (it != LauncherSettings.FONT_CUSTOM || !p[Keys.CUSTOM_FONT_PATH].isNullOrBlank())) it else LauncherSettings.FONT_DEFAULT
-            },
-            customFontPath = p[Keys.CUSTOM_FONT_PATH].orEmpty(),
             iconShape = (p[Keys.ICON_SHAPE] ?: LauncherSettings.ICON_SHAPE_SYSTEM).let {
                 if (it in LauncherSettings.ICON_SHAPES) it else LauncherSettings.ICON_SHAPE_SYSTEM
             },
@@ -435,11 +431,6 @@ class SettingsRepository @Inject constructor(
     /** How fast the home pager settles on a page ([LauncherSettings.SPEED_NORMAL] / FAST / FASTEST). */
     suspend fun setPageSwitchSpeed(speed: String) = edit { it[Keys.PAGE_SWITCH_SPEED] = speed }
 
-    /** The launcher's font, one of [LauncherSettings.FONTS]; anything else reads back as the default. */
-    suspend fun setFontFamily(font: String) = edit {
-        it[Keys.FONT_FAMILY] = if (font in LauncherSettings.FONTS) font else LauncherSettings.FONT_DEFAULT
-    }
-    suspend fun setCustomFontPath(path: String) = edit { it[Keys.CUSTOM_FONT_PATH] = path } 
     suspend fun setIconShape(shape: String) = edit {
         it[Keys.ICON_SHAPE] = if (shape in LauncherSettings.ICON_SHAPES) shape else LauncherSettings.ICON_SHAPE_SYSTEM
     }
@@ -757,8 +748,6 @@ class SettingsRepository @Inject constructor(
         val SHOW_PAGE_INDICATOR = booleanPreferencesKey("show_page_indicator")
         val HOME_PAGE_MARKER = stringPreferencesKey("home_page_marker")
         val PAGE_SWITCH_SPEED = stringPreferencesKey("page_switch_speed")
-        val FONT_FAMILY = stringPreferencesKey("font_family")
-        val CUSTOM_FONT_PATH = stringPreferencesKey("custom_font_path")
         val ICON_SHAPE = stringPreferencesKey("icon_shape")
         val AUTO_RESIZE_ICONS = booleanPreferencesKey("auto_resize_icons")
         val INFINITE_SCROLL = booleanPreferencesKey("infinite_scroll")
@@ -874,7 +863,7 @@ class SettingsRepository @Inject constructor(
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
             "notif_widget_count_style", "icon_pack_package", "weather_app_key", "home_page_marker",
-            "page_switch_speed", "collapsed_settings_sections", "font_family", "icon_shape", "drawer_label_color_mode",
+            "page_switch_speed", "collapsed_settings_sections", "icon_shape", "drawer_label_color_mode",
             "people_privacy", "pinned_people", "people_aliases",
             "custom_icons", "folder_icons", "shortcut_icons",
         )
@@ -939,7 +928,7 @@ class SettingsRepository @Inject constructor(
             "drive_interval_days", "drive_wifi_only", "drive_charging_only",
             "auto_update_enabled", "update_last_check", "update_last_notified_version",
             "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications", "people_batch_enabled", "people_batch_times",
-            "default_reminder_dismissed", "left_swipe_app_key", "custom_font_path",
+            "default_reminder_dismissed", "left_swipe_app_key", "custom_font_path", "font_family",
             // Legacy settings from removed features must not reappear in backups or be restored.
             "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",
             "hide_system_status_bar", "status_bar_scrim", "lock_sound_uri", "unlock_sound_uri",

@@ -47,17 +47,16 @@ internal fun tailShowsPageZero(
 /**
  * Pages to jump when a user drag runs past an end of the pager, or 0. Back from page 0 it jumps
  * forward onto the copy of page 0 (the pager can then keep scrolling back to the last page) —
- * unless the left-edge app owns that swipe. On past the copy it jumps back onto the real page 0.
+ *  On past the copy it jumps back onto the real page 0.
  */
 internal fun wrapJumpPages(
     atStart: Boolean,
     atEnd: Boolean,
     pageCount: Int,
     tailShowsPageZero: Boolean,
-    leftEdgeAction: Boolean,
 ): Int = when {
     !tailShowsPageZero -> 0
-    atStart && !leftEdgeAction -> pageCount
+    atStart -> pageCount
     atEnd -> -pageCount
     else -> 0
 }
@@ -106,14 +105,13 @@ internal fun rememberWrapAroundOverscroll(
     pagerState: PagerState,
     pageCount: Int,
     tailShowsPageZero: Boolean,
-    leftEdgeAction: Boolean,
     onWrap: (toTailCopy: Boolean) -> Unit = {},
     onStartOverscroll: () -> Unit = {},
     onEndOverscroll: () -> Unit = {},
 ): OverscrollEffect {
     val platform = rememberOverscrollEffect()
     val config = rememberUpdatedState(
-        WrapConfig(pageCount, tailShowsPageZero, leftEdgeAction, onWrap, onStartOverscroll, onEndOverscroll),
+        WrapConfig(pageCount, tailShowsPageZero, onWrap, onStartOverscroll, onEndOverscroll),
     )
     return remember(pagerState, platform) { WrapAroundOverscroll(pagerState, platform) { config.value } }
 }
@@ -121,7 +119,6 @@ internal fun rememberWrapAroundOverscroll(
 private class WrapConfig(
     val pageCount: Int,
     val tailShowsPageZero: Boolean,
-    val leftEdgeAction: Boolean,
     val onWrap: (toTailCopy: Boolean) -> Unit,
     val onStartOverscroll: () -> Unit,
     val onEndOverscroll: () -> Unit,
@@ -162,11 +159,10 @@ private class WrapAroundOverscroll(
                     atEnd = !pagerState.canScrollForward,
                     pageCount = c.pageCount,
                     tailShowsPageZero = c.tailShowsPageZero,
-                    leftEdgeAction = c.leftEdgeAction,
                 )
                 val stride = pagerState.layoutInfo.pageSize + pagerState.layoutInfo.pageSpacing
                 if (pages == 0 || stride <= 0) {
-                    if (pages == 0 && atStart && !c.leftEdgeAction) c.onStartOverscroll()
+                    if (pages == 0 && atStart) c.onStartOverscroll()
                     consumed
                 } else {
                     c.onWrap(pages > 0)
@@ -211,7 +207,6 @@ internal fun Modifier.wrapAroundPagingSemantics(
     pageCount: Int,
     enabled: Boolean,
     tailShowsPageZero: Boolean,
-    leftEdgeAction: Boolean,
     scope: CoroutineScope,
     onWrap: () -> Unit,
     onEndReached: () -> Unit,
@@ -228,7 +223,7 @@ internal fun Modifier.wrapAroundPagingSemantics(
         )
         pageLeft {
             if (pagerState.pageBack(scope, pageSpec)) return@pageLeft true
-            if (!leftEdgeAction) onEndReached()
+            onEndReached()
             false
         }
         pageRight {
@@ -241,7 +236,7 @@ internal fun Modifier.wrapAroundPagingSemantics(
             true
         }
     }
-    wrapJumpPages(atStart = true, atEnd = false, pageCount, tailShowsPageZero, leftEdgeAction) != 0 -> semantics {
+    wrapJumpPages(atStart = true, atEnd = false, pageCount, tailShowsPageZero) != 0 -> semantics {
         horizontalScrollAxisRange = ScrollAxisRange(
             value = { (pagerState.currentPage + pagerState.currentPageOffsetFraction + 1f) * pagerState.stride() },
             maxValue = { (pageCount + 1) * pagerState.stride() },

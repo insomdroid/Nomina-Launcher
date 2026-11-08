@@ -186,7 +186,6 @@ fun HomeScreen(
     val settings = uiState.settings
     // First-run intro (fresh installs only) — covers the whole home surface until finished/skipped.
     val showOnboarding by viewModel.showOnboarding.collectAsStateWithLifecycle()
-    val leftSwipeAvailable by viewModel.leftSwipeAvailable.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val hostView = LocalView.current
     val hostWindow = (context as? android.app.Activity)?.window
@@ -628,10 +627,6 @@ fun HomeScreen(
                 // startsInBottomGestureZone). Zero with three-button navigation under an opaque bar.
                 bottomGestureZonePx = WindowInsets.mandatorySystemGestures.getBottom(LocalDensity.current).toFloat(),
                 onOpenNotifications = { NotificationShade.expand(context) },
-                // Left-edge action: a right-drag on the leftmost page launches the configured app.
-                leftEdgeEnabled = leftSwipeAvailable && !showOnboarding && openFolderId == null,
-                atLeftEdge = { dragController.currentPage == 0 },
-                onLeftEdgeAction = viewModel::onLeftSwipe,
                 // Issue #17 (opt-in): a swipe up from a home folder icon opens the folder's first app.
                 folderSwipeOpensFirstApp = settings.folderSwipeOpensFirstApp && !showOnboarding && openFolderId == null,
                 onFolderSwipeUp = { id ->
@@ -657,9 +652,6 @@ fun HomeScreen(
                 widgetEdgesAlignWithIcons = settings.widgetEdgesAlignWithIcons,
                 homePageMarker = settings.homePageMarker,
                 infiniteScroll = settings.infiniteScroll,
-                // Same condition as pixelHomeSwipe's left-edge gesture above: while it owns the
-                // right-drag on page 0, page 0 must not wrap back.
-                leftEdgeActionEnabled = leftSwipeAvailable && !showOnboarding,
                 locked = settings.desktopLocked,
                 homeSignals = homeSignals,
                 homePage = if (uiState.loaded) uiState.homePage else null,
@@ -1213,9 +1205,6 @@ internal fun Modifier.pixelHomeSwipe(
     onDrawerDrag: (Float) -> Unit,
     onDrawerSettle: (Float) -> Unit,
     onOpenNotifications: () -> Unit,
-    leftEdgeEnabled: Boolean = false,
-    atLeftEdge: () -> Boolean = { false },
-    onLeftEdgeAction: () -> Unit = {},
     folderSwipeOpensFirstApp: Boolean = false,
     onFolderSwipeUp: (Long) -> Unit = {},
     bottomGestureZonePx: Float = 0f,
@@ -1226,10 +1215,9 @@ internal fun Modifier.pixelHomeSwipe(
     val latestOnDrawerCancel by rememberUpdatedState(onDrawerCancel)
     val latestBottomGestureZonePx by rememberUpdatedState(bottomGestureZonePx)
     val latestOnOpenNotifications by rememberUpdatedState(onOpenNotifications)
-    val latestOnLeftEdgeAction by rememberUpdatedState(onLeftEdgeAction)
     val latestOnFolderSwipeUp by rememberUpdatedState(onFolderSwipeUp)
 
-    return pointerInput(swipeUpForDrawer, swipeDownForNotifications, leftEdgeEnabled, folderSwipeOpensFirstApp, dragController) {
+    return pointerInput(swipeUpForDrawer, swipeDownForNotifications, folderSwipeOpensFirstApp, dragController) {
         val touchSlop = viewConfiguration.touchSlop
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
@@ -1250,8 +1238,7 @@ internal fun Modifier.pixelHomeSwipe(
             val verticalSlop = if (fromDock) dockSwipeSlop(touchSlop, DOCK_SWIPE_MIN_TRAVEL.toPx()) else touchSlop
             val velocityTracker = VelocityTracker()
             velocityTracker.addPosition(down.uptimeMillis, down.position)
-            // 0 = undecided, 1 = drawer up-drag, 2 = left-edge action (right-drag on page 0),
-            // 3 = notification shade opened (swallow the rest of the gesture so it can't reach the pager)
+            // 0 = undecided, 1 = drawer up-drag, 3 = notification shade opened (swallow the rest of the gesture)
             var mode = 0
             var lastY = down.position.y
             var settled = false
@@ -1289,10 +1276,6 @@ internal fun Modifier.pixelHomeSwipe(
                         if (finalDy != 0f) latestOnDrawerDrag(finalDy)
                         settled = true
                         latestOnDrawerSettle(velocityTracker.calculateVelocity().y)
-                    } else if (mode == 2) {
-                        // Left-edge action: commit only when dragged far enough right (a short drag
-                        // cancels, so the gesture can be aborted by releasing early).
-                        if (change.position.x - down.position.x > size.width * 0.25f) latestOnLeftEdgeAction()
                     }
                     break
                 }
@@ -1336,28 +1319,14 @@ internal fun Modifier.pixelHomeSwipe(
                             }
                         }
                         // Horizontal gesture.
-                        abs(dx) > touchSlop && abs(dx) >= abs(dy) -> {
-                            if (fromDock) {
-                                // Sideways on the dock is the dock's own (a reorder after a hold); never the edge action.
-                                break
-                            } else if (leftEdgeEnabled && dx > 0f && atLeftEdge()) {
-                                // Right-drag on the leftmost page → the configurable left-edge action.
-                                // Consume so the pager doesn't overscroll; commit on release past slop.
-                                mode = 2
-                                change.consume()
-                            } else {
-                                // Other horizontal → don't consume; leave it to the HorizontalPager.
-                                break
-                            }
-                        }
+                        abs(dx) > touchSlop && abs(dx) >= abs(dy) -> break
                     }
                 } else if (mode == 1) {
                     change.consume()
                     latestOnDrawerDrag(change.position.y - lastY)
                     lastY = change.position.y
                 } else {
-                    // mode == 2 (left-edge drag) or mode == 3 (shade opened): keep consuming so the
-                    // pager never grabs the rest of the gesture.
+                    // mode == 3 (shade opened): keep consuming so the pager never grabs the rest of the gesture.
                     change.consume()
                 }
             } } finally {

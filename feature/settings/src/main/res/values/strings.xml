@@ -149,9 +149,8 @@
     <string name="settings_font_desc">Geist for the interface; Geist Mono for compact technical information. Numeric displays use Doto.</string>
     <string name="settings_font_default">Geist</string>
     <string name="settings_font_geist_mono">Geist Mono</string>
-    <string name="settings_left_edge">Left edge</string>
-    <string name="settings_left_edge_none">None</string>
-    <string name="settings_left_edge_pick">Choose app</string>
+    <string name="settings_weather_app_none">None</string>
+    <string name="settings_weather_app_pick">Choose app</string>
     <string name="settings_close">Close</string>
     <string name="settings_lock_desktop">Lock desktop</string>
     <string name="settings_frequent_apps">Most used at the top</string>

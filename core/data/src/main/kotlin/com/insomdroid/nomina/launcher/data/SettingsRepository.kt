@@ -133,7 +133,6 @@ class SettingsRepository @Inject constructor(
             notificationDotScale = (p[Keys.NOTIF_DOT_SCALE] ?: 1.0f).coerceIn(MIN_DOT_SCALE, MAX_DOT_SCALE),
             useThemedIcons = p[Keys.USE_THEMED_ICONS] ?: false,
             iconPackPackage = p[Keys.ICON_PACK] ?: "",
-            leftSwipeAppKey = p[Keys.LEFT_SWIPE_APP_KEY] ?: "",
             weatherAppKey = p[Keys.WEATHER_APP_KEY] ?: "",
             desktopLocked = p[Keys.DESKTOP_LOCKED] ?: false,
             showFrequentApps = p[Keys.SHOW_FREQUENT_APPS] ?: false,
@@ -447,9 +446,6 @@ class SettingsRepository @Inject constructor(
     suspend fun setWidgetTonalBackground(value: Boolean) = edit { it[Keys.WIDGET_TONAL_BACKGROUND] = value }
     suspend fun setNotificationWidgetCountStyle(style: String) = edit { it[Keys.NOTIF_WIDGET_COUNT_STYLE] = style }
 
-    /** Sets (or, for a blank/null [key], clears) the app launched by the left-edge home swipe. */
-    suspend fun setLeftSwipeAppKey(key: String?) = edit { it[Keys.LEFT_SWIPE_APP_KEY] = key?.trim().orEmpty() }
-
     /** Sets (or, for a blank/null [key], clears) the app a tap on the weather line opens. */
     suspend fun setWeatherAppKey(key: String?) = edit { it[Keys.WEATHER_APP_KEY] = key?.trim().orEmpty() }
 
@@ -761,7 +757,6 @@ class SettingsRepository @Inject constructor(
         val NOTIF_WIDGET_COUNT_STYLE = stringPreferencesKey("notif_widget_count_style")
         val USE_THEMED_ICONS = booleanPreferencesKey("use_themed_icons")
         val ICON_PACK = stringPreferencesKey("icon_pack_package")
-        val LEFT_SWIPE_APP_KEY = stringPreferencesKey("left_swipe_app_key")
         val WEATHER_APP_KEY = stringPreferencesKey("weather_app_key")
         val DESKTOP_LOCKED = booleanPreferencesKey("desktop_locked")
         val DOUBLE_TAP_LOCK = booleanPreferencesKey("double_tap_lock")
@@ -863,7 +858,7 @@ class SettingsRepository @Inject constructor(
         )
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
-            "notif_widget_count_style", "icon_pack_package", "left_swipe_app_key", "weather_app_key", "home_page_marker",
+            "notif_widget_count_style", "icon_pack_package", "weather_app_key", "home_page_marker",
             "page_switch_speed", "collapsed_settings_sections", "font_family", "drawer_label_color_mode",
             "people_privacy", "pinned_people", "people_aliases",
             "custom_icons", "folder_icons", "shortcut_icons",
@@ -885,7 +880,7 @@ class SettingsRepository @Inject constructor(
          *  `dock_favorites` is the dock of versions before 0.9.7, kept here so an older backup
          *  file's keys are remapped before they become dock rows. */
         val APP_KEY_PREFS = setOf(
-            "dock_favorites", "hidden_apps", "custom_labels", "custom_icons", "drawer_folders", "left_swipe_app_key", "weather_app_key",
+            "dock_favorites", "hidden_apps", "custom_labels", "custom_icons", "drawer_folders", "weather_app_key",
         )
 
         /** Every preference keyed by something that ends in a profile serial: the app keys above and the
@@ -896,7 +891,7 @@ class SettingsRepository @Inject constructor(
         /**
          * Rewrites each app key inside the value [raw] of the [APP_KEY_PREFS] preference [name] with
          * [transform]; null drops that entry (a dock or hidden entry, a label line, a drawer-folder
-         * member, the left-swipe or weather app). Duplicates a rewrite creates collapse into the first one.
+         * member or the weather app). Duplicates a rewrite creates collapse into the first one.
          * Folders that end up empty stay (an empty drawer folder is a normal state), and any other
          * preference comes back unchanged.
          */
@@ -914,7 +909,7 @@ class SettingsRepository @Inject constructor(
                     else (fields.take(2) + fields.drop(2).filter { it.isNotEmpty() }.mapNotNull(transform).distinct())
                         .joinToString("\t")
                 }
-                "left_swipe_app_key", "weather_app_key" -> if (raw.isBlank()) raw else transform(raw.trim()).orEmpty()
+                "weather_app_key" -> if (raw.isBlank()) raw else transform(raw.trim()).orEmpty()
                 else -> raw
             }
         }
@@ -929,7 +924,7 @@ class SettingsRepository @Inject constructor(
             "drive_interval_days", "drive_wifi_only", "drive_charging_only",
             "auto_update_enabled", "update_last_check", "update_last_notified_version",
             "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications", "people_batch_enabled", "people_batch_times",
-            "default_reminder_dismissed",
+            "default_reminder_dismissed", "left_swipe_app_key",
             // Legacy settings from removed features must not reappear in backups or be restored.
             "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",
             "hide_system_status_bar", "status_bar_scrim", "lock_sound_uri", "unlock_sound_uri",

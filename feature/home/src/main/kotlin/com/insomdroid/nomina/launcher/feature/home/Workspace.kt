@@ -161,9 +161,6 @@ internal fun Workspace(
     /** Swiping on from the last page continues to the first, and back from the first to the last
      *  (see WorkspaceWrap.kt). Off: the last page bounces back from the empty drop page. */
     infiniteScroll: Boolean = false,
-    /** The left-edge app takes a right-drag on page 0 (HomeScreen's root detector), so page 0 never
-     *  wraps back to the last page while it is set. */
-    leftEdgeActionEnabled: Boolean = false,
     locked: Boolean,
     homeSignals: Flow<Boolean>,
     /** The page HOME returns to and the launcher opens on; null until settings have been read. */
@@ -956,7 +953,6 @@ internal fun Workspace(
                     pagerState = pagerState,
                     pageCount = pageCount,
                     tailShowsPageZero = tailCopy,
-                    leftEdgeAction = leftEdgeActionEnabled,
                     onWrap = { toTailCopy -> copyOnScreen = toTailCopy },
                     onStartOverscroll = ::sayNoMorePages,
                     onEndOverscroll = ::sayNoMorePages,
@@ -971,8 +967,7 @@ internal fun Workspace(
                         pageCount = pageCount,
                         enabled = pagerScrolls,
                         tailShowsPageZero = tailCopy,
-                        leftEdgeAction = leftEdgeActionEnabled,
-                        scope = scope,
+                            scope = scope,
                         onWrap = { copyOnScreen = true },
                         onEndReached = ::sayNoMorePages,
                     )

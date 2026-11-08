@@ -2,6 +2,7 @@ package com.insomdroid.nomina.feature.appdrawer
 
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -58,6 +59,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,7 +69,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -662,8 +666,7 @@ private fun AppDrawerContent(
             // Work page and the search results — so they all measure the same icon size.
             @Composable
             fun DrawerGrid(state: LazyGridState, bottomPadding: Dp, content: LazyGridScope.() -> Unit) {
-                BoxWithConstraints(Modifier.fillMaxSize()) {
-                    val scrubberTrackHeight = maxHeight
+                Box(Modifier.fillMaxSize()) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(columns),
                         state = state,
@@ -674,18 +677,21 @@ private fun AppDrawerContent(
                             .onSizeChanged { gridWidthPx = it.width },
                         content = content,
                     )
-                    val itemCount = state.layoutInfo.totalItemsCount
+                    // Keep the item count as composition state, but read the moving index only
+                    // while drawing. Reading firstVisibleItemIndex in composition caused the
+                    // drawer subtree to recompose repeatedly during fast finger and wheel scrolling.
+                    val itemCount by remember(state) {
+                        derivedStateOf { state.layoutInfo.totalItemsCount }
+                    }
                     if (showScrubber && !searching && itemCount > 1) {
                         val maxScroll = (itemCount - 1).coerceAtLeast(1)
-                        val progress = (state.firstVisibleItemIndex.toFloat() / maxScroll).coerceIn(0f, 1f)
-                        val thumbHeight = 28.dp.coerceAtMost(scrubberTrackHeight)
                         val scrubberPalette = LocalExpressivePalette.current
-                        Box(
+                        Canvas(
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
                                 .fillMaxHeight()
                                 .width(24.dp)
-                                .pointerInput(state, itemCount, scrubberTrackHeight) {
+                                .pointerInput(state, itemCount) {
                                     coroutineScope {
                                         // Keep only the latest finger position while one scroll
                                         // request is being processed. A drag can emit many events
@@ -717,24 +723,32 @@ private fun AppDrawerContent(
                                         }
                                     }
                                 },
-                            contentAlignment = Alignment.TopCenter,
                         ) {
-                            // A hairline track and a short accent thumb replace the old long,
-                            // heavy-looking scrollbar. The wider parent remains the touch target.
-                            Box(
-                                Modifier
-                                    .fillMaxHeight()
-                                    .width(1.dp)
-                                    .background(scrubberPalette.trackOff, RoundedCornerShape(1.dp)),
-                            )
-                            Box(
-                                Modifier
-                                    .align(Alignment.TopCenter)
-                                    .offset(y = (scrubberTrackHeight - thumbHeight) * progress)
-                                    .width(2.dp)
-                                    .height(thumbHeight)
-                                    .background(scrubberPalette.accent, RoundedCornerShape(2.dp)),
-                            )
+                            val currentItemCount = state.layoutInfo.totalItemsCount
+                            if (currentItemCount > 1) {
+                                val currentMaxScroll = (currentItemCount - 1).coerceAtLeast(1)
+                                val progress = (
+                                    state.firstVisibleItemIndex.toFloat() / currentMaxScroll
+                                ).coerceIn(0f, 1f)
+                                val thumbHeight = 28.dp.toPx().coerceAtMost(size.height)
+                                val thumbWidth = 2.dp.toPx()
+                                val centerX = size.width / 2f
+                                drawLine(
+                                    color = scrubberPalette.trackOff,
+                                    start = Offset(centerX, 0f),
+                                    end = Offset(centerX, size.height),
+                                    strokeWidth = 1.dp.toPx(),
+                                )
+                                drawRoundRect(
+                                    color = scrubberPalette.accent,
+                                    topLeft = Offset(
+                                        centerX - thumbWidth / 2f,
+                                        (size.height - thumbHeight) * progress,
+                                    ),
+                                    size = Size(thumbWidth, thumbHeight),
+                                    cornerRadius = CornerRadius(2.dp.toPx()),
+                                )
+                            }
                         }
                     }
                 }

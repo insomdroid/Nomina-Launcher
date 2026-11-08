@@ -30,31 +30,23 @@ class WorkspaceWrapTest {
 
     @Test
     fun aDragBackFromPageZeroJumpsForwardOntoTheCopy() {
-        assertThat(wrapJumpPages(atStart = true, atEnd = false, pageCount = 3, tailShowsPageZero = true, leftEdgeAction = false))
+        assertThat(wrapJumpPages(atStart = true, atEnd = false, pageCount = 3, tailShowsPageZero = true))
             .isEqualTo(3)
     }
 
     @Test
-    fun theLeftEdgeAppKeepsPageZeroFromWrappingBack() {
-        assertThat(wrapJumpPages(atStart = true, atEnd = false, pageCount = 3, tailShowsPageZero = true, leftEdgeAction = true))
-            .isEqualTo(0)
-    }
-
-    @Test
-    fun aDragOnPastTheCopyJumpsBackOntoPageZeroEvenWithTheLeftEdgeApp() {
-        assertThat(wrapJumpPages(atStart = false, atEnd = true, pageCount = 3, tailShowsPageZero = true, leftEdgeAction = false))
-            .isEqualTo(-3)
-        assertThat(wrapJumpPages(atStart = false, atEnd = true, pageCount = 3, tailShowsPageZero = true, leftEdgeAction = true))
+    fun aDragOnPastTheCopyJumpsBackOntoPageZero() {
+        assertThat(wrapJumpPages(atStart = false, atEnd = true, pageCount = 3, tailShowsPageZero = true))
             .isEqualTo(-3)
     }
 
     @Test
     fun noJumpWithoutTheCopyOrAwayFromTheEnds() {
-        assertThat(wrapJumpPages(atStart = true, atEnd = false, pageCount = 3, tailShowsPageZero = false, leftEdgeAction = false))
+        assertThat(wrapJumpPages(atStart = true, atEnd = false, pageCount = 3, tailShowsPageZero = false))
             .isEqualTo(0)
-        assertThat(wrapJumpPages(atStart = false, atEnd = true, pageCount = 3, tailShowsPageZero = false, leftEdgeAction = false))
+        assertThat(wrapJumpPages(atStart = false, atEnd = true, pageCount = 3, tailShowsPageZero = false))
             .isEqualTo(0)
-        assertThat(wrapJumpPages(atStart = false, atEnd = false, pageCount = 3, tailShowsPageZero = true, leftEdgeAction = false))
+        assertThat(wrapJumpPages(atStart = false, atEnd = false, pageCount = 3, tailShowsPageZero = true))
             .isEqualTo(0)
     }
 

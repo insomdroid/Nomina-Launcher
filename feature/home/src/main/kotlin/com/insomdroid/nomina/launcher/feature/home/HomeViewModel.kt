@@ -481,23 +481,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    /** The left-edge swipe is armed only while its app still resolves: an uninstalled target left the
-     *  gesture swallowing right-drags on the first page with nothing to open. */
-    val leftSwipeAvailable: StateFlow<Boolean> =
-        combine(settingsRepository.settings, appRepository.apps) { s, apps ->
-            s.leftSwipeAppKey.isNotBlank() && apps.any { it.key == s.leftSwipeAppKey }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), false)
-
-    /**
-     * Launches the app bound to the home left-edge swipe (Settings ▸ Eleet ▸ Vasen reuna). No-op when
-     * none is configured (blank key) or the app no longer resolves (e.g. uninstalled).
-     */
-    fun onLeftSwipe() = viewModelScope.launch {
-        val key = settingsRepository.settings.first().leftSwipeAppKey
-        if (key.isBlank()) return@launch
-        appRepository.apps.first().firstOrNull { it.key == key }?.let { launch(it) }
-    }
-
     /** "Not now" on the set-as-default card: hide it on this device from now on. */
     fun dismissDefaultReminder() {
         viewModelScope.launch { settingsRepository.dismissDefaultReminder() }

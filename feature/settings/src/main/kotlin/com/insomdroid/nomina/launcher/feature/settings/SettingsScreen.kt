@@ -129,7 +129,6 @@ fun SettingsScreen(
     // picker's result (an empty file in Downloads, no message).
     var showHiddenManager by rememberSaveable { mutableStateOf(false) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
-    var showLeftSwipePicker by rememberSaveable { mutableStateOf(false) }
     var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
@@ -524,12 +523,6 @@ fun SettingsScreen(
                         s.folderSwipeOpensFirstApp,
                         viewModel::setFolderSwipeOpensFirstApp,
                     )
-                    val leftSwipeLabel = allApps.firstOrNull { it.key == s.leftSwipeAppKey }?.label
-                        ?: stringResource(R.string.settings_left_edge_none)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_left_edge),
-                        description = leftSwipeLabel,
-                    ) { showLeftSwipePicker = true }
                     DoubleTapLockToggle(enabled = s.doubleTapToLock, onSetEnabled = viewModel::setDoubleTapToLock)
                     // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
                     // number is the real wait here and the default chip names it.
@@ -648,16 +641,6 @@ fun SettingsScreen(
             }
         }
 
-        if (showLeftSwipePicker) {
-            SingleAppPicker(
-                apps = allApps,
-                onPick = { key ->
-                    viewModel.setLeftSwipeAppKey(key)
-                    showLeftSwipePicker = false
-                },
-                onDismiss = { showLeftSwipePicker = false },
-            )
-        }
         if (showPageSpeedPicker) {
             ChoicePicker(
                 title = R.string.settings_page_switch_speed,
@@ -852,12 +835,12 @@ internal fun PageSwitchSpeedRow(selected: String, onClick: () -> Unit) {
 internal fun WeatherAppRow(appLabel: String?, onClick: () -> Unit) {
     ExpressiveActionRow(
         label = stringResource(R.string.settings_weather_app),
-        description = appLabel ?: stringResource(R.string.settings_left_edge_none),
+        description = appLabel ?: stringResource(R.string.settings_weather_app_none),
         onClick = onClick,
     )
 }
 
-/** Single-select app picker (the left-edge swipe app, the weather app): a "None" entry on top, then every app. */
+/** Single-select weather-app picker: a "None" entry on top, then every app. */
 @Composable
 private fun SingleAppPicker(
     apps: List<AppItem>,
@@ -868,7 +851,7 @@ private fun SingleAppPicker(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = p.surfaceHi,
-        title = { Text(stringResource(R.string.settings_left_edge_pick), color = p.text) },
+        title = { Text(stringResource(R.string.settings_weather_app_pick), color = p.text) },
         text = {
             Column(
                 modifier = Modifier
@@ -882,7 +865,7 @@ private fun SingleAppPicker(
                         .padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(stringResource(R.string.settings_left_edge_none), color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
+                    Text(stringResource(R.string.settings_weather_app_none), color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
                 }
                 apps.forEach { app ->
                     Row(

@@ -50,7 +50,7 @@ data class LauncherSettings(
      *  their own text and keep their own fonts. */
     val fontFamily: String = FONT_DEFAULT,
     /** Swiping past the last home page continues to the first one, and back from the first to the
-     *  last (unless the left-edge app takes that swipe). Off keeps the bounce back from the end. */
+     *  last. Off keeps the bounce back from the end. */
     val infiniteScroll: Boolean = true,
     /** "Not now" on the set-as-default card: it stays hidden on this device (Settings still offers
      *  the default-launcher row). Device-local, never in a backup. */
@@ -65,8 +65,6 @@ data class LauncherSettings(
     /** Package name of the selected third-party icon pack (empty = system default). Overrides
      *  [useThemedIcons] when set: mapped apps use the pack's icon, unmapped apps are masked to its style. */
     val iconPackPackage: String = "",
-    /** App key launched by the left-edge home swipe (Settings ▸ Eleet); blank = gesture disabled. */
-    val leftSwipeAppKey: String = "",
     /** App key opened by a tap on the smartspace weather line (Settings > Home); blank = plain text. */
     val weatherAppKey: String = "",
     /** Lock the desktop layout: when true, home + dock items can't be moved, removed, or added. */

@@ -306,12 +306,10 @@ private fun PermissionsPage() {
     val context = LocalContext.current
     var notifAccess by remember { mutableStateOf(hasNotificationAccess(context)) }
     var calendar by remember { mutableStateOf(granted(context, Manifest.permission.READ_CALENDAR)) }
-    var contacts by remember { mutableStateOf(granted(context, Manifest.permission.READ_CONTACTS)) }
     var location by remember { mutableStateOf(granted(context, Manifest.permission.ACCESS_COARSE_LOCATION)) }
     fun refresh() {
         notifAccess = hasNotificationAccess(context)
         calendar = granted(context, Manifest.permission.READ_CALENDAR)
-        contacts = granted(context, Manifest.permission.READ_CONTACTS)
         location = granted(context, Manifest.permission.ACCESS_COARSE_LOCATION)
     }
     LifecycleResumeEffect(Unit) {
@@ -370,25 +368,18 @@ private fun PermissionsPage() {
             onClick = { permissionsLauncher.launch(arrayOf(Manifest.permission.READ_CALENDAR)) },
         )
         PermissionRow(
-            title = stringResource(R.string.onboarding_perm_contacts),
-            description = stringResource(R.string.onboarding_perm_contacts_desc),
-            granted = contacts,
-            onClick = { permissionsLauncher.launch(arrayOf(Manifest.permission.READ_CONTACTS)) },
-        )
-        PermissionRow(
             title = stringResource(R.string.onboarding_perm_location),
             description = stringResource(R.string.onboarding_perm_location_desc),
             granted = location,
             onClick = { permissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)) },
         )
         Spacer(Modifier.height(20.dp))
-        if (!(calendar && contacts && location && notifAccess)) {
+        if (!(calendar && location && notifAccess)) {
             Button(
                 onClick = {
                     openNotifAfterChain = true
                     val perms = arrayOf(
                         Manifest.permission.READ_CALENDAR,
-                        Manifest.permission.READ_CONTACTS,
                         Manifest.permission.ACCESS_COARSE_LOCATION,
                     )
                     permissionsLauncher.launch(perms)

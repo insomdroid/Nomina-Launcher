@@ -32,13 +32,13 @@ class WeatherAppRowTest {
     @Test fun withoutAChosenAppTheRowSaysNone() {
         show(appLabel = null)
         compose.onNodeWithText(res.getString(R.string.settings_weather_app)).assertIsDisplayed()
-        compose.onNodeWithText(res.getString(R.string.settings_left_edge_none)).assertIsDisplayed()
+        compose.onNodeWithText(res.getString(R.string.settings_weather_app_none)).assertIsDisplayed()
     }
 
     @Test fun theChosenAppsNameShowsUnderTheLabel() {
         show(appLabel = "Weather & Radar")
         compose.onNodeWithText("Weather & Radar").assertIsDisplayed()
-        compose.onNodeWithText(res.getString(R.string.settings_left_edge_none)).assertDoesNotExist()
+        compose.onNodeWithText(res.getString(R.string.settings_weather_app_none)).assertDoesNotExist()
     }
 
     @Test fun aTapOnTheRowOpensThePicker() {

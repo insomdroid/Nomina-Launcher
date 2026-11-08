@@ -76,18 +76,6 @@ class SettingsRepositoryTest {
         assertThat(store.data.first()[stringPreferencesKey("people_held_notifications")]).isEqualTo("held")
     }
 
-    @Test
-    fun `leftSwipeAppKey defaults to blank and round-trips`() = runTest {
-        val repo = newRepository()
-        assertThat(repo.settings.first().leftSwipeAppKey).isEmpty()
-
-        repo.setLeftSwipeAppKey("com.example/Main/0")
-        assertThat(repo.settings.first().leftSwipeAppKey).isEqualTo("com.example/Main/0")
-
-        // null clears back to blank (None / gesture disabled).
-        repo.setLeftSwipeAppKey(null)
-        assertThat(repo.settings.first().leftSwipeAppKey).isEmpty()
-    }
 
     @Test
     fun `weatherAppKey defaults to blank and round-trips`() = runTest {

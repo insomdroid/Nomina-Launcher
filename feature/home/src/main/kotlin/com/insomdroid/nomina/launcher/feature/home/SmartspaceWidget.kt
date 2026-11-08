@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -70,7 +73,9 @@ import com.insomdroid.nomina.data.smartspace.CurrentWeather
 import com.insomdroid.nomina.data.smartspace.NextEventPicker
 import com.insomdroid.nomina.data.smartspace.WeatherRepository
 import com.insomdroid.nomina.model.AppItem
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 import com.insomdroid.nomina.ui.launcherDisplayFontFamily
@@ -217,14 +222,13 @@ internal fun SmartspaceContent(
 
     val timeFormat = rememberTimeFormat()
     val dateText = remember(now) {
-        DateUtils.formatDateTime(
-            context,
-            now,
-            DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR,
-        )
+        SimpleDateFormat("EEEE d 'of' MMMM yyyy", Locale.getDefault()).format(Date(now))
     }
     val timeText = remember(now, timeFormat) { timeFormat.format(Date(now)) }
-    val dateTimeText = "$dateText · $timeText"
+    val timeZoneText = remember(now) {
+        SimpleDateFormat("z", Locale.getDefault()).format(Date(now))
+    }
+    val dateTimeText = "$dateText · $timeText $timeZoneText"
 
     val agendaText = when {
         !state.hasCalendarPermission -> "Calendar permission needed"
@@ -282,7 +286,7 @@ internal fun SmartspaceContent(
     val noIndication = remember { MutableInteractionSource() }
     val technicalStyle = TextStyle(
         fontFamily = launcherTechnicalFontFamily(),
-        fontSize = 10.sp,
+        fontSize = 12.sp,
         color = ink,
     )
     val batteryLine = remember(deviceStatus.batteryText, deviceStatus.networkText) {
@@ -297,7 +301,7 @@ internal fun SmartspaceContent(
             } else {
                 append(battery)
             }
-            append(" · " + deviceStatus.networkText)
+            append("  " + deviceStatus.networkText)
         }
     }
 
@@ -317,7 +321,7 @@ internal fun SmartspaceContent(
             Text(
                 text = dateTimeText,
                 color = ink,
-                style = themedTextStyle(technicalStyle.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium)),
+                style = themedTextStyle(technicalStyle.copy(fontWeight = FontWeight.Medium)),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -350,13 +354,24 @@ internal fun SmartspaceContent(
                     alignment = Alignment.CenterEnd,
                     modifier = Modifier.padding(start = 10.dp),
                 ) {
-                    Text(
-                        text = weatherText,
-                        color = ink.copy(alpha = 0.92f),
-                        style = themedTextStyle(technicalStyle),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_weather_outline),
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = ink.copy(alpha = 0.92f),
+                        )
+                        Text(
+                            text = weatherText,
+                            color = ink.copy(alpha = 0.92f),
+                            style = themedTextStyle(technicalStyle),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }

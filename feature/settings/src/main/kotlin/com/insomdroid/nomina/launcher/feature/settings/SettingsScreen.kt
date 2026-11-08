@@ -96,6 +96,8 @@ import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.LongPressScale
 import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.component.LocalIconPack
+import com.insomdroid.nomina.ui.component.LocalIconShape
+import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
 import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
 import com.insomdroid.nomina.ui.component.LocalThemedIcons
 import com.insomdroid.nomina.ui.component.NotificationBadge
@@ -114,12 +116,16 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val s by viewModel.settings.collectAsStateWithLifecycle()
+    val fontImportError by viewModel.fontImportError.collectAsStateWithLifecycle()
     val drawerWallpaper by viewModel.drawerWallpaperPicture.collectAsStateWithLifecycle()
     val allApps by viewModel.apps.collectAsStateWithLifecycle()
     val hiddenKeys by viewModel.hiddenKeys.collectAsStateWithLifecycle()
     val drawerFolders by viewModel.drawerFolders.collectAsStateWithLifecycle()
     val iconPacks by viewModel.iconPacks.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val fontPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) viewModel.importFont(uri)
+    }
     val resources = context.resources
     // Size multipliers read as whole percents, so 100 is the default and the number is easy to come back to.
     val percentText: (Float) -> String = { resources.getString(R.string.settings_percent, scalePercent(it)) }
@@ -167,6 +173,8 @@ fun SettingsScreen(
         // So AppIcons in the pickers (left-edge app, hidden apps) match the selected icon pack / themed
         // icons like every other surface.
         LocalIconPack provides s.iconPackPackage,
+        LocalIconShape provides s.iconShape,
+        LocalAutoResizeIcons provides s.autoResizeIcons,
         LocalThemedIcons provides s.useThemedIcons,
         LocalThemeAllIcons provides s.themeAllIcons,
     ) {
@@ -384,6 +392,13 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_icon_pack),
                         description = iconPackName,
                     ) { showIconPackPicker = true }
+                    IconShapeRow(selected = s.iconShape, onPick = viewModel::setIconShape)
+                    SwitchRow(
+                        stringResource(R.string.settings_auto_resize_icons),
+                        stringResource(R.string.settings_auto_resize_icons_desc),
+                        s.autoResizeIcons,
+                        viewModel::setAutoResizeIcons,
+                    )
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                         SwitchRow(
                             stringResource(R.string.settings_themed_icons),
@@ -428,7 +443,14 @@ fun SettingsScreen(
                     )
 
                     SettingsGroupLabel(stringResource(R.string.settings_typography_group))
-                    FontRow(selected = s.fontFamily, onPick = viewModel::setFontFamily)
+                    FontRow(
+                        selected = s.fontFamily,
+                        hasCustomFont = s.customFontPath.isNotBlank(),
+                        error = fontImportError,
+                        onPick = viewModel::setFontFamily,
+                        onImport = { fontPicker.launch(arrayOf("font/ttf", "application/x-font-ttf", "application/octet-stream")) },
+                        onRemove = viewModel::removeCustomFont,
+                    )
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_home_label_size),
                         value = s.appLabelTextScale,
@@ -1533,21 +1555,69 @@ private fun ColorSwatch(argb: Int, selected: Boolean, enabled: Boolean = true, o
 /** A test tag per font chip, by its settings key. */
 internal fun fontChipTag(key: String): String = "font-$key"
 
-/** The name of a font choice, in its own words. */
-private fun fontNameRes(key: String): Int = when (key) {
-    LauncherSettings.FONT_GEIST_MONO -> R.string.settings_font_geist_mono
-    else -> R.string.settings_font_default
+internal fun iconShapeChipTag(key: String): String = "icon-shape-$key"
+
+private fun iconShapeNameRes(key: String): Int = when (key) {
+    LauncherSettings.ICON_SHAPE_CIRCLE -> R.string.settings_icon_shape_circle
+    LauncherSettings.ICON_SHAPE_SQUIRCLE -> R.string.settings_icon_shape_squircle
+    LauncherSettings.ICON_SHAPE_ROUNDED_SQUARE -> R.string.settings_icon_shape_rounded_square
+    LauncherSettings.ICON_SHAPE_SQUARE -> R.string.settings_icon_shape_square
+    LauncherSettings.ICON_SHAPE_TEARDROP -> R.string.settings_icon_shape_teardrop
+    LauncherSettings.ICON_SHAPE_HEXAGON -> R.string.settings_icon_shape_hexagon
+    LauncherSettings.ICON_SHAPE_OCTAGON -> R.string.settings_icon_shape_octagon
+    LauncherSettings.ICON_SHAPE_FLOWER -> R.string.settings_icon_shape_flower
+    LauncherSettings.ICON_SHAPE_CAT -> R.string.settings_icon_shape_cat
+    else -> R.string.settings_icon_shape_system
 }
 
-/** Two carefully selected launcher families; numeric widget displays use Doto independently. */
+/** All available masks, including the actual adaptive-icon mask supplied by Android. */
 @Composable
-internal fun FontRow(selected: String, onPick: (String) -> Unit) {
+internal fun IconShapeRow(selected: String, onPick: (String) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            .border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
+    ) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+            RowLabel(stringResource(R.string.settings_icon_shape))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
+                LauncherSettings.ICON_SHAPES.forEach { key ->
+                    FilterChip(
+                        selected = selected == key,
+                        onClick = { onPick(key) },
+                        label = { Text(stringResource(iconShapeNameRes(key))) },
+                        modifier = Modifier.testTag(iconShapeChipTag(key)),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Geist is the only bundled family; importing a TTF adds one device-local custom choice. */
+@Composable
+internal fun FontRow(
+    selected: String,
+    onPick: (String) -> Unit,
+    hasCustomFont: Boolean = false,
+    error: String? = null,
+    onImport: () -> Unit = {},
+    onRemove: () -> Unit = {},
+) {
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi,
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = p.shadow,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            .border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_font))
@@ -1556,21 +1626,34 @@ internal fun FontRow(selected: String, onPick: (String) -> Unit) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
             ) {
-                val selectedFont = if (selected == LauncherSettings.FONT_GEIST_MONO) {
-                    LauncherSettings.FONT_GEIST_MONO
-                } else {
-                    LauncherSettings.FONT_DEFAULT
-                }
-                LauncherSettings.FONTS.forEach { key ->
-                    FilterChip(
-                        selected = key == selectedFont,
-                        onClick = { onPick(key) },
-                        label = { Text(stringResource(fontNameRes(key)), fontFamily = launcherFontFamily(key)) },
-                        modifier = Modifier.testTag(fontChipTag(key)),
+                FilterChip(
+                    selected = selected != LauncherSettings.FONT_CUSTOM || !hasCustomFont,
+                    onClick = { onPick(LauncherSettings.FONT_DEFAULT) },
+                    label = { Text(stringResource(R.string.settings_font_default), fontFamily = launcherFontFamily(LauncherSettings.FONT_DEFAULT)) },
+                    modifier = Modifier.testTag(fontChipTag(LauncherSettings.FONT_DEFAULT)),
+                )
+                if (hasCustomFont) {
+                    Text(
+                        stringResource(R.string.settings_font_custom_active),
+                        color = p.text,
+                        fontSize = 12.5.sp,
+                        modifier = Modifier.weight(1f),
                     )
                 }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = onImport) {
+                    Text(stringResource(R.string.settings_font_import), color = p.text)
+                }
+                if (hasCustomFont) {
+                    TextButton(onClick = onRemove) {
+                        Text(stringResource(R.string.settings_font_remove), color = p.text)
+                    }
+                }
+            }
+            if (error != null) {
+                Text(error, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
             }
         }
     }

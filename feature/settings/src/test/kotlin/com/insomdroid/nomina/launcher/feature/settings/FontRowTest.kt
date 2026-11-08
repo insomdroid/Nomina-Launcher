@@ -33,7 +33,7 @@ class FontRowTest {
     @Test fun onlyGeistIsOfferedAsTheBundledFont() {
         show(LauncherSettings.FONT_DEFAULT)
         compose.onNodeWithText(res.getString(R.string.settings_font)).assertIsDisplayed()
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().assertIsSelected()
+        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).assertIsSelected()
         compose.onNodeWithText(res.getString(R.string.settings_font_import)).assertIsDisplayed()
         assertThat(LauncherSettings.FONTS).containsExactly(
             LauncherSettings.FONT_DEFAULT,
@@ -43,7 +43,7 @@ class FontRowTest {
 
     @Test fun tappingGeistSelectsTheBundledFont() {
         show(LauncherSettings.FONT_CUSTOM)
-        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performScrollTo().performClick()
+        compose.onNodeWithTag(fontChipTag(LauncherSettings.FONT_DEFAULT)).performClick()
         assertThat(picked).containsExactly(LauncherSettings.FONT_DEFAULT)
     }
 

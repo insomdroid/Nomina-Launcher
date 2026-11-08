@@ -4,11 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.Paint
 import android.graphics.Rect
-import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.core.graphics.createBitmap
@@ -62,8 +60,6 @@ class CustomIconFiles(context: Context) {
         val crop = Rect((picture.width - side) / 2, (picture.height - side) / 2, (picture.width + side) / 2, (picture.height + side) / 2)
         val icon = createBitmap(SIZE, SIZE)
         val canvas = Canvas(icon)
-        val shape = AdaptiveIconDrawable(Color.BLACK.toDrawable(), null).apply { setBounds(0, 0, SIZE, SIZE) }.iconMask
-        canvas.clipPath(shape)
         canvas.drawBitmap(picture, crop, Rect(0, 0, SIZE, SIZE), Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG))
         save(icon)
     }.getOrNull()

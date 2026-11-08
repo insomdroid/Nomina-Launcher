@@ -824,7 +824,7 @@ fun HomeScreen(
                     .padding(top = 0.dp, bottom = 12.dp)
                     .offset(y = miniDockOffsetY)
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
-                color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
+                color = Color.Black.copy(alpha = 0.35f),
                 shape = RoundedCornerShape(18.dp),
                 shadowElevation = 6.dp,
             ) {

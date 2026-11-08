@@ -50,9 +50,9 @@ class CustomIconFiles(context: Context) {
     private val dir = File(context.filesDir, "custom_icons")
 
     /**
-     * Turns the picture at [uri] into an icon: the middle square of it, scaled to [SIZE] and cut to
-     * the phone's own icon shape (the adaptive-icon mask), so it sits among the other icons like
-     * one of them. Null when [uri] is no readable picture.
+     * Turns the picture at [uri] into a square icon: the middle square of it, scaled to [SIZE].
+     * The currently selected launcher icon shape is applied when the image is displayed. Null when
+     * [uri] is no readable picture.
      */
     fun import(context: Context, uri: Uri): CustomIcon.FromFile? = runCatching {
         val picture = decodePicture(context, uri) ?: return null

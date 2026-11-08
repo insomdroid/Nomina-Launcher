@@ -1536,9 +1536,6 @@ private fun ColorSwatch(argb: Int, selected: Boolean, enabled: Boolean = true, o
     )
 }
 
-/** A test tag per font chip, by its settings key. */
-internal fun fontChipTag(key: String): String = "font-$key"
-
 internal fun iconShapeChipTag(key: String): String = "icon-shape-$key"
 
 private fun iconShapeNameRes(key: String): Int = when (key) {

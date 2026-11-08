@@ -41,9 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -78,7 +75,6 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
-import com.insomdroid.nomina.ui.launcherDisplayFontFamily
 import androidx.core.content.ContextCompat
 import com.insomdroid.nomina.ui.themedTextStyle
 
@@ -293,19 +289,7 @@ internal fun SmartspaceContent(
         fontWeight = FontWeight.Medium,
     )
     val batteryLine = remember(deviceStatus.batteryText, deviceStatus.networkText) {
-        buildAnnotatedString {
-            val battery = deviceStatus.batteryText
-            val numberStart = battery.lastIndexOf(' ').let { if (it >= 0) it + 1 else 0 }
-            if (numberStart in battery.indices && battery.substring(numberStart).any(Char::isDigit)) {
-                append(battery.substring(0, numberStart))
-                withStyle(SpanStyle(fontFamily = launcherDisplayFontFamily())) {
-                    append(battery.substring(numberStart))
-                }
-            } else {
-                append(battery)
-            }
-            append(" · " + deviceStatus.networkText)
-        }
+        "${deviceStatus.batteryText} · ${deviceStatus.networkText}"
     }
 
     Column(
@@ -355,7 +339,7 @@ internal fun SmartspaceContent(
                 Text(
                     text = agendaText,
                     color = ink.copy(alpha = 0.92f),
-                    style = themedTextStyle(dateTimeStyle.copy(fontWeight = FontWeight.Normal)),
+                    style = themedTextStyle(dateTimeStyle),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -391,7 +375,7 @@ internal fun SmartspaceContent(
         Text(
             text = batteryLine,
             color = ink.copy(alpha = 0.92f),
-            style = themedTextStyle(technicalStyle),
+            style = themedTextStyle(dateTimeStyle),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

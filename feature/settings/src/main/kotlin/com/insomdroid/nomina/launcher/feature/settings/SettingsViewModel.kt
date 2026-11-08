@@ -9,6 +9,7 @@ import android.graphics.Typeface
 import android.provider.OpenableColumns
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
@@ -130,7 +131,7 @@ class SettingsViewModel @Inject constructor(
             return@launch
         }
 
-        val destination = File(context.filesDir, "nomina_custom_font.ttf")
+        val destination = File(context.filesDir, "nomina_custom_font_${UUID.randomUUID()}.ttf")
         val temporary = File(context.cacheDir, "nomina_custom_font_import.tmp")
         try {
             var total = 0L
@@ -153,9 +154,11 @@ class SettingsViewModel @Inject constructor(
                 signature.contentEquals("true".toByteArray(Charsets.US_ASCII))
             require(isTrueType) { "The selected file is not a TrueType font." }
             Typeface.createFromFile(temporary)
-            temporary.copyTo(destination, overwrite = true)
+            temporary.copyTo(destination, overwrite = false)
+            val previousPath = repository.settings.first().customFontPath
             repository.setCustomFontPath(destination.absolutePath)
             repository.setFontFamily(LauncherSettings.FONT_CUSTOM)
+            if (previousPath.isNotBlank() && previousPath != destination.absolutePath) File(previousPath).delete()
         } catch (error: Exception) {
             fontImportError.value = error.message ?: "Unable to import this font."
         } finally {
@@ -164,7 +167,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun removeCustomFont() = viewModelScope.launch(Dispatchers.IO) {
-        File(context.filesDir, "nomina_custom_font.ttf").delete()
+        val currentPath = repository.settings.first().customFontPath
+        if (currentPath.isNotBlank()) File(currentPath).delete()
         repository.setCustomFontPath("")
         repository.setFontFamily(LauncherSettings.FONT_DEFAULT)
         fontImportError.value = null

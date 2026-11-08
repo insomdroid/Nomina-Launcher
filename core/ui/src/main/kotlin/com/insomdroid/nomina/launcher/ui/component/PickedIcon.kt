@@ -1,6 +1,7 @@
 package com.insomdroid.nomina.ui.component
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +38,7 @@ fun PickedIcon(
     AsyncImage(
         model = CustomIconImage(icon, epoch),
         contentDescription = contentDescription,
-        modifier = modifier.size(size),
+        modifier = modifier.size(size).clip(launcherIconShape(LocalIconShape.current)),
         onError = { failed = true },
     )
 }

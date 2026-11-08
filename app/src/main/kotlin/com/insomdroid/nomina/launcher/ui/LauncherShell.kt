@@ -46,6 +46,7 @@ import com.insomdroid.nomina.feature.home.HomeScreen
 import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconScale
+import com.insomdroid.nomina.ui.component.LocalIconShape
 import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
 import com.insomdroid.nomina.ui.component.LocalThemedIcons
 import kotlin.math.roundToInt
@@ -180,7 +181,8 @@ fun LauncherShell(
     // The wallpaper behind the window softens as the drawer rises (opt-in, Android 12 and newer).
     DrawerWallpaperBlur(enabled = drawerBlur.enabled, strength = drawerBlur.strength, progress = { currentProgress })
 
-    LongPressDelay(longPressScale) {
+    CompositionLocalProvider(LocalIconShape provides iconStyle.iconShape) {
+        LongPressDelay(longPressScale) {
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -333,5 +335,6 @@ fun LauncherShell(
         }
     }
 
+    }
     BackHandler(enabled = drawerOpen) { animateProgress(0f) }
 }

@@ -133,7 +133,6 @@
     <string name="settings_icon_shape_cat">Cat</string>
     <string name="settings_auto_resize_icons">Automatic icon sizing</string>
     <string name="settings_auto_resize_icons_desc">Adjust transparent icon padding so app icons appear more visually consistent.</string>
-    <string name="settings_typography_group">Typography</string>
     <string name="settings_themed_icons">Themed icons (Monochrome)</string>
     <string name="settings_icon_pack">Icon pack</string>
     <string name="settings_icon_pack_system">System default</string>
@@ -158,13 +157,6 @@
     <string name="settings_long_press_delay">Long-press delay</string>
     <string name="settings_long_press_delay_desc">How long to hold an icon before its menu opens or it can be moved</string>
     <string name="settings_label_color">Label text color</string>
-    <string name="settings_font">Font</string>
-    <string name="settings_font_desc">Geist is the built-in font. Import a TrueType (.ttf) font to use it across Nomina.</string>
-    <string name="settings_font_default">Geist</string>
-    <string name="settings_font_geist_mono">Geist Mono</string>
-    <string name="settings_font_import">Import TTF (max 5 MB)</string>
-    <string name="settings_font_remove">Remove custom font</string>
-    <string name="settings_font_custom_active">Custom TTF active</string>
     <string name="settings_weather_app_none">None</string>
     <string name="settings_weather_app_pick">Choose app</string>
     <string name="settings_close">Close</string>

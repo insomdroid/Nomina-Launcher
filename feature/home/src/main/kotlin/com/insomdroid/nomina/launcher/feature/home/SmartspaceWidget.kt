@@ -288,6 +288,10 @@ internal fun SmartspaceContent(
         fontSize = 12.sp,
         color = ink,
     )
+    val dateTimeStyle = technicalStyle.copy(
+        lineHeight = 12.sp,
+        fontWeight = FontWeight.Medium,
+    )
     val batteryLine = remember(deviceStatus.batteryText, deviceStatus.networkText) {
         buildAnnotatedString {
             val battery = deviceStatus.batteryText
@@ -318,13 +322,13 @@ internal fun SmartspaceContent(
             alignment = Alignment.CenterStart,
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(1.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalAlignment = Alignment.Start,
             ) {
                 Text(
                     text = dateText,
                     color = ink,
-                    style = themedTextStyle(technicalStyle.copy(fontWeight = FontWeight.Medium)),
+                    style = themedTextStyle(dateTimeStyle),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

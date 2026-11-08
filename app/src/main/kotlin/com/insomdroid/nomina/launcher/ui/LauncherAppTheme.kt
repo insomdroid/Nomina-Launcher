@@ -18,6 +18,7 @@ import com.insomdroid.nomina.designsystem.theme.LauncherTheme
 import com.insomdroid.nomina.model.LauncherSettings
 import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
 import com.insomdroid.nomina.ui.component.LocalIconShape
+import com.insomdroid.nomina.ui.LocalLauncherFontFamily
 import javax.inject.Inject
 
 /** The settings the theme itself depends on: the user's font (Settings > Icons > Font). */
@@ -35,6 +36,7 @@ fun LauncherAppTheme(content: @Composable () -> Unit) {
         launcherFontFamily(appearance.fontFamily, appearance.customFontPath)
     }
     CompositionLocalProvider(
+        LocalLauncherFontFamily provides font,
         LocalIconShape provides appearance.iconShape,
         LocalAutoResizeIcons provides appearance.autoResizeIcons,
     ) {

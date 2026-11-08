@@ -228,7 +228,7 @@ internal fun SmartspaceContent(
     val timeZoneText = remember(now) {
         SimpleDateFormat("z", Locale.getDefault()).format(Date(now))
     }
-    val dateTimeText = "$dateText · $timeText $timeZoneText"
+    val dateTimeText = "$dateText\n$timeText $timeZoneText"
 
     val agendaText = when {
         !state.hasCalendarPermission -> "Calendar permission needed"
@@ -318,13 +318,25 @@ internal fun SmartspaceContent(
             interactionSource = noIndication,
             alignment = Alignment.CenterStart,
         ) {
-            Text(
-                text = dateTimeText,
-                color = ink,
-                style = themedTextStyle(technicalStyle.copy(fontWeight = FontWeight.Medium)),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Text(
+                    text = dateText,
+                    color = ink,
+                    style = themedTextStyle(technicalStyle.copy(fontWeight = FontWeight.Medium)),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "$timeText $timeZoneText",
+                    color = ink,
+                    style = themedTextStyle(technicalStyle.copy(fontWeight = FontWeight.Medium)),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
 
         Row(

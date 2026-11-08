@@ -6,7 +6,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import com.insomdroid.nomina.model.LauncherSettings
 
 private val GeistFontFamily = FontFamily(
     Font(R.font.geist_regular, FontWeight.Normal),
@@ -28,7 +27,7 @@ fun launcherTechnicalFontFamily(): FontFamily = GeistMonoFontFamily
 fun launcherDisplayFontFamily(): FontFamily = DotoDisplayFontFamily
 
 /** The launcher uses Geist for general interface text. */
-fun launcherFontFamily(key: String = LauncherSettings.FONT_DEFAULT): FontFamily = GeistFontFamily
+fun launcherFontFamily(): FontFamily = GeistFontFamily
 
 /**
  * Merge a local style over the theme's text style so the default Geist family remains in effect.

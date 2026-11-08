@@ -310,14 +310,14 @@ internal fun SmartspaceContent(
                 horizontalAlignment = Alignment.Start,
             ) {
                 Text(
-                    text = dateText,
+                    text = dateText.uppercase(Locale.getDefault()),
                     color = ink,
                     style = themedTextStyle(dateTimeStyle),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "$timeText $timeZoneText",
+                    text = "$timeText $timeZoneText".uppercase(Locale.getDefault()),
                     color = ink,
                     style = themedTextStyle(dateTimeStyle),
                     maxLines = 1,
@@ -337,7 +337,7 @@ internal fun SmartspaceContent(
                 alignment = Alignment.CenterStart,
             ) {
                 Text(
-                    text = agendaText,
+                    text = agendaText.uppercase(Locale.getDefault()),
                     color = ink.copy(alpha = 0.92f),
                     style = themedTextStyle(dateTimeStyle),
                     maxLines = 1,
@@ -361,7 +361,7 @@ internal fun SmartspaceContent(
                             tint = ink.copy(alpha = 0.92f),
                         )
                         Text(
-                            text = weatherText,
+                            text = weatherText.uppercase(Locale.getDefault()),
                             color = ink.copy(alpha = 0.92f),
                             style = themedTextStyle(dateTimeStyle.copy(fontWeight = FontWeight.Normal)),
                             maxLines = 1,
@@ -373,7 +373,7 @@ internal fun SmartspaceContent(
         }
 
         Text(
-            text = batteryLine,
+            text = batteryLine.uppercase(Locale.getDefault()),
             color = ink.copy(alpha = 0.92f),
             style = themedTextStyle(dateTimeStyle),
             maxLines = 1,

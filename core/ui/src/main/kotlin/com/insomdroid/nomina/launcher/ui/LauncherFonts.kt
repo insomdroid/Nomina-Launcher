@@ -15,14 +15,6 @@ private val GeistFontFamily = FontFamily(
     Font(R.font.geist_semibold, FontWeight.SemiBold),
 )
 
-private val GeistMonoFontFamily = FontFamily(
-    Font(R.font.geistmono_regular, FontWeight.Normal),
-)
-
-private val DotoDisplayFontFamily = FontFamily(
-    Font(R.font.doto_rond_wght, FontWeight.Normal),
-)
-
 /** Geist Mono is reserved for technical labels and compact system data. */
 fun launcherTechnicalFontFamily(): FontFamily = GeistFontFamily
 

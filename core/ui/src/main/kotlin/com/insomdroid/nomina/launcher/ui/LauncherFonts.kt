@@ -2,13 +2,10 @@ package com.insomdroid.nomina.ui
 
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import android.graphics.Typeface
-import java.io.File
 import com.insomdroid.nomina.model.LauncherSettings
 
 private val GeistFontFamily = FontFamily(
@@ -16,27 +13,25 @@ private val GeistFontFamily = FontFamily(
     Font(R.font.geist_semibold, FontWeight.SemiBold),
 )
 
-/** The currently selected font family, shared by theme typography and explicitly styled text. */
-val LocalLauncherFontFamily = staticCompositionLocalOf { GeistFontFamily }
+private val GeistMonoFontFamily = FontFamily(
+    Font(R.font.geistmono_regular, FontWeight.Normal),
+)
 
-/** Technical labels use the same selected family as the rest of the interface. */
-@Composable
-fun launcherTechnicalFontFamily(): FontFamily = LocalLauncherFontFamily.current
+private val DotoDisplayFontFamily = FontFamily(
+    Font(R.font.doto_rond_wght, FontWeight.Normal),
+)
 
-/** Numeric displays use the same selected family as the rest of the interface. */
-@Composable
-fun launcherDisplayFontFamily(): FontFamily = LocalLauncherFontFamily.current
+/** Geist Mono is reserved for Smartspace technical information. */
+fun launcherTechnicalFontFamily(): FontFamily = GeistMonoFontFamily
 
-/** The selected family for launcher-owned text. Removed legacy choices resolve safely to Geist. */
-fun launcherFontFamily(key: String, customFontPath: String = ""): FontFamily =
-    if (key == LauncherSettings.FONT_CUSTOM && customFontPath.isNotBlank()) {
-        runCatching { FontFamily(Typeface.createFromFile(File(customFontPath))) }.getOrDefault(GeistFontFamily)
-    } else {
-        GeistFontFamily
-    }
+/** Doto Rounded is reserved for numeric accents in the Smartspace clock and battery. */
+fun launcherDisplayFontFamily(): FontFamily = DotoDisplayFontFamily
+
+/** The launcher uses Geist for general interface text. */
+fun launcherFontFamily(key: String = LauncherSettings.FONT_DEFAULT): FontFamily = GeistFontFamily
 
 /**
- * Merge a local style over the theme's text style so the user's chosen family remains in effect.
+ * Merge a local style over the theme's text style so the default Geist family remains in effect.
  * Explicit style fields such as size and weight still take precedence.
  */
 @Composable

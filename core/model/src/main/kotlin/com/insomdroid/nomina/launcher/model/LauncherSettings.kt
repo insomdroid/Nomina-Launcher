@@ -45,12 +45,6 @@ data class LauncherSettings(
     /** How fast the home pager settles on a page (its snap and every programmatic page change):
      *  [SPEED_NORMAL], [SPEED_FAST] or [SPEED_FASTEST] (issue #18). */
     val pageSwitchSpeed: String = SPEED_NORMAL,
-    /** The launcher's font for every text it draws itself (home labels, the clock, the drawer, Settings):
-     *  one of [FONTS], device families Android ships (a Telegram request after 0.9.9). Widgets draw
-     *  their own text and keep their own fonts. */
-    val fontFamily: String = FONT_DEFAULT,
-    /** Absolute path to the validated user-imported TTF, empty when Geist is selected. */
-    val customFontPath: String = "",
     /** Icon mask used on every launcher-owned app icon. */
     val iconShape: String = ICON_SHAPE_SYSTEM,
     /** Normalizes transparent icon padding so legacy icons have a more consistent visual size. */
@@ -163,13 +157,6 @@ data class LauncherSettings(
         const val LABEL_COLOR_FOLLOW_HOME = "follow_home"
         const val LABEL_COLOR_AUTOMATIC = "automatic"
         const val LABEL_COLOR_CUSTOM = "custom"
-
-        /** Launcher text families. The legacy default key now uses the bundled Geist UI face. */
-        const val FONT_DEFAULT = "default"
-        const val FONT_GEIST_MONO = "geist_mono" // Legacy key; no longer offered in Settings.
-        const val FONT_CUSTOM = "custom"
-        /** Geist is the only bundled choice; custom is available only after a TTF has been imported. */
-        val FONTS = listOf(FONT_DEFAULT, FONT_CUSTOM)
 
         const val ICON_SHAPE_SYSTEM = "system"
         const val ICON_SHAPE_CIRCLE = "circle"

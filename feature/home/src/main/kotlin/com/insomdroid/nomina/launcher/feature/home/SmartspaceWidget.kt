@@ -228,7 +228,6 @@ internal fun SmartspaceContent(
     val timeZoneText = remember(now) {
         SimpleDateFormat("z", Locale.getDefault()).format(Date(now))
     }
-    val dateTimeText = "$dateText\n$timeText $timeZoneText"
 
     val agendaText = when {
         !state.hasCalendarPermission -> "Calendar permission needed"

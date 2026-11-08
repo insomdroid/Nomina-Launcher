@@ -66,8 +66,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -825,16 +827,30 @@ fun HomeScreen(
             // Compact Nothing-inspired mini dock: camera, app search and browser.
             Surface(
                 modifier = Modifier
-                    .width(124.dp)
+                    .width(112.dp)
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 0.dp, bottom = 12.dp)
                     .offset(y = miniDockOffsetY)
-                    .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
+                    .border(1.dp, Color.White.copy(alpha = 0.24f), RoundedCornerShape(22.dp)),
                 color = Color.Black.copy(alpha = settings.dockBackgroundOpacity),
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(22.dp),
+                shadowElevation = 6.dp,
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(34.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .drawBehind {
+                            drawRect(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.10f),
+                                        Color.White.copy(alpha = 0.025f),
+                                        Color.Black.copy(alpha = 0.08f),
+                                    ),
+                                ),
+                            )
+                        },
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

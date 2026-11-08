@@ -1,6 +1,7 @@
 package com.insomdroid.nomina.ui.component
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import coil3.compose.AsyncImage
 import com.insomdroid.nomina.model.AppItem
 import com.insomdroid.nomina.model.IconEpochs
 import com.insomdroid.nomina.model.IconRequest
+import com.insomdroid.nomina.model.LauncherSettings
 import com.insomdroid.nomina.ui.AppLaunchOrigin
 import com.insomdroid.nomina.ui.AppLaunchSources
 import com.insomdroid.nomina.ui.appLaunchTouch
@@ -49,6 +51,12 @@ val LocalThemeAllIcons = compositionLocalOf { false }
  * drawable wins; an unmapped app continues through the native/generated themed-icon priority chain.
  */
 val LocalIconPack = compositionLocalOf { "" }
+
+/** Selected launcher-wide mask for app and picked icons. */
+val LocalIconShape = compositionLocalOf { LauncherSettings.ICON_SHAPE_SYSTEM }
+
+/** Whether app icons with transparent padding should be normalized to a common visual size. */
+val LocalAutoResizeIcons = compositionLocalOf { true }
 
 /**
  * Icon re-fetch tokens (see [IconEpochs]), provided once at the shell root. [AppIcon] folds the
@@ -121,9 +129,10 @@ fun AppIcon(
                     iconPack = LocalIconPack.current,
                     epoch = LocalIconEpochs.current.of(appItem.packageName),
                     themeAll = LocalThemeAllIcons.current,
+                    autoResize = LocalAutoResizeIcons.current,
                 ),
                 contentDescription = appItem.label,
-                modifier = Modifier.size(iconSize).onGloballyPositioned { origin?.icon = it },
+                modifier = Modifier.size(iconSize).clip(launcherIconShape(LocalIconShape.current)).onGloballyPositioned { origin?.icon = it },
             )
             NotificationBadge(count = badgeCount, showCount = badgeShowCount, scale = badgeScale)
         }

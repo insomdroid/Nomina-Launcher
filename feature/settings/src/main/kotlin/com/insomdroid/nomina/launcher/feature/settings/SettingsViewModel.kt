@@ -4,6 +4,14 @@ import androidx.lifecycle.ViewModel
 import com.insomdroid.nomina.data.DrawerWallpaperStore
 import com.insomdroid.nomina.data.DrawerWallpaper
 import android.net.Uri
+import android.content.Context
+import android.graphics.Typeface
+import android.provider.OpenableColumns
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +42,7 @@ class SettingsViewModel @Inject constructor(
     private val customIcons: CustomIconStore,
     appRepository: AppRepository,
     private val drawerWallpaper: DrawerWallpaperStore,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     /** The user's own picture behind the app drawer, or null (a Telegram request after 0.9.9). */
@@ -105,6 +114,61 @@ class SettingsViewModel @Inject constructor(
     fun setDrawerLabelColor(argb: Int?) = update { repository.setDrawerLabelColor(argb) }
     fun setDrawerPictureDim(value: Float) = update { repository.setDrawerPictureDim(value) }
     fun setFontFamily(font: String) = update { repository.setFontFamily(font) }
+
+    val fontImportError = MutableStateFlow<String?>(null)
+
+    /** Imports a TrueType font from the document picker. The file is validated before replacing the active font. */
+    fun importFont(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
+        fontImportError.value = null
+        val displayName = runCatching {
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0) else null
+            }
+        }.getOrNull().orEmpty()
+        if (!displayName.endsWith(".ttf", ignoreCase = true)) {
+            fontImportError.value = "Please select a .ttf font file."
+            return@launch
+        }
+
+        val destination = File(context.filesDir, "nomina_custom_font.ttf")
+        val temporary = File(context.cacheDir, "nomina_custom_font_import.tmp")
+        try {
+            var total = 0L
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                temporary.outputStream().use { output ->
+                    val buffer = ByteArray(8 * 1024)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        total += count
+                        require(total <= MAX_CUSTOM_FONT_BYTES) { "Font file exceeds the 5 MB limit." }
+                        output.write(buffer, 0, count)
+                    }
+                }
+            } ?: throw IllegalArgumentException("Unable to read the selected font file.")
+
+            require(total >= 12L) { "The selected font file is empty or invalid." }
+            val signature = temporary.inputStream().use { input -> ByteArray(4).also { input.read(it) } }
+            val isTrueType = signature.contentEquals(byteArrayOf(0, 1, 0, 0)) ||
+                signature.contentEquals("true".toByteArray(Charsets.US_ASCII))
+            require(isTrueType) { "The selected file is not a TrueType font." }
+            Typeface.createFromFile(temporary)
+            temporary.copyTo(destination, overwrite = true)
+            repository.setCustomFontPath(destination.absolutePath)
+            repository.setFontFamily(LauncherSettings.FONT_CUSTOM)
+        } catch (error: Exception) {
+            fontImportError.value = error.message ?: "Unable to import this font."
+        } finally {
+            temporary.delete()
+        }
+    }
+
+    fun removeCustomFont() = viewModelScope.launch(Dispatchers.IO) {
+        File(context.filesDir, "nomina_custom_font.ttf").delete()
+        repository.setCustomFontPath("")
+        repository.setFontFamily(LauncherSettings.FONT_DEFAULT)
+        fontImportError.value = null
+    }
     fun setThemeAllIcons(value: Boolean) = update { repository.setThemeAllIcons(value) }
     fun setFolderColumns(value: Int) = update { repository.setFolderColumns(value) }
     fun setSectionCollapsed(id: String, collapsed: Boolean) = update { repository.setSettingsSectionCollapsed(id, collapsed) }
@@ -177,3 +241,5 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch { block() }
     }
 }
+
+private const val MAX_CUSTOM_FONT_BYTES = 5L * 1024L * 1024L

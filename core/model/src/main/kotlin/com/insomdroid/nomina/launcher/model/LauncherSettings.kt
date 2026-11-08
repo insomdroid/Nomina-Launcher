@@ -49,6 +49,12 @@ data class LauncherSettings(
      *  one of [FONTS], device families Android ships (a Telegram request after 0.9.9). Widgets draw
      *  their own text and keep their own fonts. */
     val fontFamily: String = FONT_DEFAULT,
+    /** Absolute path to the validated user-imported TTF, empty when Geist is selected. */
+    val customFontPath: String = "",
+    /** Icon mask used on every launcher-owned app icon. */
+    val iconShape: String = ICON_SHAPE_SYSTEM,
+    /** Normalizes transparent icon padding so legacy icons have a more consistent visual size. */
+    val autoResizeIcons: Boolean = true,
     /** Swiping past the last home page continues to the first one, and back from the first to the
      *  last. Off keeps the bounce back from the end. */
     val infiniteScroll: Boolean = true,
@@ -160,9 +166,26 @@ data class LauncherSettings(
 
         /** Launcher text families. The legacy default key now uses the bundled Geist UI face. */
         const val FONT_DEFAULT = "default"
-        const val FONT_GEIST_MONO = "geist_mono"
-        /** Only the two general-purpose launcher families remain selectable. Legacy stored keys fall back to Geist. */
-        val FONTS = listOf(FONT_DEFAULT, FONT_GEIST_MONO)
+        const val FONT_GEIST_MONO = "geist_mono" // Legacy key; no longer offered in Settings.
+        const val FONT_CUSTOM = "custom"
+        /** Geist is the only bundled choice; custom is available only after a TTF has been imported. */
+        val FONTS = listOf(FONT_DEFAULT, FONT_CUSTOM)
+
+        const val ICON_SHAPE_SYSTEM = "system"
+        const val ICON_SHAPE_CIRCLE = "circle"
+        const val ICON_SHAPE_SQUIRCLE = "squircle"
+        const val ICON_SHAPE_ROUNDED_SQUARE = "rounded_square"
+        const val ICON_SHAPE_SQUARE = "square"
+        const val ICON_SHAPE_TEARDROP = "teardrop"
+        const val ICON_SHAPE_HEXAGON = "hexagon"
+        const val ICON_SHAPE_OCTAGON = "octagon"
+        const val ICON_SHAPE_FLOWER = "flower"
+        const val ICON_SHAPE_CAT = "cat"
+        val ICON_SHAPES = listOf(
+            ICON_SHAPE_SYSTEM, ICON_SHAPE_CIRCLE, ICON_SHAPE_SQUIRCLE,
+            ICON_SHAPE_ROUNDED_SQUARE, ICON_SHAPE_SQUARE, ICON_SHAPE_TEARDROP,
+            ICON_SHAPE_HEXAGON, ICON_SHAPE_OCTAGON, ICON_SHAPE_FLOWER, ICON_SHAPE_CAT,
+        )
 
         const val PRIVACY_ALL = "all"
         const val PRIVACY_SENDER = "sender"

@@ -285,20 +285,15 @@ internal fun SmartspaceContent(
     val noIndication = remember { MutableInteractionSource() }
     val technicalStyle = TextStyle(
         fontFamily = launcherTechnicalFontFamily(),
-        fontSize = 12.sp,
+        fontSize = 11.sp,
         color = ink,
     )
     val dateTimeStyle = technicalStyle.copy(
-        lineHeight = 12.sp,
+        lineHeight = 11.sp,
         fontWeight = FontWeight.Medium,
     )
     val timeLine = remember(timeText, timeZoneText) {
-        buildAnnotatedString {
-            withStyle(SpanStyle(fontFamily = launcherDisplayFontFamily())) {
-                append(timeText.uppercase(Locale.getDefault()))
-            }
-            append(" ${timeZoneText.uppercase(Locale.getDefault())}")
-        }
+        "${timeText.uppercase(Locale.getDefault())} ${timeZoneText.uppercase(Locale.getDefault())}"
     }
     val batteryLine = remember(deviceStatus.batteryText, deviceStatus.networkText) {
         buildAnnotatedString {

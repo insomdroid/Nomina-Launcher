@@ -114,6 +114,8 @@ class SettingsViewModel @Inject constructor(
     fun setDrawerLabelColor(argb: Int?) = update { repository.setDrawerLabelColor(argb) }
     fun setDrawerPictureDim(value: Float) = update { repository.setDrawerPictureDim(value) }
     fun setFontFamily(font: String) = update { repository.setFontFamily(font) }
+    fun setIconShape(shape: String) = update { repository.setIconShape(shape) }
+    fun setAutoResizeIcons(value: Boolean) = update { repository.setAutoResizeIcons(value) }
 
     val fontImportError = MutableStateFlow<String?>(null)
 

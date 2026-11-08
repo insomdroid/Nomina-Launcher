@@ -755,27 +755,27 @@ fun HomeScreen(
                             }
                             .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
                     ) {
-                        // Five small dots form a clean chevron. Rotation preserves the existing
-                        // direction and placement: down when expanded, up when collapsed.
-                        val radius = 1.25.dp.toPx()
-                        val halfWidth = 6.dp.toPx()
-                        val halfHeight = 4.dp.toPx()
+                        // Standard continuous chevron. Rotation preserves the direction:
+                        // down when expanded, up when collapsed.
                         val centerX = size.width / 2f
                         val centerY = size.height / 2f
-                        val stepX = halfWidth / 2f
-                        val stepY = halfHeight / 2f
-                        for (index in 0..2) {
-                            val x = centerX - halfWidth + index * stepX
-                            val y = centerY - halfHeight + index * stepY
-                            drawCircle(Color.White, radius, Offset(x, y))
-                            if (index < 2) {
-                                drawCircle(
-                                    Color.White,
-                                    radius,
-                                    Offset(centerX + halfWidth - index * stepX, centerY - halfHeight + index * stepY),
-                                )
-                            }
-                        }
+                        val halfWidth = 6.dp.toPx()
+                        val halfHeight = 4.dp.toPx()
+                        val strokeWidth = 1.8.dp.toPx()
+                        drawLine(
+                            color = Color.White,
+                            start = Offset(centerX - halfWidth, centerY - halfHeight),
+                            end = Offset(centerX, centerY + halfHeight),
+                            strokeWidth = strokeWidth,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                        drawLine(
+                            color = Color.White,
+                            start = Offset(centerX, centerY + halfHeight),
+                            end = Offset(centerX + halfWidth, centerY - halfHeight),
+                            strokeWidth = strokeWidth,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
                     }
                 }
                 AnimatedVisibility(
@@ -824,7 +824,7 @@ fun HomeScreen(
                     .padding(top = 0.dp, bottom = 12.dp)
                     .offset(y = miniDockOffsetY)
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
-                color = Color.Black.copy(alpha = 0.35f),
+                color = Color.Black.copy(alpha = 0.40f),
                 shape = RoundedCornerShape(18.dp),
                 shadowElevation = 6.dp,
             ) {

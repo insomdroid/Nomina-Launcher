@@ -862,8 +862,7 @@ fun HomeScreen(
                     .width(108.dp)
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 0.dp, bottom = 12.dp)
-                    .offset(y = miniDockOffsetY)
-                    .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
+                    .offset(y = miniDockOffsetY),
                 color = (if (miniDockUsesLightBackground) Color.White else Color.Black).copy(alpha = 0.25f),
                 shape = RoundedCornerShape(18.dp),
                 shadowElevation = 0.dp,

@@ -127,13 +127,13 @@ class CustomIconFiles(context: Context) {
 
 class CustomIconKeyer : Keyer<CustomIconImage> {
     // The epoch keeps an updated pack's old drawable from being served out of the cache.
-    override fun key(data: CustomIconImage, options: Options): String = "customicon:${data.icon.encode()}:e=${data.epoch}"
+    override fun key(data: CustomIconImage, options: Options): String = "customicon:${data.icon.encode()}:e=${data.epoch}:r=${data.autoResize}"
 }
 
 /** Draws a [CustomIconImage] once into a bitmap, like [AppIconFetcher] does for app icons. */
 class CustomIconFetcher(private val data: CustomIconImage, private val source: CustomIconSource) : Fetcher {
     override suspend fun fetch(): FetchResult? = withContext(Dispatchers.IO) {
-        source.drawable(data.icon)?.let(::iconResult)
+        source.drawable(data.icon)?.let { iconResult(it, data.autoResize) }
     }
 
     class Factory(private val source: CustomIconSource) : Fetcher.Factory<CustomIconImage> {

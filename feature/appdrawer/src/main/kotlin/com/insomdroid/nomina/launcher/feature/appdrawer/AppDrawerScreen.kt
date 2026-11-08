@@ -529,28 +529,37 @@ private fun AppDrawerContent(
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
-    // Finger-following pull-to-close: when the grid is at the top and the user keeps dragging down,
-    // the leftover over-scroll reaches onPostScroll as a positive y — feed it to the shared drawer
-    // progress so the drawer tracks the finger; the fling velocity settles it open/closed.
-    val pullConnection = remember(onDrawerDrag, onDrawerSettle) {
+    // Pull-to-close is eligible only when a touch gesture STARTS with a downward movement
+    // while the active grid is already at the top. This prevents a fast up/down scroll sequence
+    // from turning its direction reversal into a drawer pull after the list reaches its boundary.
+    val activeGridState = when {
+        query.isNotBlank() -> gridState
+        selectedTab == DrawerTab.Work -> workGridState
+        else -> gridState
+    }
+    val pullConnection = remember(onDrawerDrag, onDrawerSettle, activeGridState) {
         object : NestedScrollConnection {
             private var pulling = false
+            private var userGestureActive = false
+            private var gestureCanPull = false
+
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // A reversed gesture ends pull-to-close. Do not keep consuming upward deltas:
-                // once the grid is back at its top, that stale state can swallow the next scroll.
+                if (source == NestedScrollSource.UserInput && !userGestureActive) {
+                    userGestureActive = true
+                    gestureCanPull = available.y > 0f &&
+                        activeGridState.firstVisibleItemIndex == 0 &&
+                        activeGridState.firstVisibleItemScrollOffset == 0
+                }
+                // Reversing an intentional pull cancels it; the reverse movement belongs to the grid.
                 if (pulling && available.y < 0f) {
                     pulling = false
-                    return Offset.Zero
+                    gestureCanPull = false
                 }
                 return Offset.Zero
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                // Only the FINGER may start a pull-to-close. A fast downward fling that lands the grid
-                // at its top delivers its leftover as Fling-source deltas here — feeding those in set
-                // `pulling` and let onPreFling slam the drawer shut when the user only meant to scroll
-                // to the top. Fling leftovers now go to the grid's stretch overscroll instead.
-                if (available.y > 0f && source == NestedScrollSource.UserInput) {
+                if (available.y > 0f && source == NestedScrollSource.UserInput && gestureCanPull) {
                     pulling = true
                     onDrawerDrag(available.y)
                     return available
@@ -559,6 +568,8 @@ private fun AppDrawerContent(
             }
 
             override suspend fun onPreFling(available: Velocity): Velocity {
+                userGestureActive = false
+                gestureCanPull = false
                 if (pulling) {
                     pulling = false
                     onDrawerSettle(available.y)
@@ -568,9 +579,8 @@ private fun AppDrawerContent(
             }
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                // Safety net: a pull-to-close that ends without a fling (e.g. a slow drag, finger
-                // lifted) would otherwise never reach onPreFling, leaving `pulling` stuck true and the
-                // drawer half-open. Reset here and settle on whatever velocity remains.
+                userGestureActive = false
+                gestureCanPull = false
                 if (pulling) {
                     pulling = false
                     onDrawerSettle(consumed.y + available.y)

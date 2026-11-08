@@ -24,4 +24,5 @@ data class IconRequest(
     val iconPack: String = "",
     val epoch: Int = 0,
     val themeAll: Boolean = false,
+    val autoResize: Boolean = true,
 )

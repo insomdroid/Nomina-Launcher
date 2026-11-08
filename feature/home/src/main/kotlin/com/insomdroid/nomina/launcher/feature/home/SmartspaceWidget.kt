@@ -313,7 +313,7 @@ internal fun SmartspaceContent(
             .fillMaxWidth()
             .background(widgetSurfaceColor(), RoundedCornerShape(18.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(7.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
         horizontalAlignment = Alignment.Start,
     ) {
         TapTarget(

@@ -1,6 +1,8 @@
 package com.insomdroid.nomina.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -14,19 +16,28 @@ import kotlinx.coroutines.flow.stateIn
 import com.insomdroid.nomina.data.SettingsRepository
 import com.insomdroid.nomina.designsystem.theme.LauncherTheme
 import com.insomdroid.nomina.model.LauncherSettings
+import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
+import com.insomdroid.nomina.ui.component.LocalIconShape
 import javax.inject.Inject
 
 /** The settings the theme itself depends on: the user's font (Settings > Icons > Font). */
 @HiltViewModel
 class ThemeViewModel @Inject constructor(settingsRepository: SettingsRepository) : ViewModel() {
-    val fontFamily: StateFlow<String> = settingsRepository.settings
-        .map { it.fontFamily }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LauncherSettings.FONT_DEFAULT)
+    val appearance: StateFlow<LauncherSettings> = settingsRepository.settings
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LauncherSettings())
 }
 
 /** [LauncherTheme] with the user's font, for every activity of the launcher. */
 @Composable
 fun LauncherAppTheme(content: @Composable () -> Unit) {
-    val font by hiltViewModel<ThemeViewModel>().fontFamily.collectAsStateWithLifecycle()
-    LauncherTheme(fontFamily = launcherFontFamily(font), content = content)
+    val appearance by hiltViewModel<ThemeViewModel>().appearance.collectAsStateWithLifecycle()
+    val font = remember(appearance.fontFamily, appearance.customFontPath) {
+        launcherFontFamily(appearance.fontFamily, appearance.customFontPath)
+    }
+    CompositionLocalProvider(
+        LocalIconShape provides appearance.iconShape,
+        LocalAutoResizeIcons provides appearance.autoResizeIcons,
+    ) {
+        LauncherTheme(fontFamily = font, content = content)
+    }
 }

@@ -126,13 +126,15 @@ fun LauncherShell(
     fun dragDrawer(dyPx: Float) {
         if (!isDraggingDrawer) {
             isDraggingDrawer = true
+            // Stop a previous settle once, when the finger takes control. While dragging,
+            // [dragProgress] is the rendered source of truth; launching snapTo for every
+            // pointer event only schedules redundant coroutines and can make the drawer stutter.
+            dragJob?.cancel()
             dragProgress = progress.value
         }
         // Swipe up (negative dy) increases progress; clamp to [0, 1].
         val target = (dragProgress - dyPx / shellHeightPx).coerceIn(0f, 1f)
         dragProgress = target
-        dragJob?.cancel()
-        dragJob = scope.launch { progress.snapTo(target) }
     }
 
     fun settleDrawer(velocityPxPerSec: Float) {

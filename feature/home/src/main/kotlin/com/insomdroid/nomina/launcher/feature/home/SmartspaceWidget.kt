@@ -335,28 +335,27 @@ internal fun SmartspaceContent(
                 Text(
                     text = "$timeText $timeZoneText",
                     color = ink,
-                    style = themedTextStyle(technicalStyle.copy(fontWeight = FontWeight.Medium)),
+                    style = themedTextStyle(dateTimeStyle),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
         }
 
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            horizontalAlignment = Alignment.Start,
         ) {
             TapTarget(
                 onTap = agendaAction,
-                modifier = Modifier.weight(1f, fill = false),
-                fillWidth = false,
                 interactionSource = noIndication,
                 alignment = Alignment.CenterStart,
             ) {
                 Text(
                     text = agendaText,
                     color = ink.copy(alpha = 0.92f),
-                    style = themedTextStyle(technicalStyle),
+                    style = themedTextStyle(dateTimeStyle.copy(fontWeight = FontWeight.Normal)),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -364,10 +363,8 @@ internal fun SmartspaceContent(
             if (weatherText != null) {
                 TapTarget(
                     onTap = weatherAction,
-                    fillWidth = false,
                     interactionSource = noIndication,
-                    alignment = Alignment.CenterEnd,
-                    modifier = Modifier.padding(start = 10.dp),
+                    alignment = Alignment.CenterStart,
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -382,7 +379,7 @@ internal fun SmartspaceContent(
                         Text(
                             text = weatherText,
                             color = ink.copy(alpha = 0.92f),
-                            style = themedTextStyle(technicalStyle),
+                            style = themedTextStyle(dateTimeStyle.copy(fontWeight = FontWeight.Normal)),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )

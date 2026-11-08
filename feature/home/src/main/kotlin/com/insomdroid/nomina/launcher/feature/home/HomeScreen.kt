@@ -1,6 +1,10 @@
 package com.insomdroid.nomina.feature.home
 
 import kotlinx.coroutines.flow.MutableStateFlow
+import android.app.WallpaperColors
+import android.app.WallpaperManager
+import android.os.Handler
+import android.os.Looper
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
@@ -187,6 +191,10 @@ fun HomeScreen(
     // First-run intro (fresh installs only) — covers the whole home surface until finished/skipped.
     val showOnboarding by viewModel.showOnboarding.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val wallpaperManager = remember(context) {
+        WallpaperManager.getInstance(context.applicationContext)
+    }
+    var miniDockUsesLightBackground by remember { mutableStateOf(true) }
     val hostView = LocalView.current
     val hostWindow = (context as? android.app.Activity)?.window
     SideEffect {
@@ -202,6 +210,38 @@ fun HomeScreen(
         }
     }
     val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(wallpaperManager, lifecycleOwner) {
+        val handler = Handler(Looper.getMainLooper())
+
+        fun updateWallpaperTone() {
+            val colors = runCatching {
+                wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+            }.getOrNull()
+            miniDockUsesLightBackground = colors?.let {
+                (it.colorHints and WallpaperColors.HINT_SUPPORTS_DARK_TEXT) != 0
+            } ?: true
+        }
+
+        val colorsListener = WallpaperManager.OnColorsChangedListener { colors, which ->
+            if ((which and WallpaperManager.FLAG_SYSTEM) != 0) {
+                miniDockUsesLightBackground = colors?.let {
+                    (it.colorHints and WallpaperColors.HINT_SUPPORTS_DARK_TEXT) != 0
+                } ?: true
+            }
+        }
+        val lifecycleObserver = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) updateWallpaperTone()
+        }
+
+        wallpaperManager.addOnColorsChangedListener(colorsListener, handler)
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+        updateWallpaperTone()
+
+        onDispose {
+            wallpaperManager.removeOnColorsChangedListener(colorsListener)
+            lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
+        }
+    }
     val windowHeightPx = LocalWindowInfo.current.containerSize.height
 
     // First-run onboarding: when we are NOT the default home, surface the system "set default launcher"
@@ -824,7 +864,7 @@ fun HomeScreen(
                     .padding(top = 0.dp, bottom = 12.dp)
                     .offset(y = miniDockOffsetY)
                     .border(1.dp, Color.White.copy(alpha = 0.18f), RoundedCornerShape(18.dp)),
-                color = Color.White.copy(alpha = 0.25f),
+                color = (if (miniDockUsesLightBackground) Color.White else Color.Black).copy(alpha = 0.25f),
                 shape = RoundedCornerShape(18.dp),
                 shadowElevation = 6.dp,
             ) {

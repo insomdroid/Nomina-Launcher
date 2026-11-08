@@ -720,21 +720,23 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun `font family is the default until set, survives a backup round-trip and reads an unknown key as the default`() = runTest {
+    fun `custom font path stays on this device and backup safely falls back to Geist`() = runTest {
         val repo = newRepository()
         assertThat(repo.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
-        repo.setFontFamily(LauncherSettings.FONT_SERIF)
-        assertThat(repo.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_SERIF)
+        repo.setCustomFontPath("/device/local/nomina_custom_font.ttf")
+        repo.setFontFamily(LauncherSettings.FONT_CUSTOM)
+        assertThat(repo.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_CUSTOM)
         val exported = repo.exportRaw()
-        assertThat(exported).containsEntry("font_family", LauncherSettings.FONT_SERIF)
+        assertThat(exported).containsEntry("font_family", LauncherSettings.FONT_CUSTOM)
+        assertThat(exported).doesNotContainKey("custom_font_path")
 
         val restored = newRepository()
         restored.importRaw(exported)
-        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_SERIF)
+        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
         restored.importRaw(mapOf("font_family" to "comic"))
-        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT) // unknown: the default
+        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
         restored.importRaw(mapOf("font_family" to 7))
-        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT) // wrong type dropped
+        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
     }
 
     @Test

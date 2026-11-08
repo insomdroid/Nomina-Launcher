@@ -7,15 +7,16 @@ import com.insomdroid.nomina.designsystem.theme.withFontFamily
 import com.insomdroid.nomina.model.LauncherSettings
 import org.junit.Test
 
-/** The selectable launcher typography is limited to Geist and Geist Mono; removed legacy keys safely use Geist. */
+/** Geist is the only bundled family; custom fonts require a validated imported file. */
 class LauncherFontsTest {
-    @Test fun onlyGeistFamiliesRemainSelectableAndLegacyKeysFallBackToGeist() {
+    @Test fun onlyGeistIsBundledAndLegacyChoicesFallBackToGeist() {
         assertThat(LauncherSettings.FONTS).containsExactly(
             LauncherSettings.FONT_DEFAULT,
-            LauncherSettings.FONT_GEIST_MONO,
+            LauncherSettings.FONT_CUSTOM,
         ).inOrder()
         assertThat(launcherFontFamily(LauncherSettings.FONT_DEFAULT)).isNotEqualTo(FontFamily.Default)
-        assertThat(launcherFontFamily(LauncherSettings.FONT_GEIST_MONO)).isNotEqualTo(FontFamily.Default)
+        assertThat(launcherFontFamily(LauncherSettings.FONT_GEIST_MONO)).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
+        assertThat(launcherFontFamily(LauncherSettings.FONT_CUSTOM)).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
         listOf("condensed", "serif", "monospace", "casual", "cursive", "unknown").forEach { legacy ->
             assertThat(launcherFontFamily(legacy)).isEqualTo(launcherFontFamily(LauncherSettings.FONT_DEFAULT))
         }

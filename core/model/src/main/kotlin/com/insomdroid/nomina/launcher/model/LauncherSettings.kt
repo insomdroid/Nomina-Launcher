@@ -168,8 +168,8 @@ data class LauncherSettings(
         const val PRIVACY_SENDER = "sender"
         const val PRIVACY_COUNT = "count"
 
-        /** [dockBackgroundOpacity] out of the box: a light tint that sets the dock off the wallpaper. */
-        const val DEFAULT_DOCK_BACKGROUND = 0.35f
+        /** [dockBackgroundOpacity] out of the box: transparent, letting the wallpaper show through. */
+        const val DEFAULT_DOCK_BACKGROUND = 0f
 
         /** The most [dockBottomSpacing] allows, in dp. */
         const val MAX_DOCK_BOTTOM_SPACING = 48

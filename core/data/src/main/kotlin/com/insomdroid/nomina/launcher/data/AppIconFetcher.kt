@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.AdaptiveIconDrawable
 import coil3.ImageLoader
 import coil3.asImage
 import coil3.decode.DataSource
@@ -29,11 +30,19 @@ class AppIconFetcher(
     private val custom: CustomIconSource,
 ) : Fetcher {
     override suspend fun fetch(): FetchResult? = withContext(Dispatchers.IO) {
-        // An icon the user picked for the app wins; if its pack or file is gone, the app's own shows.
-        val drawable = data.app.customIcon?.let(custom::drawable)
-            ?: source.loadIcon(data.app, data.themed, data.dark, data.iconPack, data.themeAll)
-            ?: return@withContext null
-        iconResult(drawable, data.autoResize)
+        // A user-picked icon wins; if its file or pack is gone, resolve the installed app icon.
+        val customDrawable = data.app.customIcon?.let(custom::drawable)
+        val resolved = if (customDrawable != null) {
+            ResolvedAppIcon(customDrawable, false)
+        } else {
+            source.loadIcon(data.app, data.iconPack) ?: return@withContext null
+        }
+        val reshape = shouldReshapeLegacyIcon(
+            isAdaptive = resolved.drawable is AdaptiveIconDrawable,
+            isPackMapped = resolved.isPackMapped,
+            mode = data.reshapeLegacyIcons,
+        )
+        iconResult(resolved.drawable, data.autoResize, data.iconShape.takeIf { reshape })
     }
 
     class Factory(private val source: LauncherAppsSource, private val custom: CustomIconSource) : Fetcher.Factory<IconRequest> {
@@ -46,13 +55,15 @@ class AppIconFetcher(
 private const val ICON_PX = 168
 
 /** [drawable] drawn once into a bitmap (see [AppIconFetcher]) as Coil's result. */
-internal fun iconResult(drawable: Drawable, autoResize: Boolean = false): FetchResult {
+internal fun iconResult(drawable: Drawable, autoResize: Boolean = false, reshape: String? = null): FetchResult {
     val bitmap = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     drawable.setBounds(0, 0, ICON_PX, ICON_PX)
     drawable.draw(canvas)
-    val output = if (autoResize) normalizeIconBitmap(bitmap) else bitmap
-    if (output !== bitmap) bitmap.recycle()
+    val normalized = if (autoResize) normalizeIconBitmap(bitmap) else bitmap
+    val output = reshape?.let { applyIconMask(normalized, it) } ?: normalized
+    if (output !== normalized) normalized.recycle()
+    if (normalized !== bitmap) bitmap.recycle()
     return ImageFetchResult(
         image = output.asImage(),
         isSampled = false,

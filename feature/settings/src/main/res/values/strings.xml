@@ -37,8 +37,6 @@
     <string name="settings_blur_behind_drawer_paused">Paused by the system for now (battery saver, a playing video or a developer option); it comes back by itself.</string>
     <string name="settings_blur_strength">Blur strength</string>
     <string name="settings_blur_behind_drawer_opaque">The drawer is solid now, so nothing shows through: choose “Transparent” or lower the opacity or dim above.</string>
-    <string name="settings_theme_all_icons">Theme every icon</string>
-    <string name="settings_theme_all_icons_desc">Apps without a themed icon of their own get a one-colour silhouette of their icon in the theme\'s colours.</string>
     <string name="settings_dock_bg">Dock background opacity</string>
     <string name="settings_dock_bottom_space">Space below the dock</string>
     <string name="settings_drawer_bg">Colour opacity</string>
@@ -121,6 +119,11 @@
     <string name="settings_icons">Icons</string>
     <string name="settings_app_icons_group">App icons</string>
     <string name="settings_icon_shape">Icon shape</string>
+    <string name="settings_reshape_legacy_icons">Reshape legacy icons</string>
+    <string name="settings_reshape_legacy_icons_desc">Apply the selected icon shape to older icons that do not provide an adaptive shape.</string>
+    <string name="settings_reshape_always">Always</string>
+    <string name="settings_reshape_unthemed">Unthemed</string>
+    <string name="settings_reshape_off">Off</string>
     <string name="settings_icon_shape_system">System default</string>
     <string name="settings_icon_shape_circle">Circle</string>
     <string name="settings_icon_shape_squircle">Squircle</string>
@@ -133,11 +136,10 @@
     <string name="settings_icon_shape_cat">Cat</string>
     <string name="settings_auto_resize_icons">Automatic icon sizing</string>
     <string name="settings_auto_resize_icons_desc">Adjust transparent icon padding so app icons appear more visually consistent.</string>
-    <string name="settings_themed_icons">Themed icons (Monochrome)</string>
     <string name="settings_icon_pack">Icon pack</string>
     <string name="settings_icon_pack_system">System default</string>
-    <string name="settings_icon_pack_system_desc">Use app icons from Android, with monochrome styling when enabled.</string>
-    <string name="settings_icon_pack_desc">Unmapped apps fall back to Themed icons or their original app icon.</string>
+    <string name="settings_icon_pack_system_desc">Use the original full-colour app icons from Android.</string>
+    <string name="settings_icon_pack_desc">Apps not covered by the selected pack keep their original full-colour icons.</string>
     <string name="settings_label_size">Label text size</string>
     <string name="settings_home_label_size">Home label size</string>
     <string name="settings_dock_label_size">Dock label size</string>

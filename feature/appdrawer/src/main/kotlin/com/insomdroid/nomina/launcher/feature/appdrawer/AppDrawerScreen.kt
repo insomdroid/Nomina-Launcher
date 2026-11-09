@@ -138,8 +138,7 @@ import com.insomdroid.nomina.ui.component.LocalAppLabelLines
 import com.insomdroid.nomina.ui.component.LocalAppLabelScale
 import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.LocalIconPack
-import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
-import com.insomdroid.nomina.ui.component.LocalThemedIcons
+import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
@@ -260,12 +259,10 @@ fun AppDrawerScreen(
         }
     }
 
-    // All app icons in the drawer (grid, folder sheet, popup) honour the themed-icons setting and the
-    // user's app-label text-size multiplier.
+    // Drawer app icons share the selected icon pack and legacy-reshape policy.
     CompositionLocalProvider(
-        LocalThemedIcons provides uiState.useThemedIcons,
-        LocalThemeAllIcons provides uiState.themeAllIcons,
         LocalIconPack provides uiState.iconPackPackage,
+        LocalIconReshapeMode provides uiState.reshapeLegacyIcons,
         LocalAppLabelScale provides uiState.appLabelTextScale,
         LocalIconScale provides uiState.iconScale,
         LocalAppLabelLines provides if (uiState.twoLineLabels) 2 else 1,

@@ -126,13 +126,15 @@ class SettingsRepository @Inject constructor(
             iconShape = (p[Keys.ICON_SHAPE] ?: LauncherSettings.ICON_SHAPE_SYSTEM).let {
                 if (it in LauncherSettings.ICON_SHAPES) it else LauncherSettings.ICON_SHAPE_SYSTEM
             },
+            reshapeLegacyIcons = (p[Keys.RESHAPE_LEGACY_ICONS] ?: LauncherSettings.RESHAPE_UNTHEMED).let {
+                if (it in LauncherSettings.RESHAPE_LEGACY_MODES) it else LauncherSettings.RESHAPE_UNTHEMED
+            },
             autoResizeIcons = p[Keys.AUTO_RESIZE_ICONS] ?: true,
             infiniteScroll = p[Keys.INFINITE_SCROLL] ?: true,
             defaultReminderDismissed = p[Keys.DEFAULT_REMINDER_DISMISSED] ?: false,
             showNotificationDots = p[Keys.SHOW_NOTIF_DOTS] ?: true,
             notificationDotCount = p[Keys.NOTIF_DOT_COUNT] ?: true,
             notificationDotScale = (p[Keys.NOTIF_DOT_SCALE] ?: 1.0f).coerceIn(MIN_DOT_SCALE, MAX_DOT_SCALE),
-            useThemedIcons = p[Keys.USE_THEMED_ICONS] ?: false,
             iconPackPackage = p[Keys.ICON_PACK] ?: "",
             weatherAppKey = p[Keys.WEATHER_APP_KEY] ?: "",
             desktopLocked = p[Keys.DESKTOP_LOCKED] ?: false,
@@ -146,7 +148,6 @@ class SettingsRepository @Inject constructor(
             drawerPictureDim = (p[Keys.DRAWER_PICTURE_DIM] ?: LauncherSettings.DEFAULT_DRAWER_PICTURE_DIM).coerceIn(0f, 1f),
             blurBehindDrawer = p[Keys.BLUR_BEHIND_DRAWER] ?: false,
             drawerBlurStrength =(p[Keys.DRAWER_BLUR_STRENGTH] ?: 1.0f).coerceIn(MIN_DRAWER_BLUR_STRENGTH, MAX_DRAWER_BLUR_STRENGTH),
-            themeAllIcons = p[Keys.THEME_ALL_ICONS] ?: false,
             appLabelTextScale = (p[Keys.APP_LABEL_SCALE] ?: 1.0f).coerceIn(MIN_LABEL_SCALE, MAX_LABEL_SCALE),
             iconScale = (p[Keys.ICON_SCALE] ?: 1.0f).coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE),
             dockIconScale = (p[Keys.DOCK_ICON_SCALE] ?: p[Keys.ICON_SCALE] ?: 1.0f).coerceIn(MIN_ICON_SCALE, MAX_ICON_SCALE),
@@ -435,12 +436,14 @@ class SettingsRepository @Inject constructor(
         it[Keys.ICON_SHAPE] = if (shape in LauncherSettings.ICON_SHAPES) shape else LauncherSettings.ICON_SHAPE_SYSTEM
     }
     suspend fun setAutoResizeIcons(value: Boolean) = edit { it[Keys.AUTO_RESIZE_ICONS] = value }
+    suspend fun setReshapeLegacyIcons(value: String) = edit {
+        it[Keys.RESHAPE_LEGACY_ICONS] = if (value in LauncherSettings.RESHAPE_LEGACY_MODES) value else LauncherSettings.RESHAPE_UNTHEMED
+    }
     suspend fun setInfiniteScroll(value: Boolean) = edit { it[Keys.INFINITE_SCROLL] = value }
     suspend fun setShowNotificationDots(value: Boolean) = edit { it[Keys.SHOW_NOTIF_DOTS] = value }
     suspend fun setNotificationDotCount(value: Boolean) = edit { it[Keys.NOTIF_DOT_COUNT] = value }
     suspend fun setNotificationDotScale(value: Float) =
         edit { it[Keys.NOTIF_DOT_SCALE] = value.coerceIn(MIN_DOT_SCALE, MAX_DOT_SCALE) }
-    suspend fun setUseThemedIcons(value: Boolean) = edit { it[Keys.USE_THEMED_ICONS] = value }
 
     /** Sets (or clears, for blank) the selected third-party icon pack package. */
     suspend fun setIconPackPackage(pkg: String) = edit { it[Keys.ICON_PACK] = pkg.trim() }
@@ -477,7 +480,6 @@ class SettingsRepository @Inject constructor(
     /** How much the user's own picture behind the drawer is darkened, 0 (not at all) to 1 (black). */
     suspend fun setDrawerPictureDim(value: Float) = edit { it[Keys.DRAWER_PICTURE_DIM] = value.coerceIn(0f, 1f) }
 
-    suspend fun setThemeAllIcons(value: Boolean) = edit { it[Keys.THEME_ALL_ICONS] = value }
     suspend fun setFolderColumns(value: Int) =
         edit { it[Keys.FOLDER_COLUMNS] = value.coerceIn(MIN_FOLDER_COLUMNS, MAX_FOLDER_COLUMNS) }
 
@@ -749,6 +751,7 @@ class SettingsRepository @Inject constructor(
         val HOME_PAGE_MARKER = stringPreferencesKey("home_page_marker")
         val PAGE_SWITCH_SPEED = stringPreferencesKey("page_switch_speed")
         val ICON_SHAPE = stringPreferencesKey("icon_shape")
+        val RESHAPE_LEGACY_ICONS = stringPreferencesKey("reshape_legacy_icons")
         val AUTO_RESIZE_ICONS = booleanPreferencesKey("auto_resize_icons")
         val INFINITE_SCROLL = booleanPreferencesKey("infinite_scroll")
         val FOLDER_SWIPE_FIRST_APP = booleanPreferencesKey("folder_swipe_first_app")
@@ -863,7 +866,7 @@ class SettingsRepository @Inject constructor(
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
             "notif_widget_count_style", "icon_pack_package", "weather_app_key", "home_page_marker",
-            "page_switch_speed", "collapsed_settings_sections", "icon_shape", "drawer_label_color_mode",
+            "page_switch_speed", "collapsed_settings_sections", "icon_shape", "reshape_legacy_icons", "drawer_label_color_mode",
             "people_privacy", "pinned_people", "people_aliases",
             "custom_icons", "folder_icons", "shortcut_icons",
         )

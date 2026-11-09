@@ -889,6 +889,9 @@ class SettingsRepositoryTest {
         val repo = newRepository()
         assertThat(repo.settings.first().reshapeLegacyIcons)
             .isEqualTo(LauncherSettings.RESHAPE_OFF)
+        assertThat(repo.settings.first().iconPackPackage).isEmpty()
+        assertThat(repo.settings.first().iconShape).isEqualTo(LauncherSettings.ICON_SHAPE_SYSTEM)
+        assertThat(repo.settings.first().autoResizeIcons).isFalse()
 
         repo.setReshapeLegacyIcons(LauncherSettings.RESHAPE_ALWAYS)
         assertThat(repo.settings.first().reshapeLegacyIcons)
@@ -900,7 +903,7 @@ class SettingsRepositoryTest {
 
         repo.setReshapeLegacyIcons("invalid")
         assertThat(repo.settings.first().reshapeLegacyIcons)
-            .isEqualTo(LauncherSettings.RESHAPE_UNTHEMED)
+            .isEqualTo(LauncherSettings.RESHAPE_OFF)
     }
 
 }

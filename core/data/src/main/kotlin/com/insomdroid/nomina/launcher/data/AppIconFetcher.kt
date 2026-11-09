@@ -47,6 +47,7 @@ class AppIconFetcher(
             data.autoResize,
             data.iconShape.takeIf { reshape },
             resolved.iconBackColor,
+            monochrome = reshape && !resolved.isPackMapped,
         )
     }
 
@@ -63,6 +64,7 @@ internal fun iconResult(
     autoResize: Boolean = false,
     reshape: String? = null,
     iconBackColor: Int? = null,
+    monochrome: Boolean = reshape != null,
 ): FetchResult {
     val isAdaptive = drawable is AdaptiveIconDrawable
     val artwork = if (isAdaptive && reshape != null) {
@@ -76,17 +78,17 @@ internal fun iconResult(
     // Adaptive foreground assets already contain the platform's safe-zone padding. Normalizing
     // or applying the legacy inset again would shrink their artwork twice.
     val normalized = if (autoResize && !isAdaptive) normalizeIconBitmap(bitmap) else bitmap
-    val monochrome = if (reshape != null) toMonochrome(normalized) else normalized
+    val artworkBitmap = if (monochrome) toMonochrome(normalized) else normalized
     val output = reshape?.let {
         applyIconMask(
-            monochrome,
+            artworkBitmap,
             it,
             iconBackColor ?: FALLBACK_ICON_BACKGROUND,
             artworkInset = if (isAdaptive) 0f else ICON_ARTWORK_INSET,
         )
     } ?: normalized
-    if (output !== monochrome) monochrome.recycle()
-    if (monochrome !== normalized) normalized.recycle()
+    if (output !== artworkBitmap) artworkBitmap.recycle()
+    if (artworkBitmap !== normalized) normalized.recycle()
     if (normalized !== bitmap) bitmap.recycle()
     return ImageFetchResult(image = output.asImage(), isSampled = false, dataSource = DataSource.DISK)
 }

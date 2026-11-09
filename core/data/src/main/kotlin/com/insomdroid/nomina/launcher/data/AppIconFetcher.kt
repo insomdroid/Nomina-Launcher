@@ -15,6 +15,7 @@ import coil3.fetch.ImageFetchResult
 import coil3.request.Options
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.insomdroid.nomina.model.CustomIcon
 import com.insomdroid.nomina.model.IconRequest
 
 /**
@@ -33,7 +34,7 @@ class AppIconFetcher(
         // A user-picked icon wins; if its file or pack is gone, resolve the installed app icon.
         val customDrawable = data.app.customIcon?.let(custom::drawable)
         val resolved = if (customDrawable != null) {
-            ResolvedAppIcon(customDrawable, false)
+            ResolvedAppIcon(customDrawable, data.app.customIcon is CustomIcon.FromPack)
         } else {
             source.loadIcon(data.app, data.iconPack) ?: return@withContext null
         }

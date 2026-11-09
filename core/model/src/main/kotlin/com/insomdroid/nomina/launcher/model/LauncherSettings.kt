@@ -48,9 +48,9 @@ data class LauncherSettings(
     /** Mask used when reshaping legacy app icons. */
     val iconShape: String = ICON_SHAPE_SYSTEM,
     /** Nova-style policy for applying the selected mask to legacy icons. */
-    val reshapeLegacyIcons: String = RESHAPE_UNTHEMED,
+    val reshapeLegacyIcons: String = RESHAPE_OFF,
     /** Normalizes transparent icon padding so legacy icons have a more consistent visual size. */
-    val autoResizeIcons: Boolean = true,
+    val autoResizeIcons: Boolean = false,
     /** Swiping past the last home page continues to the first one, and back from the first to the
      *  last. Off keeps the bounce back from the end. */
     val infiniteScroll: Boolean = true,

@@ -1,7 +1,5 @@
 package com.insomdroid.nomina.ui.component
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,19 +29,8 @@ import com.insomdroid.nomina.ui.AppLaunchSources
 import com.insomdroid.nomina.ui.appLaunchTouch
 import com.insomdroid.nomina.ui.rememberAppLaunchOrigin
 
-/**
- * Whether [AppIcon]s under this subtree render as Material You themed (monochrome) icons. Provided per
- * surface (home, dock, drawer) from the user's setting; default off. [AppIcon] feeds it (plus the
- * current dark/light theme) into the Coil request, so the cache keys per variant and toggling the
- * setting refreshes icons immediately.
- */
-val LocalThemedIcons = compositionLocalOf { false }
-
-/**
- * With [LocalThemedIcons] on, also theme the apps that have no monochrome layer, as a silhouette of
- * their icon (a Telegram request). Provided per surface like the other icon-style locals.
- */
-val LocalThemeAllIcons = compositionLocalOf { false }
+/** Nova-style policy for reshaping legacy icons. */
+val LocalIconReshapeMode = compositionLocalOf { LauncherSettings.RESHAPE_UNTHEMED }
 
 /**
  * Package name of the selected third-party icon pack under this subtree ("" = none). Provided per
@@ -123,16 +110,15 @@ fun AppIcon(
         Box(contentAlignment = Alignment.TopEnd) {
             AsyncImage(
                 model = IconRequest(
-                    appItem,
-                    themed = LocalThemedIcons.current,
-                    dark = isSystemInDarkTheme(),
+                    app = appItem,
                     iconPack = LocalIconPack.current,
                     epoch = LocalIconEpochs.current.of(appItem.packageName),
-                    themeAll = LocalThemeAllIcons.current,
+                    reshapeLegacyIcons = LocalIconReshapeMode.current,
+                    iconShape = LocalIconShape.current,
                     autoResize = LocalAutoResizeIcons.current,
                 ),
                 contentDescription = appItem.label,
-                modifier = Modifier.size(iconSize).clip(launcherIconShape(LocalIconShape.current)).onGloballyPositioned { origin?.icon = it },
+                modifier = Modifier.size(iconSize).onGloballyPositioned { origin?.icon = it },
             )
             NotificationBadge(count = badgeCount, showCount = badgeShowCount, scale = badgeScale)
         }

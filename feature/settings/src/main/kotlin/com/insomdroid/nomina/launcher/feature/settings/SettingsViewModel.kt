@@ -105,9 +105,9 @@ class SettingsViewModel @Inject constructor(
     fun setDrawerLabelColor(argb: Int?) = update { repository.setDrawerLabelColor(argb) }
     fun setDrawerPictureDim(value: Float) = update { repository.setDrawerPictureDim(value) }
     fun setIconShape(shape: String) = update { repository.setIconShape(shape) }
+    fun setReshapeLegacyIcons(mode: String) = update { repository.setReshapeLegacyIcons(mode) }
     fun setAutoResizeIcons(value: Boolean) = update { repository.setAutoResizeIcons(value) }
 
-    fun setThemeAllIcons(value: Boolean) = update { repository.setThemeAllIcons(value) }
     fun setFolderColumns(value: Int) = update { repository.setFolderColumns(value) }
     fun setSectionCollapsed(id: String, collapsed: Boolean) = update { repository.setSettingsSectionCollapsed(id, collapsed) }
     fun setHomeColumns(value: Int) = viewModelScope.launch {
@@ -138,7 +138,6 @@ class SettingsViewModel @Inject constructor(
     fun setShowNotificationDots(value: Boolean) = update { repository.setShowNotificationDots(value) }
     fun setNotificationDotCount(value: Boolean) = update { repository.setNotificationDotCount(value) }
     fun setNotificationDotScale(value: Float) = update { repository.setNotificationDotScale(value) }
-    fun setUseThemedIcons(value: Boolean) = update { repository.setUseThemedIcons(value) }
     fun setIconPack(pkg: String) {
         viewModelScope.launch(Dispatchers.IO) {
             // Parse the pack once before publishing it to every icon surface. The next batch of

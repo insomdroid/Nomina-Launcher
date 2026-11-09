@@ -19,11 +19,12 @@ import javax.inject.Singleton
 
 data class IconPackInfo(val packageName: String, val label: String)
 
-/** Parsed ADW/Nova appfilter mappings and the optional iconback colour. */
+/** Parsed ADW/Nova appfilter mappings and iconback artwork declarations. */
 class IconPack(
     private val packageName: String,
     private val res: Resources,
     private val componentMap: Map<String, String>,
+    private val iconBackDrawables: List<String> = emptyList(),
 ) {
     fun getIcon(component: ComponentName): Drawable? {
         val name = drawableName(component) ?: return null
@@ -36,45 +37,70 @@ class IconPack(
 
     fun mappedDrawables(): List<String> = componentMap.values.distinct()
 
-    /** Average colour of opaque pixels in the pack's iconback image; transparent pixels are ignored. */
+    /** Dominant colour sampled from the centre of the first usable iconback asset. */
     val iconBackColor: Int? by lazy(LazyThreadSafetyMode.PUBLICATION) { readIconBackColor() }
 
     @SuppressLint("DiscouragedApi")
-    private fun readIconBackColor(): Int? = runCatching {
-        val id = res.getIdentifier("iconback", "drawable", packageName)
-            .takeIf { it != 0 }
-            ?: res.getIdentifier("iconback", "mipmap", packageName).takeIf { it != 0 }
+    private fun readIconBackColor(): Int? {
+        val candidates = iconBackDrawables.ifEmpty { listOf("iconback") }
+        for (name in candidates) {
+            val drawable = loadIconBackDrawable(name) ?: continue
+            val color = sampleDominantBackplateColor(drawable)
+            if (color != null) return color
+        }
+        return null
+    }
+
+    @SuppressLint("DiscouragedApi")
+    private fun loadIconBackDrawable(name: String): Drawable? {
+        val id = res.getIdentifier(name, "drawable", packageName).takeIf { it != 0 }
+            ?: res.getIdentifier(name, "mipmap", packageName).takeIf { it != 0 }
             ?: return null
-        val drawable = ResourcesCompat.getDrawable(res, id, null) ?: return null
-        val size = 48
+        return runCatching { ResourcesCompat.getDrawable(res, id, null) }.getOrNull()
+    }
+
+    private fun sampleDominantBackplateColor(drawable: Drawable): Int? = runCatching {
+        val size = 64
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         try {
             drawable.setBounds(0, 0, size, size)
             drawable.draw(Canvas(bitmap))
-            var red = 0L
-            var green = 0L
-            var blue = 0L
-            var weight = 0L
-            for (y in 0 until size) for (x in 0 until size) {
-                val pixel = bitmap.getPixel(x, y)
-                val alpha = Color.alpha(pixel)
-                if (alpha > 16) {
-                    val w = alpha.toLong()
-                    red += Color.red(pixel) * w
-                    green += Color.green(pixel) * w
-                    blue += Color.blue(pixel) * w
-                    weight += w
+
+            // Ignore the outer edge: it often contains transparent padding, shadows or antialiasing.
+            val buckets = HashMap<Int, ColorBucket>()
+            for (y in size / 4 until size * 3 / 4) {
+                for (x in size / 4 until size * 3 / 4) {
+                    val pixel = bitmap.getPixel(x, y)
+                    val alpha = Color.alpha(pixel)
+                    if (alpha < 200) continue
+                    val red = Color.red(pixel)
+                    val green = Color.green(pixel)
+                    val blue = Color.blue(pixel)
+                    val key = ((red shr 4) shl 8) or ((green shr 4) shl 4) or (blue shr 4)
+                    val bucket = buckets.getOrPut(key) { ColorBucket() }
+                    bucket.red += red.toLong()
+                    bucket.green += green.toLong()
+                    bucket.blue += blue.toLong()
+                    bucket.count++
                 }
             }
-            if (weight == 0L) null else Color.rgb(
-                (red / weight).toInt(),
-                (green / weight).toInt(),
-                (blue / weight).toInt(),
+            val dominant = buckets.values.maxByOrNull { it.count } ?: return null
+            if (dominant.count == 0L) null else Color.rgb(
+                (dominant.red / dominant.count).toInt(),
+                (dominant.green / dominant.count).toInt(),
+                (dominant.blue / dominant.count).toInt(),
             )
         } finally {
             bitmap.recycle()
         }
     }.getOrNull()
+
+    private class ColorBucket {
+        var red = 0L
+        var green = 0L
+        var blue = 0L
+        var count = 0L
+    }
 }
 
 internal fun parseDrawableList(parser: XmlPullParser): List<String> {
@@ -83,6 +109,23 @@ internal fun parseDrawableList(parser: XmlPullParser): List<String> {
     while (event != XmlPullParser.END_DOCUMENT) {
         if (event == XmlPullParser.START_TAG && parser.name == "item") {
             parser.getAttributeValue(null, "drawable")?.takeIf { it.isNotBlank() }?.let(names::add)
+        }
+        event = parser.next()
+    }
+    return names.toList()
+}
+
+internal fun parseIconBackDrawableList(parser: XmlPullParser): List<String> {
+    val names = LinkedHashSet<String>()
+    var event = parser.eventType
+    while (event != XmlPullParser.END_DOCUMENT) {
+        if (event == XmlPullParser.START_TAG && parser.name == "iconback") {
+            for (index in 0 until parser.attributeCount) {
+                val attributeName = parser.getAttributeName(index)
+                if (attributeName.startsWith("img")) {
+                    parser.getAttributeValue(index)?.takeIf { it.isNotBlank() }?.let(names::add)
+                }
+            }
         }
         event = parser.next()
     }
@@ -228,20 +271,32 @@ private class AppFilterLoader(private val context: Context) {
             closeable = stream
         }
         val map = HashMap<String, String>()
+        val iconBacks = LinkedHashSet<String>()
         try {
             var event = parser.eventType
             while (event != XmlPullParser.END_DOCUMENT) {
-                if (event == XmlPullParser.START_TAG && parser.name == "item") {
-                    val comp = componentKey(parser.getAttributeValue(null, "component"))
-                    val drawable = parser.getAttributeValue(null, "drawable")
-                    if (comp != null && !drawable.isNullOrEmpty() && comp !in map) map[comp] = drawable
+                if (event == XmlPullParser.START_TAG) {
+                    when (parser.name) {
+                        "item" -> {
+                            val comp = componentKey(parser.getAttributeValue(null, "component"))
+                            val drawable = parser.getAttributeValue(null, "drawable")
+                            if (comp != null && !drawable.isNullOrEmpty() && comp !in map) map[comp] = drawable
+                        }
+                        "iconback" -> {
+                            for (index in 0 until parser.attributeCount) {
+                                if (parser.getAttributeName(index).startsWith("img")) {
+                                    parser.getAttributeValue(index)?.takeIf { it.isNotBlank() }?.let(iconBacks::add)
+                                }
+                            }
+                        }
+                    }
                 }
                 event = parser.next()
             }
         } finally {
             runCatching { closeable.close() }
         }
-        return IconPack(pkg, res, map)
+        return IconPack(pkg, res, map, iconBacks.toList())
     }
 
     private fun componentKey(raw: String?): String? {

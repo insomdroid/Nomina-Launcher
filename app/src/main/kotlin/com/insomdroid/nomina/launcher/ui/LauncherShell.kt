@@ -182,6 +182,7 @@ fun LauncherShell(
     DrawerWallpaperBlur(enabled = drawerBlur.enabled, strength = drawerBlur.strength, progress = { currentProgress })
 
     CompositionLocalProvider(
+        LocalIconPack provides iconStyle.iconPack,
         LocalIconShape provides iconStyle.iconShape,
         LocalAutoResizeIcons provides iconStyle.autoResizeIcons,
         LocalIconReshapeMode provides iconStyle.reshapeLegacyIcons,

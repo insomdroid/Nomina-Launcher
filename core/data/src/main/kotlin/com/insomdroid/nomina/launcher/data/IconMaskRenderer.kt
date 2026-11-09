@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Matrix
 import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.AdaptiveIconDrawable
@@ -88,7 +89,19 @@ private fun iconMaskPath(shape: String, size: Int): Path {
         else -> {
             val adaptive = AdaptiveIconDrawable(ColorDrawable(Color.BLACK), null)
             adaptive.setBounds(0, 0, size, size)
-            path.set(adaptive.iconMask)
+            val systemMask = adaptive.iconMask
+            val maskBounds = RectF()
+            systemMask.computeBounds(maskBounds, true)
+            if (maskBounds.width() > 0f && maskBounds.height() > 0f) {
+                val transform = Matrix().apply {
+                    setRectToRect(
+                        maskBounds,
+                        RectF(0f, 0f, s, s),
+                        Matrix.ScaleToFit.FILL,
+                    )
+                }
+                systemMask.transform(transform, path)
+            }
         }
     }
     return path

@@ -51,6 +51,24 @@ class IconMaskRendererTest {
     }
 
     @Test
+    fun systemShapeMaskIsScaledToTheFullIconBitmap() {
+        val source = Bitmap.createBitmap(168, 168, Bitmap.Config.ARGB_8888).apply {
+            eraseColor(Color.RED)
+        }
+
+        val result = applyIconMask(
+            source = source,
+            shape = LauncherSettings.ICON_SHAPE_SYSTEM,
+            backgroundColor = Color.BLACK,
+        )
+
+        assertThat(result.getPixel(166, 84)).isEqualTo(Color.BLACK)
+        assertThat(Color.alpha(result.getPixel(167, 0))).isEqualTo(0)
+        source.recycle()
+        result.recycle()
+    }
+
+    @Test
     fun missingPackBackplateUsesNeutralFallback() {
         val source = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888).apply {
             eraseColor(Color.RED)

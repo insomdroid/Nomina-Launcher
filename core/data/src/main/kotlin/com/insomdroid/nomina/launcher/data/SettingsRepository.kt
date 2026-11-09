@@ -127,7 +127,7 @@ class SettingsRepository @Inject constructor(
                 if (it in LauncherSettings.ICON_SHAPES) it else LauncherSettings.ICON_SHAPE_SYSTEM
             },
             reshapeLegacyIcons = (p[Keys.RESHAPE_LEGACY_ICONS] ?: LauncherSettings.RESHAPE_OFF).let {
-                if (it in LauncherSettings.RESHAPE_LEGACY_MODES) it else LauncherSettings.RESHAPE_UNTHEMED
+                if (it in LauncherSettings.RESHAPE_LEGACY_MODES) it else LauncherSettings.RESHAPE_OFF
             },
             autoResizeIcons = p[Keys.AUTO_RESIZE_ICONS] ?: false,
             infiniteScroll = p[Keys.INFINITE_SCROLL] ?: true,

@@ -1553,7 +1553,7 @@ internal fun IconReshapeRow(selected: String, onPick: (String) -> Unit) {
             RowLabel(stringResource(R.string.settings_reshape_legacy_icons))
             Text(
                 text = stringResource(R.string.settings_reshape_legacy_icons_desc),
-                color = p.textMuted,
+                color = p.dim,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 4.dp, bottom = 10.dp),
             )

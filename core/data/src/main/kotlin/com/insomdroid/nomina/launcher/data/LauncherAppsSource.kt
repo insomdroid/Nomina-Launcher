@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ShortcutInfo
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -36,7 +37,7 @@ import javax.inject.Provider
 import javax.inject.Singleton
 
 /** Resolved app artwork plus whether it came from an appfilter mapping. */
-internal data class ResolvedAppIcon(val drawable: Drawable, val isPackMapped: Boolean)
+internal data class ResolvedAppIcon(val drawable: Drawable, val isPackMapped: Boolean, val isAdaptive: Boolean)
 
 /** Nova-style decision: adaptive icons keep their own mask; legacy icons follow the policy. */
 internal fun shouldReshapeLegacyIcon(isAdaptive: Boolean, isPackMapped: Boolean, mode: String): Boolean =
@@ -390,12 +391,12 @@ class LauncherAppsSource @Inject constructor(
      * A mapped appfilter drawable wins; otherwise return the original full-colour launcher icon.
      * Retaining the mapping bit lets the fetcher implement Nova's Always / Unthemed distinction.
      */
-    fun loadIcon(appItem: AppItem, iconPack: String = ""): ResolvedAppIcon? = runCatching {
+    internal fun loadIcon(appItem: AppItem, iconPack: String = ""): ResolvedAppIcon? = runCatching {
         val info = launcherApps.getActivityList(appItem.packageName, appItem.user)
             .firstOrNull { it.componentName.className == appItem.className }
             ?: return@runCatching null
         val packed = if (iconPack.isNotBlank()) iconPacks.get(iconPack)?.getIcon(appItem.componentName) else null
-        if (packed != null) ResolvedAppIcon(packed, true)
-        else ResolvedAppIcon(info.getBadgedIcon(0), false)
+        if (packed != null) ResolvedAppIcon(packed, true, packed is AdaptiveIconDrawable)
+        else ResolvedAppIcon(info.getBadgedIcon(0), false, info.getIcon(0) is AdaptiveIconDrawable)
     }.getOrNull()
 }

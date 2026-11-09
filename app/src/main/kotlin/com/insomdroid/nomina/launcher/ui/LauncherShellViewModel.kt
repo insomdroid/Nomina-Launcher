@@ -31,7 +31,7 @@ data class StatusBarSettings(
     val drawerPicture: DrawerWallpaper? = null,
 )
 
-/** The app-icon style (icon pack, themed, the icon-size multiplier), so the shell's floating drag icon
+/** The app-icon style (icon pack, legacy reshape and icon-size multiplier), so the shell floating drag icon
  *  matches the surfaces. */
 data class IconStyle(val iconPack: String = "", val iconScale: Float = 1f, val iconShape: String = com.insomdroid.nomina.model.LauncherSettings.ICON_SHAPE_SYSTEM, val reshapeLegacyIcons: String = com.insomdroid.nomina.model.LauncherSettings.RESHAPE_UNTHEMED, val autoResizeIcons: Boolean = true)
 

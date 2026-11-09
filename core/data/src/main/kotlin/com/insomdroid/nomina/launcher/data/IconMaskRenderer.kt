@@ -3,6 +3,7 @@ package com.insomdroid.nomina.data
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.drawable.AdaptiveIconDrawable
@@ -12,21 +13,32 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-/**
- * Clips legacy artwork once during Coil rasterization. Adaptive icons are deliberately excluded:
- * Android already applies their authored adaptive mask and safe zone.
- */
-internal fun applyIconMask(source: Bitmap, shape: String): Bitmap {
+/** Draws legacy artwork inside a pack-coloured shape; adaptive icons keep their own mask. */
+internal fun applyIconMask(
+    source: Bitmap,
+    shape: String,
+    backgroundColor: Int = FALLBACK_ICON_BACKGROUND,
+): Bitmap {
     val size = source.width
     val output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(output)
     val path = iconMaskPath(shape, size)
     canvas.save()
     canvas.clipPath(path)
-    canvas.drawBitmap(source, 0f, 0f, null)
+    canvas.drawPath(path, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = backgroundColor })
+    val inset = size * ICON_ARTWORK_INSET
+    canvas.drawBitmap(
+        source,
+        null,
+        RectF(inset, inset, size - inset, size - inset),
+        Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
+    )
     canvas.restore()
     return output
 }
+
+internal const val FALLBACK_ICON_BACKGROUND: Int = 0xFF808080.toInt()
+private const val ICON_ARTWORK_INSET = 0.16f
 
 private fun iconMaskPath(shape: String, size: Int): Path {
     val s = size.toFloat()
@@ -84,12 +96,7 @@ private fun iconMaskPath(shape: String, size: Int): Path {
 
 private fun rounded(path: Path, size: Float, radiusFraction: Float) {
     val radius = size * radiusFraction
-    path.addRoundRect(
-        RectF(0f, 0f, size, size),
-        radius,
-        radius,
-        Path.Direction.CW,
-    )
+    path.addRoundRect(RectF(0f, 0f, size, size), radius, radius, Path.Direction.CW)
 }
 
 private fun polygon(path: Path, size: Float, sides: Int) {

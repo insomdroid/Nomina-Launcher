@@ -438,7 +438,7 @@ class SettingsRepositoryTest {
     fun `settings sections start collapsed on fresh install, toggle per section and restore from a backup`() = runTest {
         val repo = newRepository()
         val allSections = setOf(
-            "home", "dock", "drawer", "icons", "gestures", "notifications", "permissions", "backup", "updates",
+            "home", "dock", "drawer", "icons", "wallpaper", "gestures", "notifications", "permissions", "backup", "updates",
         )
         assertThat(repo.settings.first().collapsedSettingsSections).containsExactlyElementsIn(allSections)
 

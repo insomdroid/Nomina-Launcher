@@ -206,7 +206,7 @@ class IconPackRepository internal constructor(
         )
         val THEME_CATEGORIES = listOf(
             "com.anddoes.launcher.THEME",
-            "com.teslacoilsw.launcher.THEME_ICONPACK",
+            "com.teslacoilsw.launcher.THEME",
             "com.fede.launcher.THEME_ICONPACK",
         )
     }

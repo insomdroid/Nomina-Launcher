@@ -24,19 +24,13 @@ class AppIconKeyerTest {
 
     private fun key(request: IconRequest) = keyer.key(request, options)
 
-    @Test fun themingEveryIconIsPartOfTheKey() {
-        val plain = key(IconRequest(app, themed = true))
-        val all = key(IconRequest(app, themed = true, themeAll = true))
-
-        assertThat(all).isNotEqualTo(plain)
-        assertThat(key(IconRequest(app, themed = true, themeAll = true))).isEqualTo(all)
-    }
-
-    @Test fun theOtherLookFlagsStayInTheKey() {
+    @Test fun reshapeModeAndMaskArePartOfTheKey() {
         val base = key(IconRequest(app))
-        assertThat(key(IconRequest(app, themed = true))).isNotEqualTo(base)
-        assertThat(key(IconRequest(app, dark = true))).isNotEqualTo(base)
+        assertThat(key(IconRequest(app, reshapeLegacyIcons = "always"))).isNotEqualTo(base)
+        assertThat(key(IconRequest(app, reshapeLegacyIcons = "off"))).isNotEqualTo(base)
+        assertThat(key(IconRequest(app, iconShape = "circle"))).isNotEqualTo(base)
         assertThat(key(IconRequest(app, iconPack = "com.pack"))).isNotEqualTo(base)
         assertThat(key(IconRequest(app, epoch = 1))).isNotEqualTo(base)
     }
+
 }

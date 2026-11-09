@@ -9,8 +9,6 @@ import android.content.pm.PackageManager
 import android.content.pm.ShortcutInfo
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.graphics.drawable.AdaptiveIconDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -19,7 +17,6 @@ import android.os.Looper
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
-import androidx.annotation.RequiresApi
 import coil3.ImageLoader
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -38,16 +35,16 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-/**
- * Applies the icon-source priority shared by the launcher and its unit tests:
- * a mapped pack icon wins; otherwise themed artwork is preferred before the original icon.
- */
-internal fun <T : Any> selectAppIcon(
-    packed: T?,
-    nativeThemed: T?,
-    generatedThemed: T?,
-    original: T?,
-): T? = packed ?: nativeThemed ?: generatedThemed ?: original
+/** Resolved app artwork plus whether it came from an appfilter mapping. */
+internal data class ResolvedAppIcon(val drawable: Drawable, val isPackMapped: Boolean)
+
+/** Nova-style decision: adaptive icons keep their own mask; legacy icons follow the policy. */
+internal fun shouldReshapeLegacyIcon(isAdaptive: Boolean, isPackMapped: Boolean, mode: String): Boolean =
+    !isAdaptive && when (mode) {
+        com.insomdroid.nomina.model.LauncherSettings.RESHAPE_ALWAYS -> true
+        com.insomdroid.nomina.model.LauncherSettings.RESHAPE_UNTHEMED -> !isPackMapped
+        else -> false
+    }
 
 /** Pure decision behind [LauncherAppsSource.isAppInstalled]; [profile] is the profile lookup's outcome. */
 internal fun <U : Any> installVerdict(profile: Result<U?>, appInfo: (U) -> Result<*>): Boolean {
@@ -390,83 +387,15 @@ class LauncherAppsSource @Inject constructor(
     }.getOrNull()
 
     /**
-     * Resolves [appItem]'s icon. Like [launch], this must never crash the process (the launcher is the
-     * device HOME): the app can be removed mid-load or its profile locked, so any failure resolves to
-     * a null icon instead of propagating.
-     *
-     * A mapped [iconPack] entry takes priority. Otherwise, when [themed] is enabled, Android's native
-     * monochrome layer is preferred; [themeAll] sends apps without one through Nomina's independent
-     * monochrome renderer. The original app icon remains the final fallback.
+     * A mapped appfilter drawable wins; otherwise return the original full-colour launcher icon.
+     * Retaining the mapping bit lets the fetcher implement Nova's Always / Unthemed distinction.
      */
-    fun loadIcon(
-        appItem: AppItem,
-        themed: Boolean = false,
-        dark: Boolean = false,
-        iconPack: String = "",
-        themeAll: Boolean = false,
-    ): Drawable? = runCatching {
+    fun loadIcon(appItem: AppItem, iconPack: String = ""): ResolvedAppIcon? = runCatching {
         val info = launcherApps.getActivityList(appItem.packageName, appItem.user)
             .firstOrNull { it.componentName.className == appItem.className }
             ?: return@runCatching null
-        // A mapped icon-pack entry wins. When the selected pack has no mapping for this app,
-        // keep the Material You setting active instead of silently reverting to the full-colour icon.
-        val packed = if (iconPack.isNotBlank()) {
-            iconPacks.get(iconPack)?.getIcon(appItem.componentName)
-        } else {
-            null
-        }
-        val nativeThemed = if (
-            packed == null && themed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-        ) {
-            themedIcon(info, dark)
-        } else {
-            null
-        }
-        // Never render an icon that will lose to a mapped pack entry or a usable native layer.
-        val generatedThemed = if (
-            packed == null && nativeThemed == null && themed && themeAll
-        ) {
-            generatedThemedIcon(info, dark)
-        } else {
-            null
-        }
-        selectAppIcon(packed, nativeThemed, generatedThemed, info.getBadgedIcon(0))
+        val packed = if (iconPack.isNotBlank()) iconPacks.get(iconPack)?.getIcon(appItem.componentName) else null
+        if (packed != null) ResolvedAppIcon(packed, true)
+        else ResolvedAppIcon(info.getBadgedIcon(0), false)
     }.getOrNull()
-
-    /**
-     * Uses Android's native monochrome layer as authored by the app. Its adaptive geometry and
-     * breathing room are already intentional, so do not crop, resize or rasterize it again.
-     */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun themedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
-        val adaptive = info.getIcon(0) as? AdaptiveIconDrawable ?: return null
-        val monochrome = adaptive.monochrome ?: return null
-        val (bg, fg) = themedColors(dark)
-        val glyph = monochrome.mutate().apply { setTint(fg) }
-        return AdaptiveIconDrawable(ColorDrawable(bg), glyph)
-    }
-
-    /**
-     * Conservative generated fallback for transparent artwork only. Opaque legacy icons are not
-     * guessed or recoloured: the caller then keeps the original icon instead of showing a damaged
-     * silhouette. The renderer preserves the original canvas and adaptive safe-zone proportions.
-     */
-    private fun generatedThemedIcon(info: LauncherActivityInfo, dark: Boolean): Drawable? {
-        val icon = info.getIcon(0) ?: return null
-        val glyph = (icon as? AdaptiveIconDrawable)?.foreground ?: icon
-        val (bg, fg) = themedColors(dark)
-        val rendered = MonochromeIconRenderer.render(
-            glyph = glyph,
-            tint = fg,
-            resources = context.resources,
-        ) ?: return null
-        return AdaptiveIconDrawable(ColorDrawable(bg), rendered)
-    }
-
-    /** Neutral monochrome surfaces that follow the system light/dark appearance. */
-    private fun themedColors(dark: Boolean): Pair<Int, Int> = if (dark) {
-        0xFF171717.toInt() to 0xFFF5F5F5.toInt()
-    } else {
-        0xFFF0F0F0.toInt() to 0xFF171717.toInt()
-    }
 }

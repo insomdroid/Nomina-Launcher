@@ -98,8 +98,7 @@ import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconShape
 import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
-import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
-import com.insomdroid.nomina.ui.component.LocalThemedIcons
+import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
@@ -169,8 +168,7 @@ fun SettingsScreen(
         LocalIconPack provides s.iconPackPackage,
         LocalIconShape provides s.iconShape,
         LocalAutoResizeIcons provides s.autoResizeIcons,
-        LocalThemedIcons provides s.useThemedIcons,
-        LocalThemeAllIcons provides s.themeAllIcons,
+        LocalIconReshapeMode provides s.reshapeLegacyIcons,
     ) {
         if (showBackup) {
             BackupScreen(onBack = { showBackup = false }, modifier = modifier.fillMaxSize())
@@ -392,21 +390,10 @@ fun SettingsScreen(
                         s.autoResizeIcons,
                         viewModel::setAutoResizeIcons,
                     )
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                        SwitchRow(
-                            stringResource(R.string.settings_themed_icons),
-                            s.useThemedIcons,
-                            viewModel::setUseThemedIcons,
-                        )
-                        if (s.useThemedIcons) {
-                            SwitchRow(
-                                stringResource(R.string.settings_theme_all_icons),
-                                stringResource(R.string.settings_theme_all_icons_desc),
-                                s.themeAllIcons,
-                                viewModel::setThemeAllIcons,
-                            )
-                        }
-                    }
+                    IconReshapeRow(
+                        selected = s.reshapeLegacyIcons,
+                        onPick = viewModel::setReshapeLegacyIcons,
+                    )
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_home_icon_size),
                         value = s.iconScale,
@@ -1549,6 +1536,47 @@ private fun iconShapeNameRes(key: String): Int = when (key) {
     LauncherSettings.ICON_SHAPE_FLOWER -> R.string.settings_icon_shape_flower
     LauncherSettings.ICON_SHAPE_CAT -> R.string.settings_icon_shape_cat
     else -> R.string.settings_icon_shape_system
+}
+
+/** Nova-style policy for applying the selected mask to legacy icons. */
+@Composable
+internal fun IconReshapeRow(selected: String, onPick: (String) -> Unit) {
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi,
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = p.shadow,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            .border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
+    ) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+            RowLabel(stringResource(R.string.settings_reshape_legacy_icons))
+            Text(
+                text = stringResource(R.string.settings_reshape_legacy_icons_desc),
+                color = p.textMuted,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp, bottom = 10.dp),
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
+                LauncherSettings.RESHAPE_LEGACY_MODES.forEach { mode ->
+                    val label = when (mode) {
+                        LauncherSettings.RESHAPE_ALWAYS -> R.string.settings_reshape_always
+                        LauncherSettings.RESHAPE_UNTHEMED -> R.string.settings_reshape_unthemed
+                        else -> R.string.settings_reshape_off
+                    }
+                    FilterChip(
+                        selected = selected == mode,
+                        onClick = { onPick(mode) },
+                        label = { Text(stringResource(label)) },
+                    )
+                }
+            }
+        }
+    }
 }
 
 /** All available masks, including the actual adaptive-icon mask supplied by Android. */

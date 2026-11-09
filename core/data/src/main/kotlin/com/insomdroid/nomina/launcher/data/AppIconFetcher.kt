@@ -22,8 +22,8 @@ import com.insomdroid.nomina.model.IconRequest
  * Coil fetcher that resolves an [IconRequest]'s launcher icon via [LauncherAppsSource]. The icon is
  * **rasterized to a Bitmap once** here rather than handed to Coil as a live Drawable: launcher icons
  * are usually AdaptiveIconDrawables that re-composite their layers on every draw, which makes a
- * scrolling grid stutter. A cached Bitmap is just a cheap blit per frame. The [IconRequest] carries
- * the themed/dark flags so the source can use the native monochrome layer or Nomina's renderer.
+ * scrolling grid stutter. A cached Bitmap is just a cheap blit per frame. Legacy masking is applied
+ * during this one rasterization, not as a per-frame Compose clip.
  */
 class AppIconFetcher(
     private val data: IconRequest,

@@ -274,27 +274,7 @@ fun HomeScreen(
     var dockInteractionVersion by remember { mutableIntStateOf(0) }
     val dockExpanded = settings.dockExpanded && !dockAutoHidden
 
-    // Close the dock after five idle seconds. Any pointer activity or open overlay restarts/pauses it.
-    LaunchedEffect(
-        settings.dockEnabled, dockExpanded, dockPointerActive, dockInteractionVersion,
-        drawerOpen, openFolderId, menuTarget, homeOptions, renameTarget, editingShortcut,
-        showWidgetPicker, showOnboarding, dragController.moving,
-    ) {
-        if (
-            settings.dockEnabled && dockExpanded && !dockPointerActive &&
-            !drawerOpen && openFolderId == null && menuTarget == null && homeOptions == null &&
-            renameTarget == null && editingShortcut == null && !showWidgetPicker &&
-            !showOnboarding && !dragController.moving
-        ) {
-            delay(5_000)
-            dockAutoHidden = true
-        }
-    }
-    // Empty-area long-press options popup (anchor + whether it flips above the press point).
-    var homeOptions by remember { mutableStateOf<Pair<IntOffset, Boolean>?>(null) }
-    // Page the workspace should show after a page was added or removed from the empty-area menu.
-    val pageRequests = remember { MutableSharedFlow<Int>(extraBufferCapacity = 1) }
-    val defaultFolderName = stringResource(UiR.string.folder_default_name)
+
     /** An app dropped on the dock from [source]: onto a tile it folds with that app or joins that
      *  folder; between tiles it takes the slot. Read from the state as it is NOW — the surfaces'
      *  gesture detectors hold this lambda across recompositions. */
@@ -331,6 +311,27 @@ fun HomeScreen(
     var showWidgetPicker by remember { mutableStateOf(false) }
     // The package an icon's Widgets row opened the picker on; null for the full gallery.
     var widgetPickerPackage by remember { mutableStateOf<String?>(null) }
+    // Close the dock after five idle seconds. Any pointer activity or open overlay restarts/pauses it.
+    LaunchedEffect(
+        settings.dockEnabled, dockExpanded, dockPointerActive, dockInteractionVersion,
+        drawerOpen, openFolderId, menuTarget, homeOptions, renameTarget, editingShortcut,
+        showWidgetPicker, showOnboarding, dragController.moving,
+    ) {
+        if (
+            settings.dockEnabled && dockExpanded && !dockPointerActive &&
+            !drawerOpen && openFolderId == null && menuTarget == null && homeOptions == null &&
+            renameTarget == null && editingShortcut == null && !showWidgetPicker &&
+            !showOnboarding && !dragController.moving
+        ) {
+            delay(5_000)
+            dockAutoHidden = true
+        }
+    }
+    // Empty-area long-press options popup (anchor + whether it flips above the press point).
+    var homeOptions by remember { mutableStateOf<Pair<IntOffset, Boolean>?>(null) }
+    // Page the workspace should show after a page was added or removed from the empty-area menu.
+    val pageRequests = remember { MutableSharedFlow<Int>(extraBufferCapacity = 1) }
+    val defaultFolderName = stringResource(UiR.string.folder_default_name)
     LaunchedEffect(showWidgetsFor) {
         val pkg = showWidgetsFor ?: return@LaunchedEffect
         widgetPickerPackage = pkg

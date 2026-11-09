@@ -884,4 +884,23 @@ class SettingsRepositoryTest {
         assertThat(settings.drawerLabelColor).isEqualTo(0xFFFFFFFF.toInt())
         assertThat(settings.dockBackgroundOpacity).isEqualTo(0.35f) // not a number: dropped, the default is back
     }
+    @Test
+    fun reshapeLegacyIconsDefaultsToUnthemedAndRoundTrips() = runTest {
+        val repo = newRepository()
+        assertThat(repo.settings.first().reshapeLegacyIcons)
+            .isEqualTo(LauncherSettings.RESHAPE_UNTHEMED)
+
+        repo.setReshapeLegacyIcons(LauncherSettings.RESHAPE_ALWAYS)
+        assertThat(repo.settings.first().reshapeLegacyIcons)
+            .isEqualTo(LauncherSettings.RESHAPE_ALWAYS)
+
+        repo.setReshapeLegacyIcons(LauncherSettings.RESHAPE_OFF)
+        assertThat(repo.settings.first().reshapeLegacyIcons)
+            .isEqualTo(LauncherSettings.RESHAPE_OFF)
+
+        repo.setReshapeLegacyIcons("invalid")
+        assertThat(repo.settings.first().reshapeLegacyIcons)
+            .isEqualTo(LauncherSettings.RESHAPE_UNTHEMED)
+    }
+
 }

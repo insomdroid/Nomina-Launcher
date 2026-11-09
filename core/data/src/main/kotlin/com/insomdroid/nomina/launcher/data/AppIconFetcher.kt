@@ -2,6 +2,8 @@ package com.insomdroid.nomina.data
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
@@ -74,17 +76,30 @@ internal fun iconResult(
     // Adaptive foreground assets already contain the platform's safe-zone padding. Normalizing
     // or applying the legacy inset again would shrink their artwork twice.
     val normalized = if (autoResize && !isAdaptive) normalizeIconBitmap(bitmap) else bitmap
+    val monochrome = if (reshape != null) toMonochrome(normalized) else normalized
     val output = reshape?.let {
         applyIconMask(
-            normalized,
+            monochrome,
             it,
             iconBackColor ?: FALLBACK_ICON_BACKGROUND,
             artworkInset = if (isAdaptive) 0f else ICON_ARTWORK_INSET,
         )
     } ?: normalized
-    if (output !== normalized) normalized.recycle()
+    if (output !== monochrome) monochrome.recycle()
+    if (monochrome !== normalized) normalized.recycle()
     if (normalized !== bitmap) bitmap.recycle()
     return ImageFetchResult(image = output.asImage(), isSampled = false, dataSource = DataSource.DISK)
+}
+
+
+/** Removes hue from unthemed artwork while preserving its luminance, edges and transparency. */
+private fun toMonochrome(source: Bitmap): Bitmap {
+    val output = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+        colorFilter = ColorMatrixColorFilter(ColorMatrix().apply { setSaturation(0f) })
+    }
+    Canvas(output).drawBitmap(source, 0f, 0f, paint)
+    return output
 }
 
 /** Normalizes transparent padding while preserving aspect ratio and centring the visible artwork. */

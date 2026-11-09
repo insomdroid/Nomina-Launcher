@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class IconMaskRendererTest {
 
     @Test
-    fun legacyArtworkIsScaledInsidePackColouredCircle() {
+    fun legacyArtworkKeepsItsCornersInsidePackColouredCircle() {
         val source = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888).apply {
             eraseColor(Color.RED)
         }
@@ -24,8 +24,28 @@ class IconMaskRendererTest {
         )
 
         assertThat(result.getPixel(50, 50)).isEqualTo(Color.RED)
+        assertThat(result.getPixel(17, 17)).isEqualTo(Color.RED)
         assertThat(result.getPixel(50, 8)).isEqualTo(Color.BLACK)
-        assertThat(Color.alpha(result.getPixel(0, 50))).isEqualTo(0)
+        assertThat(Color.alpha(result.getPixel(0, 0))).isEqualTo(0)
+        source.recycle()
+        result.recycle()
+    }
+
+    @Test
+    fun selectedShapeControlsBackplateWithoutClippingArtwork() {
+        val source = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888).apply {
+            eraseColor(Color.RED)
+        }
+
+        val result = applyIconMask(
+            source = source,
+            shape = LauncherSettings.ICON_SHAPE_ROUNDED_SQUARE,
+            backgroundColor = Color.BLACK,
+        )
+
+        assertThat(result.getPixel(50, 5)).isEqualTo(Color.BLACK)
+        assertThat(result.getPixel(17, 17)).isEqualTo(Color.RED)
+        assertThat(Color.alpha(result.getPixel(0, 0))).isEqualTo(0)
         source.recycle()
         result.recycle()
     }

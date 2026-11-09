@@ -40,7 +40,7 @@ internal fun applyIconMask(
 }
 
 internal const val FALLBACK_ICON_BACKGROUND: Int = 0xFF808080.toInt()
-private const val ICON_ARTWORK_INSET = 0.16f
+internal const val ICON_ARTWORK_INSET = 0.16f
 
 private fun iconMaskPath(shape: String, size: Int): Path {
     val s = size.toFloat()

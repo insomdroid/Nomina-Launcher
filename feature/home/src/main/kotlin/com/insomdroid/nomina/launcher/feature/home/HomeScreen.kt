@@ -15,8 +15,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -104,6 +102,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import com.insomdroid.nomina.data.PendingWidgetIds
@@ -269,6 +268,28 @@ fun HomeScreen(
     // A pinned shortcut whose icon is being edited (issue #23): a still long-press on it.
     var editingShortcut by remember { mutableStateOf<PlacedShortcut?>(null) }
     var openFolderId by remember { mutableStateOf<Long?>(null) }
+    // Auto-hide is transient: it must not write the user's dock preference to DataStore.
+    var dockAutoHidden by remember { mutableStateOf(false) }
+    var dockPointerActive by remember { mutableStateOf(false) }
+    var dockInteractionVersion by remember { mutableIntStateOf(0) }
+    val dockExpanded = settings.dockExpanded && !dockAutoHidden
+
+    // Close the dock after five idle seconds. Any pointer activity or open overlay restarts/pauses it.
+    LaunchedEffect(
+        settings.dockEnabled, dockExpanded, dockPointerActive, dockInteractionVersion,
+        drawerOpen, openFolderId, menuTarget, homeOptions, renameTarget, editingShortcut,
+        showWidgetPicker, showOnboarding, dragController.moving,
+    ) {
+        if (
+            settings.dockEnabled && dockExpanded && !dockPointerActive &&
+            !drawerOpen && openFolderId == null && menuTarget == null && homeOptions == null &&
+            renameTarget == null && editingShortcut == null && !showWidgetPicker &&
+            !showOnboarding && !dragController.moving
+        ) {
+            delay(5_000)
+            dockAutoHidden = true
+        }
+    }
     // Empty-area long-press options popup (anchor + whether it flips above the press point).
     var homeOptions by remember { mutableStateOf<Pair<IntOffset, Boolean>?>(null) }
     // Page the workspace should show after a page was added or removed from the empty-area menu.
@@ -560,16 +581,17 @@ fun HomeScreen(
 
     // When the expanded dock is hidden, reveal it as an incoming app drag reaches the lower
     // portion of the workspace. The drag keeps running while AnimatedVisibility slides the dock in.
-    LaunchedEffect(dragController, settings.dockEnabled, settings.dockExpanded, homeOrigin, homeHeightPx) {
+    LaunchedEffect(dragController, settings.dockEnabled, settings.dockExpanded, dockExpanded, homeOrigin, homeHeightPx) {
         snapshotFlow { Triple(dragController.moving, dragController.source, dragController.rootPosition) }
             .collect { (moving, source, position) ->
                 val incoming = source == DragSource.Home || source == DragSource.Drawer || source == DragSource.Folder
                 val revealZoneTop = homeOrigin.y + homeHeightPx * 0.82f
                 if (
-                    settings.dockEnabled && !settings.dockExpanded && moving && incoming &&
+                    settings.dockEnabled && !dockExpanded && moving && incoming &&
                     homeHeightPx > 0 && position.y >= revealZoneTop
                 ) {
-                    viewModel.setDockExpanded(true)
+                    if (settings.dockExpanded) dockAutoHidden = false
+                    else viewModel.setDockExpanded(true)
                 }
             }
     }
@@ -621,8 +643,8 @@ fun HomeScreen(
                 homeWidthPx = it.size.width
                 homeHeightPx = it.size.height
             }
-            .pointerInput(settings.dockExpanded, homeOrigin) {
-                if (settings.dockExpanded) {
+            .pointerInput(dockExpanded, homeOrigin) {
+                if (dockExpanded) {
                     awaitEachGesture {
                         val down = awaitFirstDown(
                             requireUnconsumed = false,
@@ -639,6 +661,7 @@ fun HomeScreen(
                             pointerPressed = change.pressed
                         }
                         if (!moved && !dragController.isOverDock(down.position + homeOrigin)) {
+                            dockAutoHidden = false
                             viewModel.setDockExpanded(false)
                         }
                     }
@@ -764,15 +787,15 @@ fun HomeScreen(
 
             // Keep the chevron and compact dock in one smooth transition when the dock closes.
             val chevronOffsetY by animateDpAsState(
-                targetValue = if (settings.dockExpanded) 0.dp else (-24).dp,
+                targetValue = if (dockExpanded) 0.dp else (-24).dp,
                 animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
             )
             val chevronRotation by animateFloatAsState(
-                targetValue = if (settings.dockExpanded) 0f else 180f,
+                targetValue = if (dockExpanded) 0f else 180f,
                 animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
             )
             val miniDockOffsetY by animateDpAsState(
-                targetValue = if (settings.dockExpanded) 0.dp else (-16).dp,
+                targetValue = if (dockExpanded) 0.dp else (-16).dp,
                 animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
             )
 
@@ -788,9 +811,18 @@ fun HomeScreen(
                             .offset(y = chevronOffsetY)
                             .graphicsLayer { rotationZ = chevronRotation }
                             .semantics {
-                                contentDescription = if (settings.dockExpanded) "Collapse dock" else "Expand dock"
+                                contentDescription = if (dockExpanded) "Collapse dock" else "Expand dock"
                             }
-                            .clickable { viewModel.setDockExpanded(!settings.dockExpanded) },
+                            .clickable {
+                                if (dockExpanded) {
+                                    dockAutoHidden = false
+                                    viewModel.setDockExpanded(false)
+                                } else if (settings.dockExpanded) {
+                                    dockAutoHidden = false
+                                } else {
+                                    viewModel.setDockExpanded(true)
+                                }
+                            },
                     ) {
                         // Standard continuous chevron. Rotation preserves the direction:
                         // down when expanded, up when collapsed.
@@ -817,9 +849,9 @@ fun HomeScreen(
                     }
                 }
                 AnimatedVisibility(
-                    visible = settings.dockExpanded,
-                    enter = slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(220)) + fadeIn(tween(180)),
-                    exit = slideOutVertically(targetOffsetY = { it / 2 }, animationSpec = tween(180)) + fadeOut(tween(140)),
+                    visible = dockExpanded,
+                    enter = fadeIn(tween(180)),
+                    exit = fadeOut(tween(180)),
                 ) {
                     CompositionLocalProvider(
                         LocalIconScale provides settings.dockIconScale,
@@ -849,6 +881,18 @@ fun HomeScreen(
                         onDropOnTile = { app, target -> dropOnDock(app, target, DragSource.Dock) },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .pointerInput(dockExpanded) {
+                                awaitEachGesture {
+                                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                                    dockPointerActive = true
+                                    dockInteractionVersion++
+                                    try {
+                                        while (awaitPointerEvent(PointerEventPass.Initial).changes.any { it.pressed }) Unit
+                                    } finally {
+                                        dockPointerActive = false
+                                    }
+                                }
+                            }
                             .homeDockPadding(bottomSpacing = settings.dockBottomSpacing.dp),
                     )
                     }

@@ -48,8 +48,7 @@ import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.LocalIconShape
 import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
-import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
-import com.insomdroid.nomina.ui.component.LocalThemedIcons
+import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import kotlin.math.roundToInt
 
 /**
@@ -185,6 +184,7 @@ fun LauncherShell(
     CompositionLocalProvider(
         LocalIconShape provides iconStyle.iconShape,
         LocalAutoResizeIcons provides iconStyle.autoResizeIcons,
+        LocalIconReshapeMode provides iconStyle.reshapeLegacyIcons,
     ) {
         LongPressDelay(longPressScale) {
         Box(
@@ -323,8 +323,6 @@ fun LauncherShell(
                     // their CompositionLocal scopes, so without this it reverts to the plain system icon).
                     CompositionLocalProvider(
                         LocalIconPack provides iconStyle.iconPack,
-                        LocalThemedIcons provides iconStyle.themed,
-                        LocalThemeAllIcons provides iconStyle.themeAll,
                         LocalIconScale provides iconStyle.iconScale,
                     ) {
                         AppIcon(

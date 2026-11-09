@@ -492,7 +492,7 @@ class SettingsRepository @Inject constructor(
 
     private fun parseSections(raw: String?): Set<String> =
         if (raw == null) {
-            setOf("home", "dock", "drawer", "icons", "gestures", "notifications", "permissions", "backup", "updates")
+            setOf("home", "dock", "drawer", "icons", "wallpaper", "gestures", "notifications", "permissions", "backup", "updates")
         } else {
             raw.split(',').map { it.trim() }.filterTo(LinkedHashSet()) { it.isNotEmpty() }
         }

@@ -19,11 +19,11 @@ class AppIconSelectionTest {
     }
 
     @Test
-    fun adaptiveIconsKeepTheirOwnMaskInEveryMode() {
-        LauncherSettings.RESHAPE_LEGACY_MODES.forEach { mode ->
-            assertThat(shouldReshapeLegacyIcon(true, false, mode)).isFalse()
-            assertThat(shouldReshapeLegacyIcon(true, true, mode)).isFalse()
-        }
+    fun unthemedAdaptiveIconsUseFallbackShapeButPackMappedAdaptiveIconsDoNot() {
+        assertThat(shouldReshapeLegacyIcon(true, false, LauncherSettings.RESHAPE_UNTHEMED)).isTrue()
+        assertThat(shouldReshapeLegacyIcon(true, true, LauncherSettings.RESHAPE_UNTHEMED)).isFalse()
+        assertThat(shouldReshapeLegacyIcon(true, false, LauncherSettings.RESHAPE_ALWAYS)).isTrue()
+        assertThat(shouldReshapeLegacyIcon(true, true, LauncherSettings.RESHAPE_ALWAYS)).isFalse()
     }
 
     @Test

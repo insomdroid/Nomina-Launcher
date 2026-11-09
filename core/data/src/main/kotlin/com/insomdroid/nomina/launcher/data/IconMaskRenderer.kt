@@ -19,6 +19,7 @@ internal fun applyIconMask(
     source: Bitmap,
     shape: String,
     backgroundColor: Int = FALLBACK_ICON_BACKGROUND,
+    artworkInset: Float = ICON_ARTWORK_INSET,
 ): Bitmap {
     val size = source.width
     val output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
@@ -28,7 +29,7 @@ internal fun applyIconMask(
     // The shape is the backplate only. The original artwork is scaled proportionally and
     // kept intact; it is deliberately not clipped to the backplate path.
     canvas.drawPath(path, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = backgroundColor })
-    val inset = size * ICON_ARTWORK_INSET
+    val inset = size * artworkInset
     canvas.drawBitmap(
         source,
         null,

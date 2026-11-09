@@ -62,12 +62,25 @@ internal fun iconResult(
     reshape: String? = null,
     iconBackColor: Int? = null,
 ): FetchResult {
+    val isAdaptive = drawable is AdaptiveIconDrawable
+    val artwork = if (isAdaptive && reshape != null) {
+        drawable.foreground ?: drawable
+    } else {
+        drawable
+    }
     val bitmap = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888)
-    drawable.setBounds(0, 0, ICON_PX, ICON_PX)
-    drawable.draw(Canvas(bitmap))
-    val normalized = if (autoResize) normalizeIconBitmap(bitmap) else bitmap
+    artwork.setBounds(0, 0, ICON_PX, ICON_PX)
+    artwork.draw(Canvas(bitmap))
+    // Adaptive foreground assets already contain the platform's safe-zone padding. Normalizing
+    // or applying the legacy inset again would shrink their artwork twice.
+    val normalized = if (autoResize && !isAdaptive) normalizeIconBitmap(bitmap) else bitmap
     val output = reshape?.let {
-        applyIconMask(normalized, it, iconBackColor ?: FALLBACK_ICON_BACKGROUND)
+        applyIconMask(
+            normalized,
+            it,
+            iconBackColor ?: FALLBACK_ICON_BACKGROUND,
+            artworkInset = if (isAdaptive) 0f else ICON_ARTWORK_INSET,
+        )
     } ?: normalized
     if (output !== normalized) normalized.recycle()
     if (normalized !== bitmap) bitmap.recycle()

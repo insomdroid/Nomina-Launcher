@@ -44,10 +44,10 @@ internal data class ResolvedAppIcon(
     val iconBackColor: Int?,
 )
 
-/** Nova-style decision: adaptive icons keep their own mask; legacy icons follow the policy. */
+/** Pack-mapped adaptive artwork keeps the pack's own presentation; unthemed adaptive artwork can use fallback shape. */
 internal fun shouldReshapeLegacyIcon(isAdaptive: Boolean, isPackMapped: Boolean, mode: String): Boolean =
-    !isAdaptive && when (mode) {
-        com.insomdroid.nomina.model.LauncherSettings.RESHAPE_ALWAYS -> true
+    when (mode) {
+        com.insomdroid.nomina.model.LauncherSettings.RESHAPE_ALWAYS -> !isAdaptive || !isPackMapped
         com.insomdroid.nomina.model.LauncherSettings.RESHAPE_UNTHEMED -> !isPackMapped
         else -> false
     }

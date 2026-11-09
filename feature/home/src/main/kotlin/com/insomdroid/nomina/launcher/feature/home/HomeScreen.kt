@@ -311,6 +311,9 @@ fun HomeScreen(
     var showWidgetPicker by remember { mutableStateOf(false) }
     // The package an icon's Widgets row opened the picker on; null for the full gallery.
     var widgetPickerPackage by remember { mutableStateOf<String?>(null) }
+
+    // Empty-area long-press options popup (anchor + whether it flips above the press point).
+    var homeOptions by remember { mutableStateOf<Pair<IntOffset, Boolean>?>(null) }
     // Close the dock after five idle seconds. Any pointer activity or open overlay restarts/pauses it.
     LaunchedEffect(
         settings.dockEnabled, dockExpanded, dockPointerActive, dockInteractionVersion,
@@ -327,8 +330,6 @@ fun HomeScreen(
             dockAutoHidden = true
         }
     }
-    // Empty-area long-press options popup (anchor + whether it flips above the press point).
-    var homeOptions by remember { mutableStateOf<Pair<IntOffset, Boolean>?>(null) }
     // Page the workspace should show after a page was added or removed from the empty-area menu.
     val pageRequests = remember { MutableSharedFlow<Int>(extraBufferCapacity = 1) }
     val defaultFolderName = stringResource(UiR.string.folder_default_name)

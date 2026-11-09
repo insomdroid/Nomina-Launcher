@@ -885,10 +885,10 @@ class SettingsRepositoryTest {
         assertThat(settings.dockBackgroundOpacity).isEqualTo(0.35f) // not a number: dropped, the default is back
     }
     @Test
-    fun reshapeLegacyIconsDefaultsToUnthemedAndRoundTrips() = runTest {
+    fun reshapeLegacyIconsDefaultsToOffAndRoundTrips() = runTest {
         val repo = newRepository()
         assertThat(repo.settings.first().reshapeLegacyIcons)
-            .isEqualTo(LauncherSettings.RESHAPE_UNTHEMED)
+            .isEqualTo(LauncherSettings.RESHAPE_OFF)
 
         repo.setReshapeLegacyIcons(LauncherSettings.RESHAPE_ALWAYS)
         assertThat(repo.settings.first().reshapeLegacyIcons)

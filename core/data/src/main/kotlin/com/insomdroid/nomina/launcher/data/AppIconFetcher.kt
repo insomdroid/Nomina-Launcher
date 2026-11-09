@@ -34,12 +34,12 @@ class AppIconFetcher(
         // A user-picked icon wins; if its file or pack is gone, resolve the installed app icon.
         val customDrawable = data.app.customIcon?.let(custom::drawable)
         val resolved = if (customDrawable != null) {
-            ResolvedAppIcon(customDrawable, data.app.customIcon is CustomIcon.FromPack)
+            ResolvedAppIcon(customDrawable, data.app.customIcon is CustomIcon.FromPack, customDrawable is AdaptiveIconDrawable)
         } else {
             source.loadIcon(data.app, data.iconPack) ?: return@withContext null
         }
         val reshape = shouldReshapeLegacyIcon(
-            isAdaptive = resolved.drawable is AdaptiveIconDrawable,
+            isAdaptive = resolved.isAdaptive,
             isPackMapped = resolved.isPackMapped,
             mode = data.reshapeLegacyIcons,
         )

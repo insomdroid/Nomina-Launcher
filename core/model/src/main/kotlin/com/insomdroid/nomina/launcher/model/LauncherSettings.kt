@@ -45,8 +45,10 @@ data class LauncherSettings(
     /** How fast the home pager settles on a page (its snap and every programmatic page change):
      *  [SPEED_NORMAL], [SPEED_FAST] or [SPEED_FASTEST] (issue #18). */
     val pageSwitchSpeed: String = SPEED_NORMAL,
-    /** Icon mask used on every launcher-owned app icon. */
+    /** Mask used when reshaping legacy app icons. */
     val iconShape: String = ICON_SHAPE_SYSTEM,
+    /** Nova-style policy for applying the selected mask to legacy icons. */
+    val reshapeLegacyIcons: String = RESHAPE_UNTHEMED,
     /** Normalizes transparent icon padding so legacy icons have a more consistent visual size. */
     val autoResizeIcons: Boolean = true,
     /** Swiping past the last home page continues to the first one, and back from the first to the
@@ -60,8 +62,6 @@ data class LauncherSettings(
     val notificationDotCount: Boolean = true,
     /** Size multiplier for the notification dot/badge (1.0 = default). */
     val notificationDotScale: Float = 1.0f,
-    /** Render app icons as Material You themed (monochrome) icons where the app provides one. */
-    val useThemedIcons: Boolean = false,
     /** Package name of the selected third-party icon pack (empty = system default). Overrides
      *  [useThemedIcons] when set: mapped apps use the pack's icon, unmapped apps are masked to its style. */
     val iconPackPackage: String = "",
@@ -86,8 +86,6 @@ data class LauncherSettings(
     val blurBehindDrawer: Boolean = false,
     /** Multiplier on the drawer blur's radius (1.0 = the 0.9.9 blur, 0.1–2.0; a Telegram request). */
     val drawerBlurStrength: Float = 1.0f,
-    /** With themed icons on, apps without a monochrome layer get a silhouette of their icon (a Telegram request). */
-    val themeAllIcons: Boolean = false,
     /** Apps placed on the home screen (its pages, its folders, the dock) leave the drawer's list; the search
      *  still finds them (a Telegram request after 0.9.7, opt-in). */
     val hideHomeAppsFromDrawer: Boolean = false,
@@ -157,6 +155,11 @@ data class LauncherSettings(
         const val LABEL_COLOR_FOLLOW_HOME = "follow_home"
         const val LABEL_COLOR_AUTOMATIC = "automatic"
         const val LABEL_COLOR_CUSTOM = "custom"
+
+        const val RESHAPE_ALWAYS = "always"
+        const val RESHAPE_UNTHEMED = "unthemed"
+        const val RESHAPE_OFF = "off"
+        val RESHAPE_LEGACY_MODES = listOf(RESHAPE_ALWAYS, RESHAPE_UNTHEMED, RESHAPE_OFF)
 
         const val ICON_SHAPE_SYSTEM = "system"
         const val ICON_SHAPE_CIRCLE = "circle"

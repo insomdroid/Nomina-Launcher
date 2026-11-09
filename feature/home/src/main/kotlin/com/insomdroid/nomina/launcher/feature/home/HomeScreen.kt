@@ -135,8 +135,7 @@ import com.insomdroid.nomina.ui.component.LocalAppLabelLines
 import com.insomdroid.nomina.ui.component.LocalAppLabelScale
 import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.LocalIconPack
-import com.insomdroid.nomina.ui.component.LocalThemeAllIcons
-import com.insomdroid.nomina.ui.component.LocalThemedIcons
+import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import kotlin.math.abs
 
 /** The space above and below the workspace in the home column. */
@@ -596,13 +595,11 @@ fun HomeScreen(
     val badgeShowCount = settings.notificationDotCount
     val badgeScale = settings.notificationDotScale
 
-    // All app icons on home (workspace, dock, folders) honour the themed-icons setting and the
-    // user's app-label text-size multiplier.
+    // Home app icons share the selected icon pack and legacy-reshape policy.
     CompositionLocalProvider(
         LocalTonalWidgets provides settings.widgetTonalBackground,
-        LocalThemedIcons provides settings.useThemedIcons,
-        LocalThemeAllIcons provides settings.themeAllIcons,
         LocalIconPack provides settings.iconPackPackage,
+        LocalIconReshapeMode provides settings.reshapeLegacyIcons,
         LocalAppLabelScale provides settings.appLabelTextScale,
         LocalIconScale provides settings.iconScale,
         LocalPageSwitchSpeed provides settings.pageSwitchSpeed,

@@ -37,7 +37,12 @@ import javax.inject.Provider
 import javax.inject.Singleton
 
 /** Resolved app artwork plus whether it came from an appfilter mapping. */
-internal data class ResolvedAppIcon(val drawable: Drawable, val isPackMapped: Boolean, val isAdaptive: Boolean)
+internal data class ResolvedAppIcon(
+    val drawable: Drawable,
+    val isPackMapped: Boolean,
+    val isAdaptive: Boolean,
+    val iconBackColor: Int?,
+)
 
 /** Nova-style decision: adaptive icons keep their own mask; legacy icons follow the policy. */
 internal fun shouldReshapeLegacyIcon(isAdaptive: Boolean, isPackMapped: Boolean, mode: String): Boolean =
@@ -395,8 +400,12 @@ class LauncherAppsSource @Inject constructor(
         val info = launcherApps.getActivityList(appItem.packageName, appItem.user)
             .firstOrNull { it.componentName.className == appItem.className }
             ?: return@runCatching null
-        val packed = if (iconPack.isNotBlank()) iconPacks.get(iconPack)?.getIcon(appItem.componentName) else null
-        if (packed != null) ResolvedAppIcon(packed, true, packed is AdaptiveIconDrawable)
-        else ResolvedAppIcon(info.getBadgedIcon(0), false, info.getIcon(0) is AdaptiveIconDrawable)
+        val pack = if (iconPack.isNotBlank()) iconPacks.get(iconPack) else null
+        val packed = pack?.getIcon(appItem.componentName)
+        if (packed != null) {
+            ResolvedAppIcon(packed, true, packed is AdaptiveIconDrawable, pack.iconBackColor)
+        } else {
+            ResolvedAppIcon(info.getBadgedIcon(0), false, info.getIcon(0) is AdaptiveIconDrawable, pack?.iconBackColor)
+        }
     }.getOrNull()
 }

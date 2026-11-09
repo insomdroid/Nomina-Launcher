@@ -30,7 +30,7 @@ class AppIconFetcher(
                 customDrawable,
                 data.app.customIcon is CustomIcon.FromPack,
                 customDrawable is AdaptiveIconDrawable,
-                null,
+                source.iconBackColor(data.iconPack),
             )
         } else {
             source.loadIcon(data.app, data.iconPack) ?: return@withContext null

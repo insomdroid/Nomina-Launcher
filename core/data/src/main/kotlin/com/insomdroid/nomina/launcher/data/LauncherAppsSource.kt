@@ -396,6 +396,9 @@ class LauncherAppsSource @Inject constructor(
      * A mapped appfilter drawable wins; otherwise return the original full-colour launcher icon.
      * Retaining the mapping bit lets the fetcher implement Nova's Always / Unthemed distinction.
      */
+    internal fun iconBackColor(iconPack: String): Int? =
+        if (iconPack.isBlank()) null else iconPacks.get(iconPack)?.iconBackColor
+
     internal fun loadIcon(appItem: AppItem, iconPack: String = ""): ResolvedAppIcon? = runCatching {
         val info = launcherApps.getActivityList(appItem.packageName, appItem.user)
             .firstOrNull { it.componentName.className == appItem.className }

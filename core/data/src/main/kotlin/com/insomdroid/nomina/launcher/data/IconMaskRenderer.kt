@@ -13,7 +13,7 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-/** Draws legacy artwork inside a pack-coloured shape; adaptive icons keep their own mask. */
+/** Draws legacy artwork centred on a selected backplate shape without clipping the artwork. */
 internal fun applyIconMask(
     source: Bitmap,
     shape: String,
@@ -23,8 +23,9 @@ internal fun applyIconMask(
     val output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(output)
     val path = iconMaskPath(shape, size)
-    canvas.save()
-    canvas.clipPath(path)
+
+    // The shape is the backplate only. The original artwork is scaled proportionally and
+    // kept intact; it is deliberately not clipped to the backplate path.
     canvas.drawPath(path, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = backgroundColor })
     val inset = size * ICON_ARTWORK_INSET
     canvas.drawBitmap(
@@ -33,7 +34,6 @@ internal fun applyIconMask(
         RectF(inset, inset, size - inset, size - inset),
         Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
     )
-    canvas.restore()
     return output
 }
 

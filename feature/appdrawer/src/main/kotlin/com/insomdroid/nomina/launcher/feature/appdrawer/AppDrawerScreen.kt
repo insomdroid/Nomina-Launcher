@@ -144,6 +144,7 @@ import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
 import com.insomdroid.nomina.ui.expressive.ExpressiveTheme
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
 import com.insomdroid.nomina.ui.rememberHomeDragController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1572,8 +1573,7 @@ private fun DrawerAppCell(
 private fun CalcResultCard(calc: SearchResult.Calculation, onCopy: () -> Unit) {
     val p = LocalExpressivePalette.current
     ExpressiveCard(onClick = onCopy) {
-        Text("${calc.expression} = ", color = p.dim, fontSize = 18.sp)
-        Text(calc.result, color = p.text, fontSize = 22.sp,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+        Text("${calc.expression} = ", color = p.dim, style = LauncherTextStyles.calculationExpression)
+        Text(calc.result, color = p.text, style = LauncherTextStyles.calculationResult)
     }
 }

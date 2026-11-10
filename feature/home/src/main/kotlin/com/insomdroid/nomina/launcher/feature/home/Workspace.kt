@@ -1108,11 +1108,7 @@ internal fun Workspace(
                                 val folderBadge = entry.apps.sumOf { badges[it.badgeKey] ?: 0 }
                                 Box(
                                     modifier = Modifier
-                                        .offset {
-                                            val sx = entry.cellX.coerceIn(0, columns - 1)
-                                            val sy = entry.cellY.coerceIn(0, rows - 1)
-                                            IntOffset((sx * cellW).roundToInt(), (sy * cellH).roundToInt())
-                                        }
+                                        .workspaceCellOffset(entry.cellX, entry.cellY, columns, rows, cellW, cellH)
                                         .size(with(density) { cellW.toDp() }, with(density) { cellH.toDp() })
                                         // Hide (but keep composed) the in-grid folder once it's moving;
                                         // the floating copy is drawn on top. While only lifted it stays.
@@ -1368,11 +1364,7 @@ internal fun Workspace(
                             is PlacedShortcut -> {
                                 Box(
                                     modifier = Modifier
-                                        .offset {
-                                            val sx = entry.cellX.coerceIn(0, columns - 1)
-                                            val sy = entry.cellY.coerceIn(0, rows - 1)
-                                            IntOffset((sx * cellW).roundToInt(), (sy * cellH).roundToInt())
-                                        }
+                                        .workspaceCellOffset(entry.cellX, entry.cellY, columns, rows, cellW, cellH)
                                         .size(with(density) { cellW.toDp() }, with(density) { cellH.toDp() })
                                         .graphicsLayer {
                                             // A row just added by another app pops in (see revealScale).
@@ -2259,3 +2251,18 @@ internal fun cellTaken(entries: List<HomeEntry>, page: Int, cellX: Int, cellY: I
             else -> e.cellX == cellX && e.cellY == cellY
         }
     }
+
+
+/** Shared cell positioning for home items that occupy one grid cell. */
+private fun Modifier.workspaceCellOffset(
+    cellX: Int,
+    cellY: Int,
+    columns: Int,
+    rows: Int,
+    cellWidthPx: Float,
+    cellHeightPx: Float,
+): Modifier = offset {
+    val safeX = cellX.coerceIn(0, columns - 1)
+    val safeY = cellY.coerceIn(0, rows - 1)
+    IntOffset((safeX * cellWidthPx).roundToInt(), (safeY * cellHeightPx).roundToInt())
+}

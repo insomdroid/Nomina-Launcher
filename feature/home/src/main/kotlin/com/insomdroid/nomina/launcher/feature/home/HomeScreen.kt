@@ -929,17 +929,17 @@ fun HomeScreen(
             }
             // Keep the compact mini-dock capsule in sync with the main dock auto-hide state.
             AnimatedVisibility(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
                 visible = dockExpanded,
                 enter = fadeIn(tween(180)),
                 exit = fadeOut(tween(180)),
             ) {
                 // Compact Nothing-inspired mini dock: camera, app search and browser.
                 Surface(
-                modifier = Modifier
-                    .width(108.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 0.dp, bottom = 12.dp)
-                    .offset(y = miniDockOffsetY),
+                    modifier = Modifier
+                        .width(108.dp)
+                        .padding(top = 0.dp, bottom = 12.dp)
+                        .offset(y = miniDockOffsetY),
                 color = (if (miniDockUsesLightBackground) Color.White else Color.Black).copy(alpha = 0.25f),
                 shape = RoundedCornerShape(18.dp),
                 shadowElevation = 0.dp,

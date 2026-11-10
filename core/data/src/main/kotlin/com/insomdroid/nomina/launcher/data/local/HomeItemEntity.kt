@@ -82,7 +82,7 @@ data class HomeItemEntity(
         /** [builtinType] of the battery widget (a ring gauge + percent, app-icon sized). */
         const val BUILTIN_BATTERY = "battery"
 
-        /** [builtinType] of the people widget (conversations grouped by person, as quiet tiles). */
+        /** Legacy [builtinType] retained only to discard saved rows and backups from the removed widget. */
         const val BUILTIN_PEOPLE = "people"
     }
 }

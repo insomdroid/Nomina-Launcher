@@ -39,4 +39,14 @@ object LauncherTextStyles {
     val appLabel = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Normal)
     val calculationExpression = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal)
     val calculationResult = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+    val settingsEyebrow = TextStyle(fontSize = 9.sp, letterSpacing = 1.4.sp)
+    val settingsTitle = TextStyle(fontSize = 34.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp)
+    val settingsRowLabel = TextStyle(fontSize = 16.sp)
+    val settingsDescription = TextStyle(fontSize = 12.5.sp)
+    val settingsSupportingText = TextStyle(fontSize = 12.sp)
+    val settingsGroupLabel = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
+    val expressiveSectionTitle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+    val expressiveActionLabel = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Medium)
+    val expressiveActionDescription = TextStyle(fontSize = 12.sp)
 }

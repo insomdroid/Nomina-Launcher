@@ -12,8 +12,6 @@
          widget itself. Clock + date work without it. -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
 
-    <!-- Optional: People widget contact matching; requested only from Settings > Permissions. -->
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <!-- Optional: the smartspace widget's weather (Open-Meteo needs rough coordinates); requested at
          runtime from the widget/intro. A cached coarse fix is read — no active location requests. -->

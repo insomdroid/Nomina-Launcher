@@ -211,8 +211,6 @@ class AppDrawerViewModel @Inject constructor(
             mixDrawerFolders = settings.mixDrawerFolders,
             folderColumns = settings.folderColumns,
         )
-    }.combine(notificationBadgeRepository.badges) { state, badges ->
-        state.copy(badges = badges)
     }.let { base ->
         combine(
             base,
@@ -284,6 +282,8 @@ class AppDrawerViewModel @Inject constructor(
         state.copy(selectedTab = effectiveTab(tab, hasWorkTab = state.workProfile != null))
     }.combine(drawerWallpaper.current) { state, wallpaper ->
         state.copy(wallpaper = wallpaper)
+    }.combine(notificationBadgeRepository.badges) { state, badges ->
+        state.copy(badges = badges)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),

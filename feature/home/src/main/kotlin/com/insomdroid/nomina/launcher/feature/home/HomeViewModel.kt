@@ -348,8 +348,7 @@ class HomeViewModel @Inject constructor(
         homeLayoutRepository.homeItems.combine(shortcutCache.generation) { items, _ -> items }
             .combine(settingsRepository.folderIcons) { items, icons -> items to icons }
             .combine(settingsRepository.shortcutIcons) { (items, folderIcons), shortcutIcons -> Triple(items, folderIcons, shortcutIcons) },
-        notificationBadgeRepository.badges,
-    ) { settings, apps, (homeItems, folderIcons, shortcutIcons), badges ->
+    ) { settings, apps, (homeItems, folderIcons, shortcutIcons) ->
         val byKey = apps.associateBy { it.key }
         // Children grouped by their folder id, kept in stored order.
         val childrenByFolder = homeItems
@@ -465,9 +464,10 @@ class HomeViewModel @Inject constructor(
             pageCount = pageCount,
             homePage = settings.homePage.coerceIn(0, pageCount - 1),
             occupiedPages = occupied,
-            badges = badges,
             loaded = true,
         )
+    }.combine(notificationBadgeRepository.badges) { state, badges ->
+        state.copy(badges = badges)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),

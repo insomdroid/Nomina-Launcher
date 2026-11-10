@@ -960,13 +960,13 @@ fun HomeScreen(
                                 runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
                             }
                         },
-                        tint = Color.White,
+                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
                     )
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = "Search apps",
                         modifier = Modifier.size(16.dp).clickable { onOpenDrawer() },
-                        tint = Color.White,
+                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
                     )
                     Icon(
                         painter = painterResource(R.drawable.ic_mini_browser),
@@ -977,7 +977,7 @@ fun HomeScreen(
                                 runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }
                             }
                         },
-                        tint = Color.White,
+                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
                     )
                 }
             }

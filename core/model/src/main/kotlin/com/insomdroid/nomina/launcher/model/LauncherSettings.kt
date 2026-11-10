@@ -130,12 +130,6 @@ data class LauncherSettings(
     val notificationWidgetCountStyle: String = COUNT_NUMBER,
     /** Double-tap on empty home-screen space locks the screen (needs the lock accessibility service). */
     val doubleTapToLock: Boolean = false,
-    /** What the built-in people widget shows of a notification on the (shared) home screen:
-     *  [PRIVACY_ALL] = sender + message text, [PRIVACY_SENDER] = sender only, [PRIVACY_COUNT] = the
-     *  tile colors and counts but shows no text at all (pinned people keep their user-chosen name). */
-    val peoplePrivacy: String = PRIVACY_ALL,
-    /** Also show notifications that aren't from a person in the people widget, grouped by app. */
-    val peopleShowApps: Boolean = true,
     /** The page the launcher opens on and the HOME button returns to (0 = the leftmost). */
     val homePage: Int = 0,
     /** Pages the user added explicitly (0 = none): the home keeps at least this many pages even
@@ -179,9 +173,6 @@ data class LauncherSettings(
             ICON_SHAPE_HEXAGON, ICON_SHAPE_OCTAGON, ICON_SHAPE_FLOWER, ICON_SHAPE_CAT,
         )
 
-        const val PRIVACY_ALL = "all"
-        const val PRIVACY_SENDER = "sender"
-        const val PRIVACY_COUNT = "count"
 
         /** [dockBackgroundOpacity] out of the box: transparent, letting the wallpaper show through. */
         const val DEFAULT_DOCK_BACKGROUND = 0f

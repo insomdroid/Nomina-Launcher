@@ -87,6 +87,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.insomdroid.nomina.data.SettingsRepository
+import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
 import com.insomdroid.nomina.feature.backup.BackupScreen
 import com.insomdroid.nomina.model.AppItem
 import com.insomdroid.nomina.model.LauncherSettings
@@ -234,16 +235,13 @@ fun SettingsScreen(
                 Text(
                     text = "N O M I N A  /  SYSTEM",
                     color = palette.faint,
-                    fontSize = 9.sp,
-                    letterSpacing = 1.4.sp,
+                    style = LauncherTextStyles.settingsEyebrow,
                     modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
                 )
                 Text(
                     text = stringResource(R.string.settings_title),
                     color = palette.text,
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.3).sp,
+                    style = LauncherTextStyles.settingsTitle,
                     modifier = Modifier.padding(start = 6.dp, top = 0.dp, bottom = 6.dp),
                 )
 
@@ -310,8 +308,8 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(R.string.settings_dock_icons_desc),
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
-                        fontSize = 12.sp,
-                        color = Color.Gray,
+                        style = LauncherTextStyles.settingsSupportingText,
+                        color = palette.dim,
                     )
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
@@ -617,7 +615,7 @@ fun SettingsScreen(
                         Text(
                             text = installedVersion,
                             color = palette.dim,
-                            fontSize = 12.5.sp,
+                            style = LauncherTextStyles.settingsDescription,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1047,7 +1045,7 @@ private fun DoubleTapLockToggle(enabled: Boolean, onSetEnabled: (Boolean) -> Uni
 
 @Composable
 private fun RowLabel(text: String, modifier: Modifier = Modifier, color: Color = LocalExpressivePalette.current.text) {
-    Text(text, modifier = modifier, color = color, fontSize = 16.sp)
+    Text(text, modifier = modifier, color = color, style = LauncherTextStyles.settingsRowLabel)
 }
 
 @Composable
@@ -1071,7 +1069,7 @@ internal fun SwitchRow(
         } else {
             Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                 RowLabel(label, color = labelColor)
-                Text(description, color = p.dim, fontSize = 12.5.sp)
+                Text(description, color = p.dim, style = LauncherTextStyles.settingsDescription)
             }
         }
         Switch(
@@ -1339,9 +1337,7 @@ private fun SettingsGroupLabel(text: String) {
     Text(
         text = text.uppercase(),
         color = p.dim,
-        fontSize = 11.sp,
-        fontWeight = FontWeight.SemiBold,
-        letterSpacing = 1.2.sp,
+        style = LauncherTextStyles.settingsGroupLabel,
         modifier = Modifier.padding(start = 6.dp, top = 12.dp, bottom = 8.dp),
     )
 }
@@ -1642,7 +1638,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_wallpaper))
-            Text(stringResource(R.string.settings_drawer_wallpaper_desc), color = p.dim, fontSize = 12.5.sp)
+            Text(stringResource(R.string.settings_drawer_wallpaper_desc), color = p.dim, style = LauncherTextStyles.settingsDescription)
             Spacer(Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (wallpaper != null) {
@@ -1688,7 +1684,7 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_color))
             if (locked) {
-                Text(stringResource(R.string.settings_drawer_color_locked), color = p.dim, fontSize = 12.5.sp)
+                Text(stringResource(R.string.settings_drawer_color_locked), color = p.dim, style = LauncherTextStyles.settingsDescription)
             }
             Spacer(Modifier.height(14.dp))
             Row(

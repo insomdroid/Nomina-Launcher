@@ -18,9 +18,6 @@ import com.insomdroid.nomina.model.LauncherSettings
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** A person the user pinned to the people widget: a quiet tile that stays put between messages.
- *  [key] is [PeopleGrouping.personKey] of [name]; the contact fields are what a lookup found when
- *  the pin was made (blank when the person isn't in the contacts, or contacts aren't allowed). */
 /** A folder shown in the app drawer: a stable [id], a [name], and the keys of its member apps. */
 data class DrawerFolder(val id: Long, val name: String, val appKeys: List<String>)
 

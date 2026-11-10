@@ -22,7 +22,7 @@ data class LauncherColors(
 
 internal val LightLauncherColors = LauncherColors(
     batteryNormal = Color(0xFF777777),
-    batteryLow = Color(0xFFE53935),
+    batteryLow = Color(0xFFD71921),
     dockScrim = Color(0x2EFFFFFF),
     pageIndicatorActive = Color(0xFFFFFFFF),
     pageIndicatorInactive = Color(0x66FFFFFF),
@@ -30,7 +30,7 @@ internal val LightLauncherColors = LauncherColors(
 
 internal val DarkLauncherColors = LauncherColors(
     batteryNormal = Color(0xFFBDBDBD),
-    batteryLow = Color(0xFFE53935),
+    batteryLow = Color(0xFFD71921),
     dockScrim = Color(0x12FFFFFF),
     pageIndicatorActive = Color(0xFFFFFFFF),
     pageIndicatorInactive = Color(0x66FFFFFF),

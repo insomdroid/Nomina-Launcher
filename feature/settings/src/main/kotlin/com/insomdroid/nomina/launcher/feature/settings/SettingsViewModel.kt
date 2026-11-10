@@ -172,8 +172,6 @@ class SettingsViewModel @Inject constructor(
     fun setShowWeather(value: Boolean) = update { repository.setShowWeather(value) }
     fun setWidgetTonalBackground(value: Boolean) = update { repository.setWidgetTonalBackground(value) }
     fun setNotificationWidgetCountStyle(value: String) = update { repository.setNotificationWidgetCountStyle(value) }
-    fun setPeoplePrivacy(value: String) = update { repository.setPeoplePrivacy(value) }
-    fun setPeopleShowApps(value: Boolean) = update { repository.setPeopleShowApps(value) }
 
     private fun update(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

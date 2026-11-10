@@ -37,4 +37,6 @@ object LauncherTextStyles {
     val clockTietokeskus = TextStyle(fontSize = 34.sp, fontWeight = FontWeight.Normal, letterSpacing = (-0.5).sp)
     val clockIlmaisuvoimainen = TextStyle(fontSize = 78.sp, fontWeight = FontWeight.Bold, letterSpacing = (-3).sp)
     val appLabel = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Normal)
+    val calculationExpression = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal)
+    val calculationResult = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold)
 }

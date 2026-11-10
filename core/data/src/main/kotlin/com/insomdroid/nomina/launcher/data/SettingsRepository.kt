@@ -99,6 +99,7 @@ class SettingsRepository @Inject constructor(
             dockEnabled = p[Keys.DOCK_ENABLED] ?: true,
             dockColumns = (p[Keys.DOCK_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_DOCK_ITEMS),
             dockExpanded = p[Keys.DOCK_EXPANDED] ?: true,
+            autoHideDock = p[Keys.DOCK_AUTO_HIDE] ?: false,
             homeColumns = (p[Keys.HOME_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_COLUMNS),
             homeRows = (p[Keys.HOME_ROWS] ?: 6).coerceIn(MIN_ROWS, MAX_ROWS),
             drawerColumns = (p[Keys.DRAWER_COLUMNS] ?: 4).coerceIn(MIN_COLUMNS, MAX_COLUMNS),
@@ -404,6 +405,7 @@ class SettingsRepository @Inject constructor(
     suspend fun setDockEnabled(value: Boolean) = edit { it[Keys.DOCK_ENABLED] = value }
     suspend fun setDockColumns(value: Int) = edit { it[Keys.DOCK_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_DOCK_ITEMS) }
     suspend fun setDockExpanded(value: Boolean) = edit { it[Keys.DOCK_EXPANDED] = value }
+    suspend fun setAutoHideDock(value: Boolean) = edit { it[Keys.DOCK_AUTO_HIDE] = value }
     suspend fun setHomeColumns(value: Int) = edit { it[Keys.HOME_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_COLUMNS) }
     suspend fun setHomeRows(value: Int) = edit { it[Keys.HOME_ROWS] = value.coerceIn(MIN_ROWS, MAX_ROWS) }
     suspend fun setDrawerColumns(value: Int) = edit { it[Keys.DRAWER_COLUMNS] = value.coerceIn(MIN_COLUMNS, MAX_COLUMNS) }
@@ -724,6 +726,7 @@ class SettingsRepository @Inject constructor(
         val DOCK_ENABLED = booleanPreferencesKey("dock_enabled")
         val DOCK_COLUMNS = intPreferencesKey("dock_columns")
         val DOCK_EXPANDED = booleanPreferencesKey("dock_expanded")
+        val DOCK_AUTO_HIDE = booleanPreferencesKey("dock_auto_hide")
         val HOME_COLUMNS = intPreferencesKey("home_columns")
         val HOME_ROWS = intPreferencesKey("home_rows")
         val DRAWER_COLUMNS = intPreferencesKey("drawer_columns")
@@ -854,7 +857,7 @@ class SettingsRepository @Inject constructor(
          *  registered type — a wrong-typed value in an edited/corrupted backup would otherwise be
          *  stored under the same key name and crash every settings read with a ClassCastException. */
         val BOOLEAN_KEYS = setOf(
-            "dock_enabled", "show_drawer_search", "swipe_up_drawer", "swipe_down_notif", "folder_swipe_first_app",
+            "dock_enabled", "dock_auto_hide", "show_drawer_search", "swipe_up_drawer", "swipe_down_notif", "folder_swipe_first_app",
             "hide_home_apps_from_drawer", "widget_inset_like_icons",
             "show_dock_labels", "show_home_labels", "show_drawer_labels", "show_page_indicator",
             "two_line_home_labels", "two_line_drawer_labels", "people_show_apps",

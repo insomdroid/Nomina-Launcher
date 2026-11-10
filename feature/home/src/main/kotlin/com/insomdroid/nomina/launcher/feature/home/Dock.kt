@@ -21,6 +21,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -127,6 +128,17 @@ fun Dock(
     // reorder must build on the *latest* list: a slot that stayed put kept the list captured before
     // its neighbours moved, and dragging it afterwards silently undid that earlier reorder.
     val latestEntries by rememberUpdatedState(entries)
+
+    // Drop targets are indexed by the current entries. Remove stale geometry when the list shrinks;
+    // in particular, an empty dock has no item callbacks to publish an empty slot list.
+    SideEffect {
+        val activeIndices = entries.indices.toSet()
+        itemRoots.keys.retainAll(activeIndices)
+        slotBounds.keys.retainAll(activeIndices)
+        if (entries.isEmpty()) {
+            dragController.dockSlots = emptyList()
+        }
+    }
     // The dock leaves composition when it is switched off in settings; without this its last bounds
     // stayed in the controller, so the workspace cells that expanded into that area still hit-tested
     // as "over the dock" and rejected every drop (and swallowed the gestures that started there).

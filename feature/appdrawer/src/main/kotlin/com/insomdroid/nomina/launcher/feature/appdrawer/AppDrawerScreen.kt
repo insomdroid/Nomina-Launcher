@@ -144,6 +144,7 @@ import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
 import com.insomdroid.nomina.ui.expressive.ExpressiveTheme
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
 import com.insomdroid.nomina.ui.rememberHomeDragController
 
@@ -1332,7 +1333,7 @@ internal fun FrequentAppsCard(
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         shadowElevation = p.shadow,
         modifier = Modifier
             .fillMaxWidth()

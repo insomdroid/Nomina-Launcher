@@ -586,6 +586,10 @@ fun SettingsScreen(
                         permission = android.Manifest.permission.READ_CALENDAR,
                     )
                     PermissionRow(
+                        label = stringResource(R.string.settings_permission_contacts),
+                        permission = android.Manifest.permission.READ_CONTACTS,
+                    )
+                    PermissionRow(
                         label = stringResource(R.string.settings_permission_location),
                         permission = android.Manifest.permission.ACCESS_COARSE_LOCATION,
                     )

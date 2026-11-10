@@ -317,11 +317,13 @@ fun HomeScreen(
     var homeOptions by remember { mutableStateOf<Pair<IntOffset, Boolean>?>(null) }
     // Close the dock after five idle seconds. Any pointer activity or open overlay restarts/pauses it.
     LaunchedEffect(
-        settings.dockEnabled, dockExpanded, dockPointerActive, dockInteractionVersion,
+        settings.autoHideDock, settings.dockEnabled, dockExpanded, dockPointerActive, dockInteractionVersion,
         drawerOpen, openFolderId, menuTarget, homeOptions, renameTarget, editingShortcut,
         showWidgetPicker, showOnboarding, dragController.moving,
     ) {
-        if (
+        if (!settings.autoHideDock) {
+            dockAutoHidden = false
+        } else if (
             settings.dockEnabled && dockExpanded && !dockPointerActive &&
             !drawerOpen && openFolderId == null && menuTarget == null && homeOptions == null &&
             renameTarget == null && editingShortcut == null && !showWidgetPicker &&
@@ -703,8 +705,8 @@ fun HomeScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     // Workspace activity resets the dock idle timer, not just touches on the dock.
-                    .pointerInput(settings.dockEnabled, settings.dockExpanded) {
-                        if (settings.dockEnabled && settings.dockExpanded) {
+                    .pointerInput(settings.autoHideDock, settings.dockEnabled, settings.dockExpanded) {
+                        if (settings.autoHideDock && settings.dockEnabled && settings.dockExpanded) {
                             awaitEachGesture {
                                 awaitFirstDown(
                                     requireUnconsumed = false,

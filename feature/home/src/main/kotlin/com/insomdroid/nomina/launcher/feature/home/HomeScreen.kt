@@ -927,8 +927,14 @@ fun HomeScreen(
                     }
                 }
             }
-            // Compact Nothing-inspired mini dock: camera, app search and browser.
-            Surface(
+            // Keep the compact mini-dock capsule in sync with the main dock auto-hide state.
+            AnimatedVisibility(
+                visible = dockExpanded,
+                enter = fadeIn(tween(180)),
+                exit = fadeOut(tween(180)),
+            ) {
+                // Compact Nothing-inspired mini dock: camera, app search and browser.
+                Surface(
                 modifier = Modifier
                     .width(108.dp)
                     .align(Alignment.CenterHorizontally)
@@ -976,7 +982,7 @@ fun HomeScreen(
                 }
             }
         }
-
+            }
         // A lifted folder on the move: a dock folder on its way to the grid, or a home folder on its
         // way to the dock. The shell draws only app icons, and the grid's own copy would be covered by
         // the dock (composed after it) right at the drop zone, so the floating copy is drawn here,

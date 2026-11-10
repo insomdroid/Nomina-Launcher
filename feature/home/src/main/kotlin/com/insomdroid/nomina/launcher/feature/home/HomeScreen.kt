@@ -930,7 +930,7 @@ fun HomeScreen(
             // Keep the compact mini-dock capsule in sync with the main dock auto-hide state.
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                visible = dockExpanded,
+                visible = settings.dockEnabled && !dockAutoHidden,
                 enter = fadeIn(tween(180)),
                 exit = fadeOut(tween(180)),
             ) {
@@ -960,13 +960,13 @@ fun HomeScreen(
                                 runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
                             }
                         },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        tint = Color.White,
                     )
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = "Search apps",
                         modifier = Modifier.size(16.dp).clickable { onOpenDrawer() },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        tint = Color.White,
                     )
                     Icon(
                         painter = painterResource(R.drawable.ic_mini_browser),
@@ -977,7 +977,7 @@ fun HomeScreen(
                                 runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }
                             }
                         },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        tint = Color.White,
                     )
                 }
             }

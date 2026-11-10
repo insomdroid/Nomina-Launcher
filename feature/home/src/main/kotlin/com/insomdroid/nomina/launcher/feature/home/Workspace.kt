@@ -387,6 +387,10 @@ internal fun Workspace(
     val effectiveEntries: List<HomeEntry> = remember(effectiveApps, effectiveFolders, effectiveShortcuts, effectiveWidgets, pendingWidgets, effectiveBuiltins) {
         effectiveApps + effectiveFolders + effectiveShortcuts + effectiveWidgets + pendingWidgets + effectiveBuiltins
     }
+    // Each pager page previously scanned the complete workspace list during composition.
+    // Group once per effective-entry update so composing adjacent pages is proportional to
+    // the entries on those pages, while preserving the original order within each page.
+    val entriesByPage = remember(effectiveEntries) { effectiveEntries.groupBy { it.page } }
     // The drag gesture's pointerInput block outlives recomposition (its keys don't include the entry
     // list), so it must read the *latest* placements through this state, not a stale closure capture.
     val latestEntries by rememberUpdatedState(effectiveEntries)
@@ -1096,9 +1100,7 @@ internal fun Workspace(
                             }
                         },
                 ) {
-                    effectiveEntries.asSequence()
-                        .filter { it.page == page }
-                        .forEach { entry ->
+                    entriesByPage[page].orEmpty().forEach { entry ->
                             // Keyed by item: without it each slot was bound by position, so a drop
                             // elsewhere on the page (or a page-count change) re-bound slots and
                             // restarted their gesture detectors — cancelling a long-press in progress.

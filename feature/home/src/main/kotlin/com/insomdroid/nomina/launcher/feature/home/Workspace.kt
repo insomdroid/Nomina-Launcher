@@ -412,6 +412,8 @@ internal fun Workspace(
     }
     // The pointerInput gesture outlives recomposition; callbacks read the latest cached rectangles.
     val latestRects by rememberUpdatedState(effectiveRects)
+    // Other long-lived workspace gestures still consume HomeEntry values directly.
+    val latestEntries by rememberUpdatedState(effectiveEntries)
     // The empty-area detector below is a pointerInput(Unit) that lives as long as the page; read the
     // callbacks through rememberUpdatedState so a recomposition with a new lambda (a changed setting)
     // reaches it instead of the lambda captured at first composition.

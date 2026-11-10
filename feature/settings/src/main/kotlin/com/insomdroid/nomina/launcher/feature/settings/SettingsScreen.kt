@@ -106,6 +106,8 @@ import com.insomdroid.nomina.ui.expressive.ExpressiveCard
 import com.insomdroid.nomina.ui.expressive.ExpressivePalette
 import com.insomdroid.nomina.ui.expressive.LightExpressivePalette
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
 
 @Composable
 fun SettingsScreen(
@@ -1416,14 +1418,14 @@ private fun FollowHomeChoiceCard(
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         shadowElevation = p.shadow,
         modifier = modifier,
     ) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
+        Column(Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = 14.dp)) {
             RowLabel(label)
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(ExpressiveSpacing.xs),
                 modifier = Modifier.padding(top = 10.dp),
             ) {
                 FilterChip(

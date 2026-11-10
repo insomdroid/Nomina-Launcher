@@ -1355,30 +1355,13 @@ private fun FollowHomeScaleRow(
     valueRange: ClosedFloatingPointRange<Float>,
     valueText: (Float) -> String,
 ) {
-    val p = LocalExpressivePalette.current
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
-        Surface(
-            color = p.surfaceHi,
-            shape = RoundedCornerShape(20.dp),
-            shadowElevation = p.shadow,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
-                RowLabel(label)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 10.dp)) {
-                    FilterChip(
-                        selected = followsHome,
-                        onClick = onFollowHome,
-                        label = { Text(stringResource(R.string.settings_follow_home)) },
-                    )
-                    FilterChip(
-                        selected = !followsHome,
-                        onClick = onCustom,
-                        label = { Text(stringResource(R.string.settings_custom)) },
-                    )
-                }
-            }
-        }
+        FollowHomeChoiceCard(
+            label = label,
+            followsHome = followsHome,
+            onFollowHome = onFollowHome,
+            onCustom = onCustom,
+        )
         if (!followsHome) {
             ScaleSliderRow(
                 label = label,
@@ -1400,16 +1383,49 @@ private fun FollowHomeColorRow(
     onCustom: () -> Unit,
     onPick: (Int) -> Unit,
 ) {
+    FollowHomeChoiceCard(
+        label = label,
+        followsHome = followsHome,
+        onFollowHome = onFollowHome,
+        onCustom = onCustom,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+    ) {
+        if (!followsHome) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier.padding(top = 14.dp).horizontalScroll(rememberScrollState()),
+            ) {
+                COLOR_SWATCHES.forEach { color ->
+                    ColorSwatch(argb = color, selected = color == selected, onClick = { onPick(color) })
+                }
+            }
+        }
+    }
+}
+
+/** Shared surface and choice controls for settings that can follow the Home value or be customized. */
+@Composable
+private fun FollowHomeChoiceCard(
+    label: String,
+    followsHome: Boolean,
+    onFollowHome: () -> Unit,
+    onCustom: () -> Unit,
+    modifier: Modifier = Modifier,
+    customContent: @Composable () -> Unit = {},
+) {
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = modifier,
     ) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
             RowLabel(label)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 10.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 10.dp),
+            ) {
                 FilterChip(
                     selected = followsHome,
                     onClick = onFollowHome,
@@ -1421,16 +1437,7 @@ private fun FollowHomeColorRow(
                     label = { Text(stringResource(R.string.settings_custom)) },
                 )
             }
-            if (!followsHome) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier.padding(top = 14.dp).horizontalScroll(rememberScrollState()),
-                ) {
-                    COLOR_SWATCHES.forEach { color ->
-                        ColorSwatch(argb = color, selected = color == selected, onClick = { onPick(color) })
-                    }
-                }
-            }
+            customContent()
         }
     }
 }
@@ -1440,7 +1447,7 @@ private fun DrawerLabelColorModeRow(mode: String, onPick: (String) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(8.dp),
         shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {

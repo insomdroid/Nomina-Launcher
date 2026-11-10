@@ -303,6 +303,7 @@ fun SettingsScreen(
                     onToggle = { viewModel.setSectionCollapsed("dock", it) },
                 ) {
                     SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
+                    SwitchRow(stringResource(R.string.settings_dock_auto_hide), s.autoHideDock, viewModel::setAutoHideDock)
                     StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 10, viewModel::setDockColumns)
                     Text(
                         text = stringResource(R.string.settings_dock_icons_desc),

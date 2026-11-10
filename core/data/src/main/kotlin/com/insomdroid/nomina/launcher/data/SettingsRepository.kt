@@ -21,14 +21,6 @@ import javax.inject.Singleton
 /** A person the user pinned to the people widget: a quiet tile that stays put between messages.
  *  [key] is [PeopleGrouping.personKey] of [name]; the contact fields are what a lookup found when
  *  the pin was made (blank when the person isn't in the contacts, or contacts aren't allowed). */
-data class PinnedPerson(
-    val key: String,
-    val name: String,
-    val lookupUri: String = "",
-    val number: String = "",
-    val photoUri: String = "",
-)
-
 /** A folder shown in the app drawer: a stable [id], a [name], and the keys of its member apps. */
 data class DrawerFolder(val id: Long, val name: String, val appKeys: List<String>)
 
@@ -66,6 +58,10 @@ class SettingsRepository @Inject constructor(
             p.remove(booleanPreferencesKey("people_batch_enabled"))
             p.remove(stringPreferencesKey("people_batch_times"))
             p.remove(stringPreferencesKey("people_held_notifications"))
+            p.remove(stringPreferencesKey("people_privacy"))
+            p.remove(stringPreferencesKey("pinned_people"))
+            p.remove(stringPreferencesKey("people_aliases"))
+            p.remove(booleanPreferencesKey("people_show_apps"))
             val stored = p.asMap()
             for (name in FLOAT_KEYS) {
                 val raw = stored[floatPreferencesKey(name)] ?: continue
@@ -175,11 +171,6 @@ class SettingsRepository @Inject constructor(
             notificationWidgetCountStyle = (p[Keys.NOTIF_WIDGET_COUNT_STYLE] ?: LauncherSettings.COUNT_NUMBER)
                 .let { if (it == LauncherSettings.COUNT_DOT || it == LauncherSettings.COUNT_NONE) it else LauncherSettings.COUNT_NUMBER },
             doubleTapToLock = p[Keys.DOUBLE_TAP_LOCK] ?: false,
-            peoplePrivacy = (p[Keys.PEOPLE_PRIVACY] ?: LauncherSettings.PRIVACY_ALL).let {
-                if (it == LauncherSettings.PRIVACY_SENDER || it == LauncherSettings.PRIVACY_COUNT) it
-                else LauncherSettings.PRIVACY_ALL
-            },
-            peopleShowApps = p[Keys.PEOPLE_SHOW_APPS] ?: true,
             homePage = (p[Keys.HOME_PAGE] ?: 0).coerceIn(0, HomeLayoutRepository.MAX_PAGES),
             homePageCount = (p[Keys.HOME_PAGE_COUNT] ?: 0).coerceIn(0, HomeLayoutRepository.MAX_PAGES),
         )
@@ -191,81 +182,6 @@ class SettingsRepository @Inject constructor(
         it[Keys.HOME_PAGE] = home.coerceIn(0, HomeLayoutRepository.MAX_PAGES - 1)
         it[Keys.HOME_PAGE_COUNT] = count.coerceIn(0, HomeLayoutRepository.MAX_PAGES)
     }
-
-    suspend fun setPeopleShowApps(value: Boolean) = edit { it[Keys.PEOPLE_SHOW_APPS] = value }
-
-    // --- People widget aliases ("this notification name is the same person") --------------------
-    // One link per line: "aliasKey\ttargetKey" (both PeopleGrouping.personKey values).
-
-    /** alias key → target key. Single-hop: a target is never itself an alias (see [linkPerson]). */
-    val peopleAliases: Flow<Map<String, String>> = dataStore.data.map { p -> parseAliases(p[Keys.PEOPLE_ALIASES]) }
-
-    /** Links [alias] to [target]: an existing link on [alias] is replaced, links that pointed at
-     *  [alias] follow it to the new target, and a target that is itself an alias resolves first. */
-    suspend fun linkPerson(alias: String, target: String) = edit { p ->
-        val current = parseAliases(p[Keys.PEOPLE_ALIASES])
-        val resolved = current[target] ?: target
-        if (resolved == alias) return@edit
-        val next = current
-            .mapValues { (_, t) -> if (t == alias) resolved else t }
-            .filterKeys { it != alias && it != resolved } + (alias to resolved)
-        p[Keys.PEOPLE_ALIASES] = serializeAliases(next.filter { (a, t) -> a != t })
-    }
-
-    /** Removes every link that merges into [target]. */
-    suspend fun unlinkPerson(target: String) = edit { p ->
-        p[Keys.PEOPLE_ALIASES] = serializeAliases(parseAliases(p[Keys.PEOPLE_ALIASES]).filterValues { it != target })
-    }
-
-    private fun parseAliases(raw: String?): Map<String, String> =
-        raw?.split("\n")?.filter { it.isNotEmpty() }?.mapNotNull { line ->
-            val i = line.indexOf('\t')
-            if (i <= 0 || i == line.length - 1) null else line.substring(0, i) to line.substring(i + 1)
-        }?.toMap() ?: emptyMap()
-
-    private fun serializeAliases(aliases: Map<String, String>): String =
-        aliases.entries.joinToString("\n") { (a, t) -> a.replace(SEPARATORS, " ") + "\t" + t.replace(SEPARATORS, " ") }
-
-    /** What the people widget shows of a notification (see LauncherSettings.PRIVACY_*). */
-    suspend fun setPeoplePrivacy(value: String) = edit { it[Keys.PEOPLE_PRIVACY] = value }
-
-    // --- People widget pins ---------------------------------------------------------------------
-    // One person per line, tab-separated: "key\tname\tlookupUri\tnumber\tphotoUri". Names are
-    // normalized at the write point like folder names, so a plain split round-trips.
-
-    /** People pinned to the people widget, in pin order. */
-    val pinnedPeople: Flow<List<PinnedPerson>> = dataStore.data.map { p -> parsePinned(p[Keys.PINNED_PEOPLE]) }
-
-    /** Pins [person] (replacing an earlier pin with the same key, keeping its position). */
-    suspend fun pinPerson(person: PinnedPerson) = edit { p ->
-        val current = parsePinned(p[Keys.PINNED_PEOPLE])
-        val next = if (current.any { it.key == person.key }) current.map { if (it.key == person.key) person else it }
-            else current + person
-        p[Keys.PINNED_PEOPLE] = serializePinned(next)
-    }
-
-    suspend fun unpinPerson(key: String) = edit { p ->
-        p[Keys.PINNED_PEOPLE] = serializePinned(parsePinned(p[Keys.PINNED_PEOPLE]).filterNot { it.key == key })
-    }
-
-    private fun parsePinned(raw: String?): List<PinnedPerson> =
-        raw?.split("\n")?.filter { it.isNotEmpty() }?.mapNotNull { line ->
-            val parts = line.split('\t')
-            val key = parts.getOrNull(0)?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-            PinnedPerson(
-                key = key,
-                name = parts.getOrNull(1).orEmpty().ifBlank { key },
-                lookupUri = parts.getOrNull(2).orEmpty(),
-                number = parts.getOrNull(3).orEmpty(),
-                photoUri = parts.getOrNull(4).orEmpty(),
-            )
-        } ?: emptyList()
-
-    private fun serializePinned(people: List<PinnedPerson>): String =
-        people.joinToString("\n") { person ->
-            listOf(person.key, person.name, person.lookupUri, person.number, person.photoUri)
-                .joinToString("\t") { it.replace(SEPARATORS, " ") }
-        }
 
     suspend fun setDoubleTapToLock(value: Boolean) = edit { it[Keys.DOUBLE_TAP_LOCK] = value }
 
@@ -800,10 +716,6 @@ class SettingsRepository @Inject constructor(
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
         val DEFAULT_REMINDER_DISMISSED = booleanPreferencesKey("default_reminder_dismissed")
         val FIRST_RUN_FRESH = stringPreferencesKey("first_run_fresh")
-        val PEOPLE_PRIVACY = stringPreferencesKey("people_privacy")
-        val PINNED_PEOPLE = stringPreferencesKey("pinned_people")
-        val PEOPLE_ALIASES = stringPreferencesKey("people_aliases")
-        val PEOPLE_SHOW_APPS = booleanPreferencesKey("people_show_apps")
         val HOME_PAGE = intPreferencesKey("home_page")
         val HOME_PAGE_COUNT = intPreferencesKey("home_page_count")
     }
@@ -860,7 +772,7 @@ class SettingsRepository @Inject constructor(
             "dock_enabled", "dock_auto_hide", "show_drawer_search", "swipe_up_drawer", "swipe_down_notif", "folder_swipe_first_app",
             "hide_home_apps_from_drawer", "widget_inset_like_icons",
             "show_dock_labels", "show_home_labels", "show_drawer_labels", "show_page_indicator",
-            "two_line_home_labels", "two_line_drawer_labels", "people_show_apps",
+            "two_line_home_labels", "two_line_drawer_labels",
             "show_home_folder_names", "show_drawer_folder_names", "mix_drawer_folders", "blur_behind_drawer",
             "theme_all_icons", "show_notif_dots", "notif_dot_count", "use_themed_icons", "auto_resize_icons",
             "desktop_locked", "double_tap_lock", "show_frequent_apps", "drawer_opens_at_top",
@@ -870,7 +782,6 @@ class SettingsRepository @Inject constructor(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
             "notif_widget_count_style", "icon_pack_package", "weather_app_key", "home_page_marker",
             "page_switch_speed", "collapsed_settings_sections", "icon_shape", "reshape_legacy_icons", "drawer_label_color_mode",
-            "people_privacy", "pinned_people", "people_aliases",
             "custom_icons", "folder_icons", "shortcut_icons",
         )
 
@@ -934,6 +845,7 @@ class SettingsRepository @Inject constructor(
             "drive_interval_days", "drive_wifi_only", "drive_charging_only",
             "auto_update_enabled", "update_last_check", "update_last_notified_version",
             "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications", "people_batch_enabled", "people_batch_times",
+            "people_privacy", "pinned_people", "people_aliases", "people_show_apps",
             "default_reminder_dismissed", "left_swipe_app_key", "custom_font_path", "font_family",
             // Legacy settings from removed features must not reappear in backups or be restored.
             "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",

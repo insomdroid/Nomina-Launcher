@@ -5,6 +5,8 @@ data class LauncherSettings(
     val dockEnabled: Boolean = true,
     val dockColumns: Int = 4,
     val dockExpanded: Boolean = true,
+    /** Automatically hide the dock after five seconds without interaction. */
+    val autoHideDock: Boolean = false,
     val homeColumns: Int = 4,
     /** Home-grid row count — more rows = tighter icon rows + more free cells for widgets. */
     val homeRows: Int = 6,

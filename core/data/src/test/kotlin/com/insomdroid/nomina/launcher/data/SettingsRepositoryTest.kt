@@ -58,6 +58,20 @@ class SettingsRepositoryTest {
     }
 
     @Test
+    fun `auto hide dock defaults off and round trips through backup`() = runTest {
+        val source = newRepository()
+        assertThat(source.settings.first().autoHideDock).isFalse()
+        source.setAutoHideDock(true)
+        assertThat(source.settings.first().autoHideDock).isTrue()
+
+        val restored = newRepository()
+        restored.importRaw(source.exportRaw())
+        assertThat(restored.settings.first().autoHideDock).isTrue()
+        restored.importRaw(mapOf("dock_auto_hide" to "invalid"))
+        assertThat(restored.settings.first().autoHideDock).isFalse()
+    }
+
+    @Test
     fun `rolling back an import keeps settings written after it`() = runTest {
         val store = InMemoryDataStore()
         val repo = SettingsRepository(store)

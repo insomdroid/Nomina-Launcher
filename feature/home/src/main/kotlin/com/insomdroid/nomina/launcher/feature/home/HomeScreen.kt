@@ -698,7 +698,32 @@ fun HomeScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             val lockNeedsServiceMsg = stringResource(R.string.double_tap_lock_needs_service)
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    // Workspace activity resets the dock idle timer, not just touches on the dock.
+                    .pointerInput(settings.dockEnabled, settings.dockExpanded) {
+                        if (settings.dockEnabled && settings.dockExpanded) {
+                            awaitEachGesture {
+                                awaitFirstDown(
+                                    requireUnconsumed = false,
+                                    pass = PointerEventPass.Initial,
+                                )
+                                dockPointerActive = true
+                                dockInteractionVersion++
+                                dockAutoHidden = false
+                                try {
+                                    do {
+                                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                                    } while (event.changes.any { it.pressed })
+                                } finally {
+                                    dockPointerActive = false
+                                }
+                            }
+                        }
+                    },
+            ) {
             Workspace(
                 pageCount = uiState.pageCount,
                 columns = settings.homeColumns,

@@ -90,6 +90,7 @@ class SettingsViewModel @Inject constructor(
     fun setHideHomeAppsFromDrawer(value: Boolean) = update { repository.setHideHomeAppsFromDrawer(value) }
     fun setWidgetEdgesAlignWithIcons(value: Boolean) = update { repository.setWidgetEdgesAlignWithIcons(value) }
     fun setDockEnabled(value: Boolean) = update { repository.setDockEnabled(value) }
+    fun setAutoHideDock(value: Boolean) = update { repository.setAutoHideDock(value) }
     fun setDockColumns(value: Int) = update { repository.setDockColumns(value) }
     fun setDrawerColumns(value: Int) = update { repository.setDrawerColumns(value) }
     fun setShowDrawerSearch(value: Boolean) = update { repository.setShowDrawerSearch(value) }

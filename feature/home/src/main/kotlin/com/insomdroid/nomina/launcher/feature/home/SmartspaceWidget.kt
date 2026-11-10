@@ -29,12 +29,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -201,16 +200,18 @@ internal fun SmartspaceContent(
     val deviceStatus = rememberDeviceStatus()
 
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = System.currentTimeMillis()
-            delay(60_000 - now % 60_000)
-        }
-    }
+    val tickerScope = rememberCoroutineScope()
     LifecycleResumeEffect(Unit) {
         now = System.currentTimeMillis()
         onRefresh()
-        onPauseOrDispose { }
+        val ticker = tickerScope.launch {
+            while (true) {
+                val current = System.currentTimeMillis()
+                now = current
+                delay(60_000 - current % 60_000)
+            }
+        }
+        onPauseOrDispose { ticker.cancel() }
     }
 
     val calendarPermission = rememberLauncherForActivityResult(
@@ -430,7 +431,7 @@ private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
     val context = LocalContext.current
     var status by remember { mutableStateOf(SmartspaceDeviceStatus()) }
 
-    DisposableEffect(context) {
+    LifecycleResumeEffect(context) {
         fun updateBattery(intent: Intent?) {
             if (intent == null) return
             val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
@@ -457,6 +458,7 @@ private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
 
         val connectivity = context.getSystemService(ConnectivityManager::class.java)
         var callbackRegistered = false
+        var callback: ConnectivityManager.NetworkCallback? = null
         if (connectivity != null) {
             fun updateNetwork(
                 network: Network? = connectivity.activeNetwork,
@@ -474,27 +476,29 @@ private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
                 status = status.copy(networkText = label)
             }
 
-            val callback = object : ConnectivityManager.NetworkCallback() {
+            val networkCallback = object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) = updateNetwork(network)
                 override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
                     updateNetwork(network, networkCapabilities)
                 }
                 override fun onLost(network: Network) = updateNetwork()
             }
+            callback = networkCallback
             callbackRegistered = runCatching {
-                connectivity.registerDefaultNetworkCallback(callback)
+                connectivity.registerDefaultNetworkCallback(networkCallback)
                 true
             }.getOrDefault(false)
             updateNetwork()
-            onDispose {
-                runCatching { context.unregisterReceiver(batteryReceiver) }
-                if (callbackRegistered) runCatching { connectivity.unregisterNetworkCallback(callback) }
-            }
-        } else {
-            onDispose { runCatching { context.unregisterReceiver(batteryReceiver) } }
         }
-    }
-    return status
+        onPauseOrDispose {
+            runCatching { context.unregisterReceiver(batteryReceiver) }
+            if (callbackRegistered) {
+                callback?.let { networkCallback ->
+                    runCatching { connectivity?.unregisterNetworkCallback(networkCallback) }
+                }
+            }
+        }
+    }    return status
 }
 
 /** A compact tappable text row; without [onTap] it remains plain text. */

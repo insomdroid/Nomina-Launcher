@@ -114,6 +114,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 import com.insomdroid.nomina.model.AppItem
 import com.insomdroid.nomina.ui.AppActionPopup
+import com.insomdroid.nomina.ui.expressive.Accent
 import com.insomdroid.nomina.ui.AppActions
 import com.insomdroid.nomina.ui.DefaultLauncher
 import com.insomdroid.nomina.ui.DismissWhenDragMoves
@@ -1073,7 +1074,7 @@ fun HomeScreen(
             dragController.isIncomingFrom(DragSource.Home, DragSource.Dock, DragSource.Folder)
         if (removableIncoming || dragController.localDragging) {
             Surface(
-                color = if (overRemove) Color(0xFFD32F2F) else Color.Black.copy(alpha = 0.55f),
+                color = if (overRemove) Accent else Color.Black.copy(alpha = 0.55f),
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
                     .align(Alignment.TopCenter)

@@ -262,6 +262,7 @@ fun HomeScreen(
     // A tapped app opens with a zoom from its icon (AppLaunchSources).
     val launchSources = LocalAppLaunchSources.current
     val launchApp: (AppItem) -> Unit = { app -> viewModel.launch(app, launchSources?.take(app)) }
+    val defaultFolderName = stringResource(UiR.string.folder_default_name)
     // An icon's menu opens as the icon lifts; pulling the icon on closes it (issue #12).
     DismissWhenDragMoves(dragController) { menuTarget = null }
     var renameTarget by remember { mutableStateOf<AppItem?>(null) }
@@ -332,7 +333,6 @@ fun HomeScreen(
     }
     // Page the workspace should show after a page was added or removed from the empty-area menu.
     val pageRequests = remember { MutableSharedFlow<Int>(extraBufferCapacity = 1) }
-    val defaultFolderName = stringResource(UiR.string.folder_default_name)
     LaunchedEffect(showWidgetsFor) {
         val pkg = showWidgetsFor ?: return@LaunchedEffect
         widgetPickerPackage = pkg

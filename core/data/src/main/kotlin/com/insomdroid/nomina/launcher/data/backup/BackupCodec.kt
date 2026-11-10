@@ -1,7 +1,6 @@
 package com.insomdroid.nomina.data.backup
 
 import com.insomdroid.nomina.data.local.HomeItemEntity
-
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -71,7 +70,8 @@ object BackupCodec {
         for (i in 0 until itemsArr.length()) {
             val o = itemsArr.getJSONObject(i)
             val builtinType = o.optStringOrNull("builtinType")
-            if (builtinType != HomeItemEntity.BUILTIN_PEOPLE) items.add(
+            if (builtinType == HomeItemEntity.BUILTIN_PEOPLE) continue
+            items.add(
                 BackupItem(
                     id = o.getLong("id"),
                     containerId = o.getLong("containerId"),

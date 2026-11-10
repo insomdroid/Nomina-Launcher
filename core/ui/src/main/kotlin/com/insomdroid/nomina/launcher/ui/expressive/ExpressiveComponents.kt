@@ -16,9 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 
@@ -27,10 +26,7 @@ fun ExpressiveSectionTitle(text: String, color: androidx.compose.ui.graphics.Col
     Text(
         text = text,
         color = color,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
-        fontFamily = launcherTechnicalFontFamily(),
-        letterSpacing = 0.sp,
+        style = LauncherTextStyles.expressiveSectionTitle.copy(fontFamily = launcherTechnicalFontFamily()),
         modifier = Modifier.padding(top = 24.dp, start = 2.dp, bottom = 12.dp),
     )
 }
@@ -74,9 +70,9 @@ fun ExpressiveActionRow(
     val p = LocalExpressivePalette.current
     ExpressiveCard(onClick = onClick) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(label, color = p.text, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            Text(label, color = p.text, style = LauncherTextStyles.expressiveActionLabel)
             if (description.isNotEmpty()) {
-                Text(description, color = p.dim, fontSize = 12.sp, fontFamily = launcherTechnicalFontFamily())
+                Text(description, color = p.dim, style = LauncherTextStyles.expressiveActionDescription.copy(fontFamily = launcherTechnicalFontFamily()))
             }
         }
         Icon(

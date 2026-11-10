@@ -53,12 +53,12 @@ fun ExpressiveCard(
                 val y = size.height - 0.5.dp.toPx()
                 drawLine(
                     color = p.trackOff.copy(alpha = 0.72f),
-                    start = Offset(0f, y),
-                    end = Offset(size.width, y),
+                    start = Offset(4.dp.toPx(), y),
+                    end = Offset(size.width - 4.dp.toPx(), y),
                     strokeWidth = 0.5.dp.toPx(),
                 )
             }
-            .padding(horizontal = 4.dp, vertical = 12.dp),
+            .padding(horizontal = 6.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )

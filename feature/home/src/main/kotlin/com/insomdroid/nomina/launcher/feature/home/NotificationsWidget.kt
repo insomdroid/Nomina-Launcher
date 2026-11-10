@@ -98,13 +98,12 @@ class NotificationsWidgetViewModel @Inject constructor(
         .map { it.notificationWidgetCountStyle }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LauncherSettings.COUNT_NUMBER)
 
-    /** One launcher entry per package+profile; see [NotificationWidgetLayout.representative]. */
+    /** One launcher entry per package+profile, preferring the package's resolved launch activity. */
     private val appsByBadgeKey: Flow<Map<String, AppItem>> = appRepository.apps.map { apps ->
         apps.groupBy { it.badgeKey }.mapValues { (_, entries) ->
-            NotificationWidgetLayout.representative(entries, { it.className }) {
-                val first = entries.first()
-                appRepository.launchClassName(first.packageName, first.user)
-            }
+            val first = entries.first()
+            val launchClassName = appRepository.launchClassName(first.packageName, first.user)
+            entries.firstOrNull { it.className == launchClassName } ?: first
         }
     }
 

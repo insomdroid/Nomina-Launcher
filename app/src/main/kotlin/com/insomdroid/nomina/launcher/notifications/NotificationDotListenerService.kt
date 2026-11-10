@@ -3,37 +3,15 @@ package com.insomdroid.nomina.notifications
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
 import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.UserManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.app.Person
-import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import com.insomdroid.nomina.data.MessageHeuristics
 import com.insomdroid.nomina.data.NotificationBadgeRepository
-import com.insomdroid.nomina.data.PeopleGrouping
-import com.insomdroid.nomina.data.PersonEntry
-import com.insomdroid.nomina.data.PersonEventKind
-import com.insomdroid.nomina.data.ReplyAction
 import com.insomdroid.nomina.data.StatusNotification
 import javax.inject.Inject
 
@@ -50,9 +28,6 @@ import javax.inject.Inject
  * - **Status-bar icons** use a looser "icon-worthy" filter (not a group summary + has a title or text),
  *   like the real system status bar — so low-priority/silent notifications whose channel sets
  *   `canShowBadge = false` (e.g. Google News) still show their glyph in the bar.
- * - **People tiles** take only conversation-like notifications (messages, calls, mail — see
- *   [personEntry]) and reduce each to its sender, newest text and quick actions; the repository
- *   groups them by person across apps.
  *
  * Requires the user to grant notification access (Settings → Notifications → Device & app
  * notifications); until then the system never binds this service.
@@ -62,13 +37,6 @@ class NotificationDotListenerService : NotificationListenerService() {
 
     @Inject
     lateinit var badgeRepository: NotificationBadgeRepository
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-
-    /** Packages that handle mailto: links — the mail clients. Their notifications carry the sender
-     *  as the title and the subject as the text, but almost none set CATEGORY_EMAIL (Gmail doesn't),
-     *  so the app being a mail client is the signal. Re-read on connect and package changes. */
-    @Volatile private var mailPackages: Set<String> = emptySet()
 
     private val userManager by lazy { getSystemService(UserManager::class.java) }
 
@@ -80,14 +48,6 @@ class NotificationDotListenerService : NotificationListenerService() {
     private var snapshotRetriesLeft = 0
     private val retryRefresh = Runnable { refresh() }
     private var connected = false
-    private var packageRefreshJob: Job? = null
-    private var receiverRegistered = false
-    private val packageReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            appLabels.clear()
-            refreshMailPackages()
-        }
-    }
     private companion object {
         const val TAG = "NotifDots"
         const val MAX_SNAPSHOT_RETRIES = 2
@@ -109,18 +69,6 @@ class NotificationDotListenerService : NotificationListenerService() {
         Log.d(TAG, "listener connected")
         connected = true
         badgeRepository.registerCanceller { key -> runCatching { cancelNotification(key) } }
-        if (!receiverRegistered) {
-            val filter = IntentFilter().apply {
-                addAction(Intent.ACTION_PACKAGE_ADDED)
-                addAction(Intent.ACTION_PACKAGE_REMOVED)
-                addAction(Intent.ACTION_PACKAGE_CHANGED)
-                addAction(Intent.ACTION_PACKAGE_REPLACED)
-                addDataScheme("package")
-            }
-            ContextCompat.registerReceiver(this, packageReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-            receiverRegistered = true
-        }
-        mailPackages = queryMailPackages()
         refreshWithRetries()
     }
 
@@ -128,11 +76,9 @@ class NotificationDotListenerService : NotificationListenerService() {
         super.onListenerDisconnected()
         connected = false
         handler.removeCallbacks(retryRefresh)
-        stopPackageRefresh()
         badgeRepository.clearCanceller()
         badgeRepository.setBadges(emptyMap())
         badgeRepository.setIcons(emptyList())
-        badgeRepository.setPeople(emptyList())
         alertedKeys.clear()
         // Aggressive OEM battery managers (Samsung, Xiaomi, …) can unbind the listener; ask the system
         // to rebind so dots + status-bar icons come back on their own instead of the user having to
@@ -181,19 +127,10 @@ class NotificationDotListenerService : NotificationListenerService() {
         val iconCounts = HashMap<String, Int>()
         val visual = LinkedHashMap<String, StatusNotification>()
         val openable = HashMap<String, StatusNotification>()
-        val people = ArrayList<PersonEntry>()
         for (sbn in active) {
             if (sbn == null) continue
             val serial = runCatching { userManager?.getSerialNumberForUser(sbn.user) }.getOrNull() ?: 0L
             val key = "${sbn.packageName}/$serial"
-            // People tiles: conversation-like notifications reduced to sender + text + actions; any
-            // other real (icon-worthy, not ongoing) notification becomes an app-grouped entry.
-            val person = runCatching { personEntry(sbn, serial, ranking, tmp) }.getOrNull()
-            when {
-                person != null -> people.add(person)
-                isIconWorthy(sbn) && (sbn.notification.flags and Notification.FLAG_ONGOING_EVENT) == 0 ->
-                    runCatching { appEntry(sbn, serial) }.getOrNull()?.let(people::add)
-            }
             // Dots: strict badge-worthy filter (meaningful home-icon badges).
             if (isBadgeWorthy(sbn, ranking, tmp)) {
                 counts[key] = (counts[key] ?: 0) + 1
@@ -239,223 +176,13 @@ class NotificationDotListenerService : NotificationListenerService() {
                 )
             }.sortedByDescending { it.postTime },
         )
-        badgeRepository.setPeople(PeopleGrouping.group(people))
-    }
-
-    /**
-     * Reduces a notification to a [PersonEntry] when it is about a person, else null. Recognized, in
-     * order: a MessagingStyle (any chat app; newest message + its sender), a call / missed call, a
-     * system-flagged conversation or CATEGORY_MESSAGE (sender = title), and mail — CATEGORY_EMAIL
-     * or any notification from a mail client (sender = title, subject = text). Group summaries and
-     * ongoing notifications (an active call, "now playing") are skipped.
-     */
-    private fun personEntry(
-        sbn: StatusBarNotification, serial: Long, ranking: RankingMap?, tmp: Ranking,
-    ): PersonEntry? {
-        val n = sbn.notification ?: return null
-        if ((n.flags and Notification.FLAG_GROUP_SUMMARY) != 0) return null
-        if ((n.flags and Notification.FLAG_ONGOING_EVENT) != 0) return null
-        val extras = n.extras ?: return null
-        val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()?.trim().orEmpty()
-        val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-        val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-        var subject: String? = null
-        val ranked = ranking?.getRanking(sbn.key, tmp) == true
-        // Ranking's conversation APIs are public from Android 12. Android 11 still uses the
-        // MessagingStyle, category and title fallbacks below to identify people and batch messages.
-        val conversation = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ranked && tmp.isConversation
-        val shortcutLabel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ranked) {
-            tmp.conversationShortcutInfo?.shortLabel?.toString()
-        } else null
-
-        var name: String
-        var preview: String? = text
-        var count = 1
-        var icon: android.graphics.drawable.Icon? = null
-        var uri: String? = null
-        var sender: String? = null
-        // A chat app's large icon is the contact's or group's picture; a dialer's, the caller's.
-        val largeIcon = runCatching { n.getLargeIcon() }.getOrNull()
-        val kind: PersonEventKind
-        val style = NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(n)
-        when {
-            style != null -> {
-                // The style also carries the user's own replies: they must not count, name the tile
-                // or be its preview.
-                val messages = style.messages.filter { !it.text.isNullOrBlank() && !isOwnMessage(it.person, style.user) }
-                if (messages.isEmpty()) return null
-                val last = messages.last()
-                val groupTitle = style.conversationTitle?.toString()?.trim()
-                    ?.takeIf { style.isGroupConversation && it.isNotEmpty() }
-                val lastSender = last.person?.name?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-                name = groupTitle ?: lastSender.orEmpty().ifEmpty { shortcutLabel ?: title }
-                preview = last.text?.toString()?.trim()
-                count = messages.size
-                // The tile is the group when there is one, so its picture beats the sender's.
-                val personIcon = last.person?.icon?.toIcon(this)
-                icon = if (groupTitle != null) largeIcon ?: personIcon else personIcon ?: largeIcon
-                if (groupTitle != null) sender = lastSender
-                uri = last.person?.uri
-                kind = PersonEventKind.MESSAGE
-            }
-            n.category == Notification.CATEGORY_MISSED_CALL || n.category == Notification.CATEGORY_CALL -> {
-                // Dialers disagree on which field carries the caller: Google's "Missed call" / "Mikko"
-                // vs. Samsung's "Mikko" / "Missed call". The people list settles it when present;
-                // otherwise the field that reads like the generic label is the label.
-                val person = runCatching {
-                    @Suppress("DEPRECATION")
-                    extras.getParcelableArrayList<android.app.Person>(Notification.EXTRA_PEOPLE_LIST)?.firstOrNull()
-                }.getOrNull()
-                val swap = MessageHeuristics.looksLikeCallLabel(title) && !text.isNullOrEmpty() &&
-                    !MessageHeuristics.looksLikeCallLabel(text)
-                name = person?.name?.toString()?.trim().orEmpty().ifEmpty { if (swap) text.orEmpty() else title }
-                preview = if (swap) title else text
-                icon = person?.icon ?: largeIcon
-                uri = person?.uri
-                kind = PersonEventKind.MISSED_CALL
-            }
-            conversation || n.category == Notification.CATEGORY_MESSAGE -> {
-                name = shortcutLabel ?: title
-                icon = largeIcon
-                kind = PersonEventKind.MESSAGE
-            }
-            n.category == Notification.CATEGORY_EMAIL || (sbn.packageName in mailPackages && n.category == null) -> {
-                // A mail client's other notices ("Syncing…", "Sending…") carry no sender/subject pair
-                // or are ongoing, and its calendar reminders declare their own category; a real mail
-                // has a sender and a subject and, Gmail included, usually no category at all.
-                if (title.isEmpty() || text == null) return null
-                name = title
-                // Mail clients put the subject in the text and the body's first lines in the
-                // expanded (big) text; show the subject as a title line and the body under it.
-                subject = text
-                preview = bigText?.removePrefix(text)?.trim()?.takeIf { it.isNotEmpty() } ?: text
-                kind = PersonEventKind.EMAIL
-            }
-            else -> return null
-        }
-        if (name.isBlank()) return null
-
-        val reply = replyAction(n, conversationOnly = true)
-        val callBack = n.actions
-            ?.firstOrNull { it.semanticAction == Notification.Action.SEMANTIC_ACTION_CALL }
-            ?.actionIntent
-        return PersonEntry(
-            key = sbn.key,
-            name = name,
-            title = subject,
-            text = preview,
-            postTime = sbn.postTime,
-            packageName = sbn.packageName,
-            userSerial = serial,
-            kind = kind,
-            count = count,
-            contentIntent = n.contentIntent,
-            autoCancel = (n.flags and Notification.FLAG_AUTO_CANCEL) != 0,
-            reply = reply,
-            callBack = callBack,
-            personIcon = icon,
-            sender = sender,
-            personUri = uri,
-        )
-    }
-
-    /** Any other notification as an entry under its app: label as the name, title + text shown. */
-    private fun appEntry(sbn: StatusBarNotification, serial: Long): PersonEntry? {
-        val n = sbn.notification ?: return null
-        // An empty incoming MessagingStyle is deliberately absent, not an ordinary app notice.
-        if (NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(n) != null) return null
-        val extras = n.extras
-        val title = extras?.getCharSequence(Notification.EXTRA_TITLE)?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-        val body = extras?.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-            ?: extras?.getCharSequence(Notification.EXTRA_TEXT)?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-        // Some apps repeat the title at the start of the text; the tile already shows the title.
-        val text = if (title != null && body != null) body.removePrefix(title).trim().ifEmpty { body } else body
-        if (title == null && text == null) return null
-        val label = appLabels.getOrPut(sbn.packageName) {
-            runCatching {
-                packageManager.getApplicationLabel(packageManager.getApplicationInfo(sbn.packageName, 0)).toString()
-            }.getOrDefault(sbn.packageName)
-        }
-        val reply = replyAction(n, conversationOnly = false)
-        return PersonEntry(
-            key = sbn.key,
-            name = label,
-            groupKey = "app:${sbn.packageName}/$serial",
-            title = title,
-            text = text,
-            postTime = sbn.postTime,
-            packageName = sbn.packageName,
-            userSerial = serial,
-            kind = PersonEventKind.APP,
-            contentIntent = n.contentIntent,
-            autoCancel = (n.flags and Notification.FLAG_AUTO_CANCEL) != 0,
-            reply = reply,
-        )
-    }
-
-    /** App labels by package, filled lazily; a label rarely changes while the listener lives. */
-    private val appLabels = HashMap<String, String>()
-
-    private fun refreshMailPackages() {
-        packageRefreshJob?.cancel()
-        packageRefreshJob = scope.launch {
-            val packages = withContext(Dispatchers.IO) { queryMailPackages() }
-            if (!connected) return@launch
-            mailPackages = packages
-            refreshWithRetries()
-        }
-    }
-
-    private fun stopPackageRefresh() {
-        packageRefreshJob?.cancel()
-        packageRefreshJob = null
-        if (receiverRegistered) {
-            unregisterReceiver(packageReceiver)
-            receiverRegistered = false
-        }
     }
 
     override fun onDestroy() {
         connected = false
         handler.removeCallbacksAndMessages(null)
-        stopPackageRefresh()
-        scope.cancel()
         super.onDestroy()
     }
-
-    /** The installed apps that offer to compose mail (handle mailto:), i.e. the mail clients. */
-    private fun queryMailPackages(): Set<String> = runCatching {
-        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:someone@example.com"))
-        packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL)
-            .map { it.activityInfo.packageName }
-            .filter { it != packageName }
-            .toSet()
-    }.getOrDefault(emptySet())
-
-    /**
-     * The first free-text RemoteInput action, as a [ReplyAction]. For a person's notification only
-     * a reply (or an unlabelled) semantic counts — a chat app's "mark as read" with a text field
-     * must not become the tile's reply; an app tile takes any text input it offers.
-     */
-    private fun replyAction(n: Notification, conversationOnly: Boolean): ReplyAction? =
-        n.actions?.firstNotNullOfOrNull { action ->
-            val input = action.remoteInputs?.firstOrNull { it.allowFreeFormInput } ?: return@firstNotNullOfOrNull null
-            val semantic = action.semanticAction
-            if (conversationOnly && semantic != Notification.Action.SEMANTIC_ACTION_REPLY &&
-                semantic != Notification.Action.SEMANTIC_ACTION_NONE
-            ) return@firstNotNullOfOrNull null
-            action.actionIntent?.let { ReplyAction(it, input) }
-        }
-
-    /** A message without a sender (legacy style) or from the style's own user is the user's. The
-     *  persons come from separate bundles, so they are matched by key, else uri, else name. */
-    private fun isOwnMessage(person: Person?, user: Person): Boolean {
-        if (person == null) return true
-        person.key?.let { return it == user.key }
-        person.uri?.let { return it == user.uri }
-        return person.name?.toString() == user.name?.toString()
-    }
-
 
     /**
      * Approximates SystemUI's heads-up decision (NotificationInterruptStateProvider.shouldHeadsUp): a

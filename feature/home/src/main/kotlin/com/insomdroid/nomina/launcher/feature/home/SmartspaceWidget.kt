@@ -498,7 +498,8 @@ private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
                 }
             }
         }
-    }    return status
+    }
+    return status
 }
 
 /** A compact tappable text row; without [onTap] it remains plain text. */

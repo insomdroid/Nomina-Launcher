@@ -41,7 +41,6 @@ internal fun BuiltinWidget(type: String, modifier: Modifier = Modifier) {
     when (type) {
         HomeItemEntity.BUILTIN_NOTIFICATIONS -> NotificationsWidget(modifier)
         HomeItemEntity.BUILTIN_BATTERY -> BatteryWidget(modifier)
-        HomeItemEntity.BUILTIN_PEOPLE -> PeopleWidget(modifier)
         else -> SmartspaceWidget(modifier)
     }
 }

@@ -930,7 +930,7 @@ fun HomeScreen(
             // Keep the compact mini-dock capsule in sync with the main dock auto-hide state.
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                visible = settings.dockEnabled && !dockAutoHidden,
+                visible = settings.dockEnabled,
                 enter = fadeIn(tween(180)),
                 exit = fadeOut(tween(180)),
             ) {

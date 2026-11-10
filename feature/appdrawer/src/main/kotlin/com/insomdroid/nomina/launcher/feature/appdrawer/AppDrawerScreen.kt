@@ -928,6 +928,11 @@ private fun DragHandle() {
     }
 }
 
+private class DrawerItemPosition {
+    var bounds: Rect = Rect.Zero
+    var origin: Offset = Offset.Zero
+}
+
 /** A drawer folder tile: a rounded 2×2 preview of its first apps + label. A tap opens the folder's
  *  card ([onClick] gets the tile's root bounds to anchor it by); a long-press (with the haptic of an
  *  app's) opens its editor. */
@@ -943,15 +948,15 @@ private fun DrawerFolderTile(
     badgeShowCount: Boolean = true,
     badgeScale: Float = 1f,
 ) {
-    var bounds by remember(folder.id) { mutableStateOf(Rect.Zero) }
+    val position = remember(folder.id) { DrawerItemPosition() }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .onGloballyPositioned { bounds = it.boundsInRoot() }
+            .onGloballyPositioned { position.bounds = it.boundsInRoot() }
             // combinedClickable ticks the long-press haptic itself (as an app's does). The label is
             // what TalkBack reads for the hold: the editor has no other way in.
             .combinedClickable(
-                onClick = { onClick(bounds) },
+                onClick = { onClick(position.bounds) },
                 onLongClickLabel = stringResource(R.string.folder_edit),
                 onLongClick = onLongClick,
             )
@@ -1349,7 +1354,7 @@ internal fun FrequentAppsCard(
             )
             Row(modifier = Modifier.fillMaxWidth()) {
                 apps.forEach { app ->
-                    var bounds by remember(app.key) { mutableStateOf(Rect.Zero) }
+                    val position = remember(app.key) { DrawerItemPosition() }
                     // On the card's own solid surface: the palette's text, not the see-through drawer's.
                     AppIcon(
                         appItem = app,
@@ -1361,10 +1366,10 @@ internal fun FrequentAppsCard(
                         badgeScale = badgeScale,
                         modifier = Modifier
                             .weight(1f)
-                            .onGloballyPositioned { bounds = it.boundsInRoot() }
+                            .onGloballyPositioned { position.bounds = it.boundsInRoot() }
                             .combinedClickable(
                                 onClick = { onAppClick(app) },
-                                onLongClick = { onAppLongClick(app, bounds) },
+                                onLongClick = { onAppLongClick(app, position.bounds) },
                             )
                             .padding(vertical = 4.dp, horizontal = 2.dp),
                     )
@@ -1428,8 +1433,7 @@ private fun DrawerAppCell(
     val currentApp by rememberUpdatedState(app)
     // [bounds] anchors the popup and is clipped by the grid; [origin] is the cell's real top-left,
     // which a cell half scrolled under the grid's top edge still needs for the finger's position.
-    var bounds by remember { mutableStateOf(Rect.Zero) }
-    var origin by remember { mutableStateOf(Offset.Zero) }
+    val position = remember(app.key) { DrawerItemPosition() }
     AppIcon(
         appItem = app,
         labelColor = drawerLabelColor(LocalDrawerLabelColor.current, MaterialTheme.colorScheme.onSurface),
@@ -1439,7 +1443,10 @@ private fun DrawerAppCell(
         badgeShowCount = badgeShowCount,
         badgeScale = badgeScale,
         modifier = Modifier
-            .onGloballyPositioned { bounds = it.boundsInRoot(); origin = it.positionInRoot() }
+            .onGloballyPositioned {
+                position.bounds = it.boundsInRoot()
+                position.origin = it.positionInRoot()
+            }
             // One unified gesture (like Workspace/Dock) but non-consuming until the
             // long-press fires, so a quick drag still scrolls the grid: quick tap
             // launches; a still long-press lifts → drag out to home/dock, or with no
@@ -1518,13 +1525,13 @@ private fun DrawerAppCell(
                     // the drag, so its local coordinate space stays put and this stays
                     // accurate.
                     val token = Any()
-                    if (!dragController.start(currentApp, DragSource.Drawer, origin + holdPos, token)) {
+                    if (!dragController.start(currentApp, DragSource.Drawer, position.origin + holdPos, token)) {
                         return@awaitEachGesture
                     }
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     // The menu opens now, by the icon, under the still-held finger (issue #12);
                     // pulling the icon on closes it (DismissWhenDragMoves) and the drag goes on.
-                    onAppLongClick(currentApp, bounds)
+                    onAppLongClick(currentApp, position.bounds)
                     val dragStartPx = IconPress.DragStartThreshold.toPx()
                     try {
                         val completed = drag(down.id) { change ->
@@ -1540,7 +1547,7 @@ private fun DrawerAppCell(
                                 onDragOutStart()
                             }
                             if (dragController.moving) {
-                                dragController.update(origin + change.position)
+                                dragController.update(position.origin + change.position)
                             }
                         }
                         // Nothing on release once HOME cancelled the lift.

@@ -391,9 +391,27 @@ internal fun Workspace(
     // Group once per effective-entry update so composing adjacent pages is proportional to
     // the entries on those pages, while preserving the original order within each page.
     val entriesByPage = remember(effectiveEntries) { effectiveEntries.groupBy { it.page } }
-    // The drag gesture's pointerInput block outlives recomposition (its keys don't include the entry
-    // list), so it must read the *latest* placements through this state, not a stale closure capture.
-    val latestEntries by rememberUpdatedState(effectiveEntries)
+    // Convert the current layout once. Widget drag/resize callbacks can run on every pointer
+    // movement, so rebuilding the same rectangle list inside those callbacks is unnecessary.
+    val effectiveRects = remember(effectiveEntries) {
+        effectiveEntries.mapIndexed { index, entry ->
+            val (spanX, spanY) = when (entry) {
+                is PlacedWidget -> entry.spanX to entry.spanY
+                is PendingWidget -> entry.spanX to entry.spanY
+                is PlacedBuiltin -> entry.spanX to entry.spanY
+                else -> 1 to 1
+            }
+            val rowId = when (entry) {
+                is PlacedWidget -> entry.rowId
+                is PendingWidget -> entry.rowId
+                is PlacedBuiltin -> entry.rowId
+                else -> -(index.toLong() + 1L)
+            }
+            ReorderPlanner.Rect(rowId, entry.page, entry.cellX, entry.cellY, spanX, spanY)
+        }
+    }
+    // The pointerInput gesture outlives recomposition; callbacks read the latest cached rectangles.
+    val latestRects by rememberUpdatedState(effectiveRects)
     // The empty-area detector below is a pointerInput(Unit) that lives as long as the page; read the
     // callbacks through rememberUpdatedState so a recomposition with a new lambda (a changed setting)
     // reaches it instead of the lambda captured at first composition.
@@ -426,32 +444,25 @@ internal fun Workspace(
     // Page flips only when the dragged icon is pushed right against the screen edge.
     val edgePx = with(density) { 20.dp.toPx() }
 
-    // Client-side mirror of rectFitsForRow over the rendered entries, for the live drag placeholder.
+    // Client-side mirror of rectFitsForRow for the live drag placeholder. Test rectangle
+    // intersection directly against the cached layout instead of rebuilding an occupied-cell set
+    // for every pointer event.
     fun rectFreeOnGrid(excludeRowId: Long, page: Int, x: Int, y: Int, spanX: Int, spanY: Int): Boolean {
-        if (x < 0 || y < 0 || x + spanX > columns || y + spanY > rows) return false
-        val occupied = HashSet<Triple<Int, Int, Int>>()
-        for (e in effectiveEntries) {
-            val (ex, ey) = when (e) {
-                is PlacedWidget -> e.spanX to e.spanY
-                is PendingWidget -> e.spanX to e.spanY
-                is PlacedBuiltin -> e.spanX to e.spanY
-                else -> 1 to 1
-            }
-            val erow = when (e) {
-                is PlacedWidget -> e.rowId
-                is PendingWidget -> e.rowId
-                is PlacedBuiltin -> e.rowId
-                else -> -2L
-            }
-            if (erow == excludeRowId) continue
-            for (dx in 0 until ex) for (dy in 0 until ey) occupied += Triple(e.page, e.cellX + dx, e.cellY + dy)
+        if (x < 0 || y < 0 || spanX < 1 || spanY < 1 || x + spanX > columns || y + spanY > rows) return false
+        val right = x + spanX
+        val bottom = y + spanY
+        return effectiveRects.none { rect ->
+            rect.rowId != excludeRowId &&
+                rect.page == page &&
+                x < rect.cellX + rect.spanX &&
+                right > rect.cellX &&
+                y < rect.cellY + rect.spanY &&
+                bottom > rect.cellY
         }
-        for (dx in 0 until spanX) for (dy in 0 until spanY) if (Triple(page, x + dx, y + dy) in occupied) return false
-        return true
     }
 
     fun canPlaceWidget(p: WidgetPlacement, rowId: Long = Long.MIN_VALUE): Boolean =
-        ReorderPlanner.planFit(latestEntries.widgetRects(), rowId, p.page, p.cellX, p.cellY,
+        ReorderPlanner.planFit(latestRects, rowId, p.page, p.cellX, p.cellY,
             p.spanX, p.spanY, columns, rows) != null
 
     fun liftWidget(item: EditingItem, root: Offset, fraction: Offset, owner: Any) {
@@ -1687,22 +1698,7 @@ internal fun Workspace(
                             canFit = { x, y, sx, sy ->
                                 rectFreeOnGrid(ew.rowId, ew.page, x, y, sx, sy) ||
                                     ReorderPlanner.planFit(
-                                        effectiveEntries.mapIndexed { i, e ->
-                                            val (esx, esy) = when (e) {
-                                                is PlacedWidget -> e.spanX to e.spanY
-                                                is PendingWidget -> e.spanX to e.spanY
-                                                is PlacedBuiltin -> e.spanX to e.spanY
-                                                else -> 1 to 1
-                                            }
-                                            // The edited row must carry its REAL id so planFit can exclude
-                                            // it from its own collision set (widget or built-in alike).
-                                            val erow = when (e) {
-                                                is PlacedWidget -> e.rowId
-                                                is PlacedBuiltin -> e.rowId
-                                                else -> -(i.toLong() + 1)
-                                            }
-                                            ReorderPlanner.Rect(erow, e.page, e.cellX, e.cellY, esx, esy)
-                                        },
+                                        effectiveRects,
                                         ew.rowId, ew.page, x, y, sx, sy, columns, rows,
                                     ) != null
                             },

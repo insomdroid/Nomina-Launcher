@@ -22,6 +22,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -132,6 +133,7 @@ internal fun BackupImportDialog(
 ) {
     when (state) {
         BackupImportState.Confirm -> AlertDialog(
+            shape = RoundedCornerShape(8.dp),
             onDismissRequest = onLeave,
             title = { Text(stringResource(R.string.backup_restore_confirm_title)) },
             text = { DialogText(stringResource(R.string.backup_restore_confirm_msg)) },

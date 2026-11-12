@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -102,10 +103,12 @@ fun BackupScreen(
             Text(stringResource(R.string.backup_file_section), style = MaterialTheme.typography.titleMedium)
             val backupDefaultName = stringResource(R.string.backup_default_name)
             Button(
+                shape = RoundedCornerShape(6.dp),
                 onClick = { guarded { createDoc.launch(backupFileName(backupDefaultName, LocalDateTime.now())) } },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.backup_export)) }
             OutlinedButton(
+                shape = RoundedCornerShape(6.dp),
                 onClick = { guarded { openDoc.launch(arrayOf("application/json")) } },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.backup_import)) }
@@ -125,6 +128,7 @@ fun BackupScreen(
     // --- File import confirm dialog ---
     pendingImport?.let { uri ->
         AlertDialog(
+            shape = RoundedCornerShape(8.dp),
             onDismissRequest = { pendingImport = null },
             title = { Text(stringResource(R.string.backup_restore_confirm_title)) },
             text = { Text(stringResource(R.string.backup_restore_confirm_msg)) },

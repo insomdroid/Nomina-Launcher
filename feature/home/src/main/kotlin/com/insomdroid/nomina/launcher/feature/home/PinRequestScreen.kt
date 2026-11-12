@@ -200,7 +200,7 @@ private fun ConfirmContent(state: PinRequestUiState.Confirm, onAdd: () -> Unit, 
                     modifier = Modifier
                         .heightIn(max = PREVIEW_MAX_HEIGHT)
                         .aspectRatio((widget.widthDp / widget.heightDp).coerceIn(1.5f, 3f))
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                         .testTag(PIN_WIDGET_PREVIEW_TAG),
                     contentAlignment = Alignment.Center,
@@ -236,6 +236,7 @@ private fun ConfirmContent(state: PinRequestUiState.Confirm, onAdd: () -> Unit, 
         // Neutral, not the theme's secondary container: that is green in both of ARK's schemes,
         // and the agreed look has a quiet Cancel next to a filled Add.
         FilledTonalButton(
+            shape = RoundedCornerShape(6.dp),
             onClick = onCancel,
             enabled = !state.busy,
             colors = ButtonDefaults.filledTonalButtonColors(
@@ -246,7 +247,7 @@ private fun ConfirmContent(state: PinRequestUiState.Confirm, onAdd: () -> Unit, 
             Text(stringResource(R.string.cancel))
         }
         Spacer(Modifier.width(12.dp))
-        Button(onClick = onAdd, enabled = !state.busy) {
+        Button(onClick = onAdd, enabled = !state.busy, shape = RoundedCornerShape(6.dp)) {
             Text(stringResource(R.string.pin_request_add))
         }
     }
@@ -261,7 +262,7 @@ private fun NoticeContent(title: String, text: String?, onClose: () -> Unit) {
     }
     Spacer(Modifier.height(24.dp))
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        Button(onClick = onClose) { Text(stringResource(R.string.pin_request_close)) }
+        Button(onClick = onClose, shape = RoundedCornerShape(6.dp)) { Text(stringResource(R.string.pin_request_close)) }
     }
 }
 

@@ -10,6 +10,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 
 val LocalTonalWidgets = staticCompositionLocalOf { false }
 
@@ -28,7 +29,7 @@ internal fun widgetSurfaceColor(): Color = Color.Transparent
 internal fun WidgetSurface(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         color = Color.Transparent,
         contentColor = widgetContentColor(),
     ) {

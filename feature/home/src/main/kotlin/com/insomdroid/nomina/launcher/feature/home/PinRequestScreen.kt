@@ -183,7 +183,7 @@ private fun ConfirmContent(state: PinRequestUiState.Confirm, onAdd: () -> Unit, 
     )
     Spacer(Modifier.height(20.dp))
     Surface(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier.fillMaxWidth(),
     ) {

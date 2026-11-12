@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.insomdroid.nomina.model.CustomIcon
 import com.insomdroid.nomina.ui.component.PickedIcon
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 
 /**

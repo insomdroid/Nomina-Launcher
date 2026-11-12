@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -62,10 +61,10 @@ internal fun CollapsibleSection(
                 modifier = Modifier.weight(1f).padding(start = 12.dp),
             )
             Icon(
-                painter = painterResource(LauncherIcons.ExpandMore),
+                painter = painterResource(LauncherIcons.ChevronRight),
                 contentDescription = null,
                 tint = p.dim,
-                modifier = Modifier.size(20.dp).rotate(-90f),
+                modifier = Modifier.size(20.dp),
             )
         }
     } else {

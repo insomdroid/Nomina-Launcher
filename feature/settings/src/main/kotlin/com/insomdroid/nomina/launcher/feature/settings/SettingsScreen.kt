@@ -18,6 +18,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.offset
@@ -125,6 +126,7 @@ import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
+import com.insomdroid.nomina.ui.launcherDisplayFontFamily
 
 @Composable
 fun SettingsScreen(
@@ -1088,7 +1090,7 @@ private fun DoubleTapLockToggle(enabled: Boolean, onSetEnabled: (Boolean) -> Uni
 
 @Composable
 private fun RowLabel(text: String, modifier: Modifier = Modifier, color: Color = LocalExpressivePalette.current.text) {
-    Text(text, modifier = modifier, color = color, style = LauncherTextStyles.settingsRowLabel)
+    Text(text, modifier = modifier, color = color, style = LauncherTextStyles.settingsRowLabel.copy(fontFamily = launcherTechnicalFontFamily(), fontSize = 13.sp, letterSpacing = 0.45.sp))
 }
 
 @Composable
@@ -1186,7 +1188,7 @@ internal fun NothingSwitch(
             checked -> p.text
             else -> p.trackOff
         },
-        animationSpec = androidx.compose.animation.core.tween(180),
+        animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)),
         label = "settingsSwitchTrack",
     )
     val thumbColor by androidx.compose.animation.animateColorAsState(
@@ -1357,6 +1359,7 @@ private fun StepperRow(label: String, value: Int, min: Int, max: Int, onValueCha
                 color = p.text,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
+                fontFamily = launcherDisplayFontFamily(),
             )
             StepButton(LauncherIcons.Add, stringResource(R.string.settings_step_increase), enabled = value < max) {
                 if (value < max) onValueChange(value + 1)
@@ -1566,7 +1569,7 @@ private fun SliderRow(
 ) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     ) {

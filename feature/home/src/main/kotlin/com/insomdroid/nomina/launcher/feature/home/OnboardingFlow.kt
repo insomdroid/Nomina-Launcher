@@ -181,15 +181,6 @@ private fun DotMatrixBackground() {
             }
             y += spacing
         }
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(AURORA_BLUE.copy(alpha = 0.18f), Color.Transparent),
-                center = Offset(size.width * 0.88f, size.height * 0.12f),
-                radius = size.minDimension * 0.48f,
-            ),
-            radius = size.minDimension * 0.48f,
-            center = Offset(size.width * 0.88f, size.height * 0.12f),
-        )
     }
 }
 

@@ -51,19 +51,19 @@ class CollapsibleSectionTest {
         show()
 
         compose.onNodeWithText("Show the dock").assertIsDisplayed()
-        compose.onNodeWithText("Dock").assertHasClickAction().assert(stateIs(res.getString(R.string.settings_section_expanded)))
+        compose.onNodeWithText("DOCK").assertHasClickAction().assert(stateIs(res.getString(R.string.settings_section_expanded)))
     }
 
     @Test fun aTapOnTheTitleFoldsTheRowsAwayAndAnotherBringsThemBack() {
         show()
 
-        compose.onNodeWithText("Dock").performClick()
+        compose.onNodeWithText("DOCK").performClick()
         compose.waitForIdle()
         assertThat(toggles).containsExactly(true)
         compose.onNodeWithText("Show the dock").assertDoesNotExist()
-        compose.onNodeWithText("Dock").assert(stateIs(res.getString(R.string.settings_section_collapsed)))
+        compose.onNodeWithText("DOCK").assert(stateIs(res.getString(R.string.settings_section_collapsed)))
 
-        compose.onNodeWithText("Dock").performClick()
+        compose.onNodeWithText("DOCK").performClick()
         compose.waitForIdle()
         assertThat(toggles).containsExactly(true, false).inOrder()
         compose.onNodeWithText("Show the dock").assertIsDisplayed()

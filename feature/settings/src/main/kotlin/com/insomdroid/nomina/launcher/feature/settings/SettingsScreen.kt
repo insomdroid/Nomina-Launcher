@@ -1872,7 +1872,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_wallpaper))
@@ -1916,7 +1916,7 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_drawer_color))
@@ -1957,7 +1957,7 @@ internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_label_color))

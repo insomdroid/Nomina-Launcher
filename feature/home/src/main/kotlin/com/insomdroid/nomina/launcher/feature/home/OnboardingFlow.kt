@@ -43,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
@@ -82,6 +84,7 @@ fun OnboardingFlow(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
             .background(AURORA_BASE)
             // The intro covers a LIVE home screen — swallow every touch that no child claims so
             // nothing falls through to the dock/workspace below (user-found bug: dock apps opened
@@ -156,16 +159,17 @@ fun OnboardingFlow(
 @Composable
 private fun DotMatrixBackground() {
     Canvas(Modifier.fillMaxSize()) {
-        val spacing = 40.dp.toPx()
-        val radius = 0.8.dp.toPx()
-        var y = spacing * 0.7f
+        val spacing = 120.dp.toPx()
+        val radius = 0.65.dp.toPx()
+        var y = spacing / 2f
         while (y < size.height) {
-            var x = spacing * 0.7f
+            var x = spacing / 2f
             while (x < size.width) {
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.075f),
+                    color = Color.White.copy(alpha = 0.12f),
                     radius = radius,
                     center = Offset(x, y),
+                    blendMode = BlendMode.Difference,
                 )
                 x += spacing
             }

@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -388,24 +386,13 @@ internal fun SmartspaceContent(
                     interactionSource = noIndication,
                     alignment = Alignment.CenterStart,
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_weather_outline),
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = ink.copy(alpha = 0.92f),
-                        )
-                        Text(
-                            text = weatherText.uppercase(Locale.getDefault()),
-                            color = ink.copy(alpha = 0.92f),
-                            style = themedTextStyle(dateTimeStyle.copy(fontWeight = FontWeight.Normal)),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
+                    Text(
+                        text = weatherText.uppercase(Locale.getDefault()),
+                        color = ink.copy(alpha = 0.92f),
+                        style = themedTextStyle(dateTimeStyle.copy(fontWeight = FontWeight.Normal)),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
         }

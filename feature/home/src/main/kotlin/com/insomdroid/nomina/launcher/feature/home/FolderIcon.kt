@@ -74,7 +74,7 @@ private fun FolderPreview(apps: List<AppItem>, size: Dp, contentDescription: Str
         modifier = Modifier
             .size(size)
             .then(if (contentDescription == null) Modifier else Modifier.semantics { this.contentDescription = contentDescription })
-            .background(Color.White.copy(alpha = 0.22f), RoundedCornerShape(15.dp))
+            .background(Color.White.copy(alpha = 0.22f), RoundedCornerShape(8.dp))
             .padding(6.dp * scale),
         contentAlignment = Alignment.Center,
     ) {

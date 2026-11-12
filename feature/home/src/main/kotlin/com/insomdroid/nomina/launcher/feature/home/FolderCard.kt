@@ -229,7 +229,7 @@ internal fun FolderCard(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(8.dp),
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .padding(16.dp)
@@ -248,7 +248,7 @@ internal fun FolderCard(
                     Box(
                         Modifier.background(
                             if (icon == null) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
-                            RoundedCornerShape(15.dp),
+                            RoundedCornerShape(8.dp),
                         ),
                     ) {
                         FolderIcon(

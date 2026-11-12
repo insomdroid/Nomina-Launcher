@@ -45,7 +45,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.insomdroid.nomina.ui.component.DrawerWallpaperPicture
 import com.insomdroid.nomina.data.DrawerWallpaper
@@ -633,7 +632,13 @@ private fun AppDrawerContent(
                         modifier = Modifier.weight(1f),
                     )
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { onQueryChange("") }) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(ExpressiveRadius.control))
+                                .clickable { onQueryChange("") },
+                            contentAlignment = Alignment.Center,
+                        ) {
                             Icon(
                                 painter = painterResource(LauncherIcons.Close),
                                 contentDescription = stringResource(R.string.search_clear),
@@ -1196,10 +1201,22 @@ private fun DrawerFolderSheet(
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f),
                     )
-                    IconButton(onClick = { onMove(-1) }, enabled = canMoveEarlier) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(ExpressiveRadius.control))
+                            .clickable(enabled = canMoveEarlier) { onMove(-1) },
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Icon(painterResource(LauncherIcons.ChevronLeft), contentDescription = stringResource(R.string.folder_move_earlier))
                     }
-                    IconButton(onClick = { onMove(1) }, enabled = canMoveLater) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(ExpressiveRadius.control))
+                            .clickable(enabled = canMoveLater) { onMove(1) },
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Icon(painterResource(LauncherIcons.ChevronRight), contentDescription = stringResource(R.string.folder_move_later))
                     }
                 }

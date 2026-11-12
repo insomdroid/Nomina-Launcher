@@ -16,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -27,6 +26,8 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.content.IntentCompat
@@ -138,10 +139,16 @@ internal fun BackupImportDialog(
             title = { Text(stringResource(R.string.backup_restore_confirm_title)) },
             text = { DialogText(stringResource(R.string.backup_restore_confirm_msg)) },
             confirmButton = {
-                TextButton(onClick = onRestore) { Text(stringResource(R.string.backup_restore_confirm_ok)) }
+                ExpressiveButton(
+                    text = stringResource(R.string.backup_restore_confirm_ok),
+                    onClick = onRestore,
+                )
             },
             dismissButton = {
-                TextButton(onClick = onLeave) { Text(stringResource(R.string.backup_cancel)) }
+                ExpressiveTextButton(
+                    text = stringResource(R.string.backup_cancel),
+                    onClick = onLeave,
+                )
             },
         )
         // Back, a tap outside and Cancel stop the import: the file may never arrive.
@@ -151,7 +158,10 @@ internal fun BackupImportDialog(
             text = { Working() },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = onLeave) { Text(stringResource(R.string.backup_cancel)) }
+                ExpressiveTextButton(
+                    text = stringResource(R.string.backup_cancel),
+                    onClick = onLeave,
+                )
             },
         )
         // No way out while the layout is replaced: the step is short and always finishes.
@@ -167,7 +177,10 @@ internal fun BackupImportDialog(
             title = { Text(stringResource(R.string.backup_title)) },
             text = { DialogText(backupEventMessage(LocalResources.current, state.event)) },
             confirmButton = {
-                TextButton(onClick = onLeave) { Text(stringResource(android.R.string.ok)) }
+                ExpressiveButton(
+                    text = stringResource(android.R.string.ok),
+                    onClick = onLeave,
+                )
             },
         )
         BackupImportState.Left -> Unit

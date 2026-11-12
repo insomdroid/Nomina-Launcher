@@ -13,15 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +32,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveButtonStyle
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -102,16 +102,17 @@ fun BackupScreen(
             // --- File section ---
             Text(stringResource(R.string.backup_file_section), style = MaterialTheme.typography.titleMedium)
             val backupDefaultName = stringResource(R.string.backup_default_name)
-            Button(
-                shape = RoundedCornerShape(6.dp),
+            ExpressiveButton(
+                text = stringResource(R.string.backup_export),
                 onClick = { guarded { createDoc.launch(backupFileName(backupDefaultName, LocalDateTime.now())) } },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(R.string.backup_export)) }
-            OutlinedButton(
-                shape = RoundedCornerShape(6.dp),
+            )
+            ExpressiveButton(
+                text = stringResource(R.string.backup_import),
                 onClick = { guarded { openDoc.launch(arrayOf("application/json")) } },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(R.string.backup_import)) }
+                style = ExpressiveButtonStyle.Secondary,
+            )
             if (localLastBackupMs > 0L) {
                 val formatted = java.text.DateFormat.getDateTimeInstance(
                     java.text.DateFormat.SHORT,
@@ -133,12 +134,16 @@ fun BackupScreen(
             title = { Text(stringResource(R.string.backup_restore_confirm_title)) },
             text = { Text(stringResource(R.string.backup_restore_confirm_msg)) },
             confirmButton = {
-                TextButton(onClick = { viewModel.importFrom(uri); pendingImport = null }) {
-                    Text(stringResource(R.string.backup_restore_confirm_ok))
-                }
+                ExpressiveButton(
+                    text = stringResource(R.string.backup_restore_confirm_ok),
+                    onClick = { viewModel.importFrom(uri); pendingImport = null },
+                )
             },
             dismissButton = {
-                TextButton(onClick = { pendingImport = null }) { Text(stringResource(R.string.backup_cancel)) }
+                ExpressiveTextButton(
+                    text = stringResource(R.string.backup_cancel),
+                    onClick = { pendingImport = null },
+                )
             },
         )
     }

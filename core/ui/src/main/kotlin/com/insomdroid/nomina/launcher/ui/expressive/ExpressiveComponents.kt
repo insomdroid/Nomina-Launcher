@@ -27,7 +27,7 @@ fun ExpressiveSectionTitle(text: String, color: androidx.compose.ui.graphics.Col
         text = text,
         color = color,
         style = LauncherTextStyles.expressiveSectionTitle.copy(fontFamily = launcherTechnicalFontFamily()),
-        modifier = Modifier.padding(top = 24.dp, start = 2.dp, bottom = 12.dp),
+        modifier = Modifier.padding(top = 24.dp, start = 4.dp, bottom = 12.dp),
     )
 }
 
@@ -54,7 +54,7 @@ fun ExpressiveCard(
                     strokeWidth = 0.5.dp.toPx(),
                 )
             }
-            .padding(horizontal = 6.dp, vertical = 10.dp),
+            .padding(horizontal = 8.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )

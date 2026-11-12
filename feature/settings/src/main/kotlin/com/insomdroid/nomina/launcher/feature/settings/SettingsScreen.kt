@@ -241,20 +241,25 @@ fun SettingsScreen(
                     style = LauncherTextStyles.settingsEyebrow,
                     modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
                 )
+                val pageTitle = when (selectedSection) {
+                    "home" -> stringResource(R.string.settings_home)
+                    "dock" -> stringResource(R.string.settings_dock)
+                    "drawer" -> stringResource(R.string.settings_drawer)
+                    "icons" -> stringResource(R.string.settings_icons_typography)
+                    "wallpaper" -> stringResource(R.string.settings_wallpaper_background)
+                    "gestures" -> stringResource(R.string.settings_gestures_interaction)
+                    "notifications" -> stringResource(R.string.settings_notifications)
+                    "permissions" -> stringResource(R.string.settings_permissions)
+                    "backup" -> stringResource(R.string.settings_backup_restore)
+                    "updates" -> stringResource(R.string.settings_about)
+                    else -> stringResource(R.string.settings_title)
+                }
                 Text(
-                    text = stringResource(R.string.settings_title),
+                    text = pageTitle,
                     color = palette.text,
                     style = LauncherTextStyles.settingsTitle,
                     modifier = Modifier.padding(start = 6.dp, top = 0.dp, bottom = 6.dp),
                 )
-                if (selectedSection != null) {
-                    TextButton(
-                        onClick = { selectedSection = null },
-                        modifier = Modifier.padding(start = 0.dp, bottom = 4.dp),
-                    ) {
-                        Text(text = "‹ ${stringResource(R.string.settings_title)}", color = palette.dim)
-                    }
-                }
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_home),

@@ -28,7 +28,7 @@ internal fun widgetSurfaceColor(): Color = Color.Transparent
 internal fun WidgetSurface(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(8.dp),
         color = Color.Transparent,
         contentColor = widgetContentColor(),
     ) {

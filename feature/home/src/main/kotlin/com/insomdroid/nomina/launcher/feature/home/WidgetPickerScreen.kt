@@ -14,10 +14,14 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +43,8 @@ import kotlinx.coroutines.withContext
 import com.insomdroid.nomina.data.local.HomeItemEntity
 import com.insomdroid.nomina.ui.CoverSystemBars
 import com.insomdroid.nomina.ui.LauncherIcons
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextField
 
 internal data class WidgetGroup(val packageName: String, val label: String, val widgets: List<WidgetOption>)
 internal data class WidgetOption(val choice: WidgetChoice, val label: String)
@@ -107,22 +113,38 @@ fun WidgetPickerScreen(
             Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.widget_picker_title), style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.weight(1f).padding(8.dp))
-                IconButton(onClick = onDismiss) {
+                Box(
+                    Modifier.size(40.dp).clip(RoundedCornerShape(6.dp)).clickable(onClick = onDismiss),
+                    contentAlignment = Alignment.Center,
+                ) {
                     Icon(painterResource(LauncherIcons.Close), stringResource(R.string.widget_picker_close))
                 }
             }
-            if (onlyPackage == null) OutlinedTextField(
-                value = query, onValueChange = { query = it }, singleLine = true,
-                placeholder = { Text(stringResource(R.string.widget_search)) },
-                leadingIcon = { Icon(painterResource(R.drawable.ic_search), null) },
-                trailingIcon = if (query.isEmpty()) null else ({
-                    IconButton(onClick = { query = "" }) {
-                        Icon(painterResource(LauncherIcons.Close), stringResource(R.string.widget_search_clear))
+            if (onlyPackage == null) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ExpressiveTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        placeholder = stringResource(R.string.widget_search),
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (query.isNotEmpty()) {
+                        Box(
+                            Modifier.padding(start = 8.dp).size(40.dp).clip(RoundedCornerShape(6.dp))
+                                .clickable { query = "" },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                painterResource(LauncherIcons.Close),
+                                stringResource(R.string.widget_search_clear),
+                            )
+                        }
                     }
-                }),
-                shape = RoundedCornerShape(6.dp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-            )
+                }
+            }
             Text(stringResource(R.string.widget_picker_hint), style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp))
@@ -132,7 +154,10 @@ fun WidgetPickerScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 userScrollEnabled = !dragging,
             ) {
-                if (groups == null) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
+                if (groups == null) item {
+                    Text("LOADING", style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 if (failed) item { Text(stringResource(R.string.widget_picker_load_failed)) }
                 if (visible.isEmpty() && groups != null) item { Text(stringResource(R.string.widget_search_none)) }
                 visible.forEach { group ->
@@ -201,9 +226,10 @@ private fun WidgetCard(
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                FilledTonalButton(onClick = { onPick(option.choice, sx, sy) }) {
-                    Text(stringResource(R.string.widget_add))
-                }
+                ExpressiveButton(
+                    text = stringResource(R.string.widget_add),
+                    onClick = { onPick(option.choice, sx, sy) },
+                )
             }
         }
     }

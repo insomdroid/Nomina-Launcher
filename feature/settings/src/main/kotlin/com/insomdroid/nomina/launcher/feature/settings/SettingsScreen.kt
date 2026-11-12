@@ -256,27 +256,27 @@ fun SettingsScreen(
                         placeholder = { Text("Search settings…") },
                     )
                     val categories = listOf(
-                        Triple("home", "", "Home screen|Layout, wallpaper, widgets"),
+                        Triple("home", "", "Home screen|Layout, pages and behavior"),
                         Triple("dock", "", "Dock|Visibility, spacing, behavior"),
-                        Triple("drawer", "", "App drawer|Grid, sorting, search"),
+                        Triple("drawer", "", "App drawer|Grid, search and background"),
                         Triple("icons", "", "Icons|Packs, shapes, appearance"),
                         Triple("folders", "", "Folders|Layout and appearance"),
                         Triple("gestures", "", "Gestures|Navigation and shortcuts"),
                         Triple("notifications", "", "Notifications|Badges and indicators"),
-                        Triple("widgets", "", "Widgets|Clock, weather and information"),
+                        Triple("widgets", "", "Widgets|Weather and widget appearance"),
                         Triple("backup", "", "Backup|Export and restore"),
                         Triple("about", "", "About|Version and feedback"),
                     )
                     val query = settingsSearch.trim().lowercase()
                     val keywords = mapOf(
-                        "home" to listOf("grid", "columns", "rows", "wallpaper", "page", "status bar", "widget"),
+                        "home" to listOf("grid", "columns", "rows", "page", "status bar", "default launcher"),
                         "dock" to listOf("auto hide", "opacity", "bottom spacing", "dock icons", "show dock"),
-                        "drawer" to listOf("search", "scrubber", "frequent apps", "hidden apps", "sorting"),
+                        "drawer" to listOf("search", "scrubber", "frequent apps", "hidden apps", "sorting", "wallpaper", "background", "blur"),
                         "icons" to listOf("icon pack", "icon shape", "resize", "reshape", "legacy"),
                         "folders" to listOf("folder", "folder columns", "folder names"),
                         "gestures" to listOf("swipe", "double tap", "long press"),
                         "notifications" to listOf("notification", "badge", "dot", "count"),
-                        "widgets" to listOf("weather", "calendar", "location", "permission", "background"),
+                        "widgets" to listOf("weather", "calendar", "location", "widget background", "widget inset"),
                         "backup" to listOf("export", "restore", "backup"),
                         "about" to listOf("version", "feedback", "update"),
                     )
@@ -342,10 +342,10 @@ fun SettingsScreen(
                             "dock" -> "Control the appearance and behavior of your dock."
                             "drawer" -> "Organize apps and control the app drawer."
                             "icons" -> "Choose icon packs, shapes and sizing."
-                            "folders" -> "Folder options are available in Home screen and App drawer."
+                            "folders" -> "Manage folder layout, names and app drawer folders."
                             "gestures" -> "Control navigation gestures and shortcuts."
                             "notifications" -> "Manage notification badges and indicators."
-                            "widgets" -> "Configure weather, wallpaper and permissions."
+                            "widgets" -> "Configure weather and widget appearance."
                             "backup" -> "Export and restore your Nomina settings."
                             else -> "Version information and feedback."
                         },
@@ -353,10 +353,6 @@ fun SettingsScreen(
                         style = LauncherTextStyles.settingsDescription,
                         modifier = Modifier.padding(start = 6.dp, bottom = 16.dp),
                     )
-                    if (selectedCategory == "folders") {
-                        ExpressiveActionRow(label = "Home folder options", description = "Folder columns and names") { selectedCategory = "home" }
-                        ExpressiveActionRow(label = "App drawer folders", description = "Folder names and management") { selectedCategory = "drawer" }
-                    }
                 }
                 if (selectedCategory == "home") {
                 CollapsibleSection(
@@ -370,11 +366,6 @@ fun SettingsScreen(
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showHomeLabels, viewModel::setShowHomeLabels)
                     SwitchRow("Hide status bar", s.hideStatusBar, viewModel::setHideStatusBar)
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineHomeLabels, viewModel::setTwoLineHomeLabels)
-                    SwitchRow(stringResource(R.string.settings_show_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
-                    StepperRow(
-                        stringResource(R.string.settings_folder_columns), s.folderColumns,
-                        SettingsRepository.MIN_FOLDER_COLUMNS, SettingsRepository.MAX_FOLDER_COLUMNS, viewModel::setFolderColumns,
-                    )
                     SwitchRow(stringResource(R.string.settings_page_indicator), s.showPageIndicator, viewModel::setShowPageIndicator)
                     if (s.showPageIndicator) {
                         ExpressiveActionRow(
@@ -395,19 +386,6 @@ fun SettingsScreen(
                         viewModel::setInfiniteScroll,
                     )
                     SwitchRow(stringResource(R.string.settings_lock_desktop), s.desktopLocked, viewModel::setDesktopLocked)
-                    SwitchRow(stringResource(R.string.settings_widget_tonal), s.widgetTonalBackground, viewModel::setWidgetTonalBackground)
-                    SwitchRow(
-                        stringResource(R.string.settings_widget_inset),
-                        stringResource(R.string.settings_widget_inset_desc),
-                        s.widgetEdgesAlignWithIcons,
-                        viewModel::setWidgetEdgesAlignWithIcons,
-                    )
-                    WeatherToggle(enabled = s.showWeather, onSetEnabled = viewModel::setShowWeather)
-                    if (s.showWeather) {
-                        WeatherAppRow(appLabel = allApps.firstOrNull { it.key == s.weatherAppKey }?.label) {
-                            showWeatherAppPicker = true
-                        }
-                    }
                 }
                 }
 
@@ -444,7 +422,6 @@ fun SettingsScreen(
                     StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
-                    SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
                     SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
                     SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
                     SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
@@ -459,34 +436,6 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_hidden_apps),
                         description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
                     ) { showHiddenManager = true }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_drawer_folders),
-                        description = pluralStringResource(
-                            R.plurals.settings_drawer_folders_count, drawerFolders.orEmpty().size, drawerFolders.orEmpty().size,
-                        ),
-                    ) { showFolderManager = true }
-                    val newFolderName = stringResource(R.string.drawer_folder_default)
-                    val folderCreatedMsg = stringResource(R.string.settings_drawer_folder_created)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_new_drawer_folder),
-                        description = stringResource(R.string.settings_new_drawer_folder_desc),
-                        trailingIcon = LauncherIcons.Add,
-                    ) {
-                        viewModel.createDrawerFolder(newFolderName)
-                        android.widget.Toast.makeText(context, folderCreatedMsg, android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                    SwitchRow(
-                        stringResource(R.string.settings_sort_drawer_folders),
-                        stringResource(R.string.settings_sort_drawer_folders_desc),
-                        s.sortDrawerFolders,
-                        viewModel::setSortDrawerFolders,
-                    )
-                    SwitchRow(
-                        stringResource(R.string.settings_mix_drawer_folders),
-                        stringResource(R.string.settings_mix_drawer_folders_desc),
-                        s.mixDrawerFolders,
-                        viewModel::setMixDrawerFolders,
-                    )
                 }
                 }
 
@@ -602,7 +551,7 @@ fun SettingsScreen(
                 }
                 }
 
-                if (selectedCategory == "widgets") {
+                if (selectedCategory == "drawer") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_wallpaper_background),
                     icon = LauncherIcons.Widgets,
@@ -682,13 +631,8 @@ fun SettingsScreen(
                 }
                 }
 
-                if (selectedCategory == "widgets") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_permissions),
-                    icon = LauncherIcons.Permissions,
-                    collapsed = "permissions" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("permissions", it) },
-                ) {
+
+                if (selectedCategory == "home") {
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_set_default),
                         description = stringResource(
@@ -697,29 +641,97 @@ fun SettingsScreen(
                     ) {
                         runCatching { setDefaultLauncher.launch(DefaultLauncher.requestIntent(context)) }
                     }
+                }
+
+                if (selectedCategory == "notifications") {
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_notif_access),
                         description = stringResource(
-                            if (notifAccessGranted) {
-                                R.string.settings_notif_access_granted
-                            } else {
-                                R.string.settings_notif_access_not_granted
-                            },
+                            if (notifAccessGranted) R.string.settings_notif_access_granted
+                            else R.string.settings_notif_access_not_granted,
                         ),
-                    ) {
-                        openNotificationAccess(context)
-                    }
-                    PermissionRow(
-                        label = stringResource(R.string.settings_permission_calendar),
-                        permission = android.Manifest.permission.READ_CALENDAR,
-                    )
-                    PermissionRow(
-                        label = stringResource(R.string.settings_permission_location),
-                        permission = android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                    )
-                }
+                    ) { openNotificationAccess(context) }
                 }
 
+                if (selectedCategory == "folders") {
+                    CollapsibleSection(
+                        title = "Folders",
+                        icon = LauncherIcons.AppsGrid,
+                        collapsed = "folders" in s.collapsedSettingsSections,
+                        onToggle = { viewModel.setSectionCollapsed("folders", it) },
+                    ) {
+                        SwitchRow(stringResource(R.string.settings_show_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
+                        StepperRow(
+                            stringResource(R.string.settings_folder_columns),
+                            s.folderColumns,
+                            SettingsRepository.MIN_FOLDER_COLUMNS,
+                            SettingsRepository.MAX_FOLDER_COLUMNS,
+                            viewModel::setFolderColumns,
+                        )
+                        SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
+                        ExpressiveActionRow(
+                            label = stringResource(R.string.settings_drawer_folders),
+                            description = pluralStringResource(
+                                R.plurals.settings_drawer_folders_count,
+                                drawerFolders.orEmpty().size,
+                                drawerFolders.orEmpty().size,
+                            ),
+                        ) { showFolderManager = true }
+                        val newFolderName = stringResource(R.string.drawer_folder_default)
+                        val folderCreatedMsg = stringResource(R.string.settings_drawer_folder_created)
+                        ExpressiveActionRow(
+                            label = stringResource(R.string.settings_new_drawer_folder),
+                            description = stringResource(R.string.settings_new_drawer_folder_desc),
+                            trailingIcon = LauncherIcons.Add,
+                        ) {
+                            viewModel.createDrawerFolder(newFolderName)
+                            android.widget.Toast.makeText(context, folderCreatedMsg, android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                        SwitchRow(
+                            stringResource(R.string.settings_sort_drawer_folders),
+                            stringResource(R.string.settings_sort_drawer_folders_desc),
+                            s.sortDrawerFolders,
+                            viewModel::setSortDrawerFolders,
+                        )
+                        SwitchRow(
+                            stringResource(R.string.settings_mix_drawer_folders),
+                            stringResource(R.string.settings_mix_drawer_folders_desc),
+                            s.mixDrawerFolders,
+                            viewModel::setMixDrawerFolders,
+                        )
+                    }
+                }
+
+                if (selectedCategory == "widgets") {
+                    CollapsibleSection(
+                        title = "Widgets",
+                        icon = LauncherIcons.Widgets,
+                        collapsed = "widgets" in s.collapsedSettingsSections,
+                        onToggle = { viewModel.setSectionCollapsed("widgets", it) },
+                    ) {
+                        SwitchRow(stringResource(R.string.settings_widget_tonal), s.widgetTonalBackground, viewModel::setWidgetTonalBackground)
+                        SwitchRow(
+                            stringResource(R.string.settings_widget_inset),
+                            stringResource(R.string.settings_widget_inset_desc),
+                            s.widgetEdgesAlignWithIcons,
+                            viewModel::setWidgetEdgesAlignWithIcons,
+                        )
+                        WeatherToggle(enabled = s.showWeather, onSetEnabled = viewModel::setShowWeather)
+                        if (s.showWeather) {
+                            WeatherAppRow(appLabel = allApps.firstOrNull { it.key == s.weatherAppKey }?.label) {
+                                showWeatherAppPicker = true
+                            }
+                        }
+                        PermissionRow(
+                            label = stringResource(R.string.settings_permission_calendar),
+                            permission = android.Manifest.permission.READ_CALENDAR,
+                        )
+                        PermissionRow(
+                            label = stringResource(R.string.settings_permission_location),
+                            permission = android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        )
+                    }
+                }
                 if (selectedCategory == "backup") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_backup_restore),

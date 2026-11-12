@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -833,7 +834,7 @@ private fun IconPackPicker(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
+            SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
         },
     )
 }
@@ -906,7 +907,7 @@ private fun SingleAppPicker(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
+            SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
         },
     )
 }
@@ -1082,7 +1083,7 @@ private fun RowLabel(text: String, modifier: Modifier = Modifier, color: Color =
 private fun SettingsFilterChip(
     selected: Boolean,
     onClick: () -> Unit,
-    label: @Composable () -> Unit,
+    label: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
@@ -1110,7 +1111,7 @@ private fun SettingsFilterChip(
 private fun SettingsTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
+    content: @Composable RowScope.() -> Unit,
 ) {
     val p = LocalExpressivePalette.current
     TextButton(
@@ -1517,7 +1518,7 @@ private fun FollowHomeChoiceCard(
                     onClick = onFollowHome,
                     label = { Text(stringResource(R.string.settings_follow_home)) },
                 )
-                FilterChip(
+                SettingsFilterChip(
                     selected = !followsHome,
                     onClick = onCustom,
                     label = { Text(stringResource(R.string.settings_custom)) },
@@ -1543,17 +1544,17 @@ private fun DrawerLabelColorModeRow(mode: String, onPick: (String) -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(top = 10.dp).horizontalScroll(rememberScrollState()),
             ) {
-                FilterChip(
+                SettingsFilterChip(
                     selected = mode == LauncherSettings.LABEL_COLOR_FOLLOW_HOME,
                     onClick = { onPick(LauncherSettings.LABEL_COLOR_FOLLOW_HOME) },
                     label = { Text(stringResource(R.string.settings_follow_home)) },
                 )
-                FilterChip(
+                SettingsFilterChip(
                     selected = mode == LauncherSettings.LABEL_COLOR_AUTOMATIC,
                     onClick = { onPick(LauncherSettings.LABEL_COLOR_AUTOMATIC) },
                     label = { Text(stringResource(R.string.settings_color_automatic)) },
                 )
-                FilterChip(
+                SettingsFilterChip(
                     selected = mode == LauncherSettings.LABEL_COLOR_CUSTOM,
                     onClick = { onPick(LauncherSettings.LABEL_COLOR_CUSTOM) },
                     label = { Text(stringResource(R.string.settings_custom)) },
@@ -1662,7 +1663,7 @@ internal fun IconReshapeRow(selected: String, onPick: (String) -> Unit) {
                         LauncherSettings.RESHAPE_UNTHEMED -> R.string.settings_reshape_unthemed
                         else -> R.string.settings_reshape_off
                     }
-                    FilterChip(
+                    SettingsFilterChip(
                         selected = selected == mode,
                         onClick = { onPick(mode) },
                         label = { Text(stringResource(label)) },
@@ -1692,7 +1693,7 @@ internal fun IconShapeRow(selected: String, onPick: (String) -> Unit) {
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
             ) {
                 LauncherSettings.ICON_SHAPES.forEach { key ->
-                    FilterChip(
+                    SettingsFilterChip(
                         selected = selected == key,
                         onClick = { onPick(key) },
                         label = { Text(stringResource(iconShapeNameRes(key))) },
@@ -1740,14 +1741,14 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
                     Text(stringResource(R.string.settings_drawer_wallpaper_none), color = p.dim, fontSize = 14.sp)
                 }
                 Spacer(Modifier.weight(1f))
-                TextButton(
+                SettingsTextButton(
                     onClick = { runCatching { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) } },
                     modifier = Modifier.testTag(DRAWER_WALLPAPER_PICK_TAG),
                 ) {
                     Text(stringResource(R.string.settings_drawer_wallpaper_pick), color = MaterialTheme.colorScheme.onSurface)
                 }
                 if (wallpaper != null) {
-                    TextButton(onClick = onClear, modifier = Modifier.testTag(DRAWER_WALLPAPER_REMOVE_TAG)) {
+                    SettingsTextButton(onClick = onClear, modifier = Modifier.testTag(DRAWER_WALLPAPER_REMOVE_TAG)) {
                         Text(stringResource(R.string.settings_drawer_wallpaper_remove), color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
@@ -1780,13 +1781,13 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
             ) {
-                FilterChip(
+                SettingsFilterChip(
                     selected = selected == LauncherSettings.DRAWER_COLOR_TRANSPARENT,
                     enabled = !locked,
                     onClick = { onPick(LauncherSettings.DRAWER_COLOR_TRANSPARENT) },
                     label = { Text(stringResource(R.string.settings_color_transparent)) },
                 )
-                FilterChip(
+                SettingsFilterChip(
                     selected = selected == null,
                     enabled = !locked,
                     onClick = { onPick(null) },
@@ -1819,7 +1820,7 @@ internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
             ) {
-                FilterChip(
+                SettingsFilterChip(
                     selected = selected == null,
                     onClick = { onPick(null) },
                     label = { Text(stringResource(R.string.settings_color_automatic)) },

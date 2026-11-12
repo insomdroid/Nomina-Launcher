@@ -123,7 +123,7 @@ internal fun ScaleSliderRow(
             if (shown != valueText(default)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     Row(
-                        modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable {
+                        modifier = Modifier.clip(RoundedCornerShape(ExpressiveRadius.control)).clickable {
                             change(default)
                             feltBase = null
                         }.padding(horizontal = ExpressiveSpacing.sm, vertical = ExpressiveSpacing.xs),

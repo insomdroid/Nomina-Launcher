@@ -1577,9 +1577,9 @@ private fun SliderRow(
     Surface(
         color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
             RowLabel(label)
             NothingSlider(value = value, onValueChange = onValueChange, valueRange = valueRange)
         }
@@ -1608,7 +1608,7 @@ private fun FollowHomeScaleRow(
     valueRange: ClosedFloatingPointRange<Float>,
     valueText: (Float) -> String,
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs)) {
         FollowHomeChoiceCard(
             label = label,
             followsHome = followsHome,
@@ -1641,7 +1641,7 @@ private fun FollowHomeColorRow(
         followsHome = followsHome,
         onFollowHome = onFollowHome,
         onCustom = onCustom,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs),
     ) {
         if (!followsHome) {
             Row(
@@ -1736,9 +1736,9 @@ private fun LabelColorRow(label: String, selected: Int, onPick: (Int) -> Unit) {
     Surface(
         color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
             RowLabel(label)
             Spacer(Modifier.height(14.dp))
             Row(
@@ -1803,9 +1803,9 @@ internal fun IconReshapeRow(selected: String, onPick: (String) -> Unit) {
     Surface(
         color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs)
     ) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
             RowLabel(stringResource(R.string.settings_reshape_legacy_icons))
             Text(
                 text = stringResource(R.string.settings_reshape_legacy_icons_desc),
@@ -1842,9 +1842,9 @@ internal fun IconShapeRow(selected: String, onPick: (String) -> Unit) {
     Surface(
         color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs)
     ) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
             RowLabel(stringResource(R.string.settings_icon_shape))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1881,9 +1881,9 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
     Surface(
         color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs),
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
             RowLabel(stringResource(R.string.settings_drawer_wallpaper))
             Text(stringResource(R.string.settings_drawer_wallpaper_desc), color = p.dim, style = LauncherTextStyles.settingsDescription)
             Spacer(Modifier.height(10.dp))
@@ -1925,9 +1925,9 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
     Surface(
         color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs),
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
             RowLabel(stringResource(R.string.settings_drawer_color))
             if (locked) {
                 Text(stringResource(R.string.settings_drawer_color_locked), color = p.dim, style = LauncherTextStyles.settingsDescription)
@@ -1966,9 +1966,9 @@ internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
     Surface(
         color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs),
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
             RowLabel(stringResource(R.string.settings_label_color))
             Spacer(Modifier.height(14.dp))
             Row(
@@ -2063,7 +2063,7 @@ private fun DockPreview(opacity: Float, icon: ImageBitmap?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
+            .padding(bottom = ExpressiveSpacing.xs)
             .background(Color(0xFFB9C3D4), RoundedCornerShape(22.dp))
             .padding(8.dp),
     ) {
@@ -2092,7 +2092,7 @@ private fun DockPreview(opacity: Float, icon: ImageBitmap?) {
 @Composable
 private fun BadgePreview(icon: ImageBitmap?, showDots: Boolean, showCount: Boolean, scale: Float) {
     Box(
-        modifier = Modifier.padding(bottom = 8.dp),
+        modifier = Modifier.padding(bottom = ExpressiveSpacing.xs),
         contentAlignment = Alignment.TopEnd,
     ) {
         if (icon != null) {

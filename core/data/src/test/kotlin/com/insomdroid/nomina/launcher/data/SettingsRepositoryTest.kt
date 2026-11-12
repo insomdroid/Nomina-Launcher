@@ -79,15 +79,15 @@ class SettingsRepositoryTest {
         val before = repo.snapshot()
         repo.importRaw(mapOf("show_weather" to true, "home_columns" to 6))
         val imported = repo.snapshot()
-        // e.g. the notification listener saving a held notification while the layout is written
-        store.edit { it[stringPreferencesKey("people_held_notifications")] = "held" }
+        // A concurrent subsystem write must survive rollback even when it is outside the import.
+        store.edit { it[stringPreferencesKey("test_listener_state")] = "pending" }
 
         repo.rollbackImport(before, imported)
 
         val s = repo.settings.first()
         assertThat(s.showWeather).isFalse()
         assertThat(store.data.first()[intPreferencesKey("home_columns")]).isNull()
-        assertThat(store.data.first()[stringPreferencesKey("people_held_notifications")]).isEqualTo("held")
+        assertThat(store.data.first()[stringPreferencesKey("test_listener_state")]).isEqualTo("pending")
     }
 
 
@@ -178,54 +178,31 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun `held notifications survive restoring a backup and recreating the repository`() = runTest {
-        val store = InMemoryDataStore()
-        val repo = SettingsRepository(store)
-        val held = mapOf(
-            "0|example.mail|42|message|10001" to 1_790_752_800_000L,
-            "0|example.chat|7|conversation|10002" to 1_790_770_800_000L,
-        )
-        repo.setHeldNotifications(held)
-        repo.setHomeColumns(5)
-        val backup = repo.exportRaw()
-        assertThat(backup).doesNotContainKey("people_held_notifications")
-
-        repo.setHomeColumns(4)
-        repo.importRaw(backup)
-
-        // A new listener must be able to identify its snoozes from the persisted state after restore.
-        val reopened = SettingsRepository(store)
-        assertThat(reopened.heldNotifications.first()).containsExactlyEntriesIn(held)
-        assertThat(reopened.settings.first().homeColumns).isEqualTo(5)
-    }
-
-    @Test
-    fun `restoring foreign held notifications preserves this devices own registry`() = runTest {
-        val store = InMemoryDataStore()
-        val repo = SettingsRepository(store)
-        val held = mapOf("local-notification" to 1_790_752_800_000L)
-        repo.setHeldNotifications(held)
-
+    fun `legacy People preferences from older backups are ignored`() = runTest {
+        val repo = newRepository()
         repo.importRaw(
             mapOf(
-                "people_held_notifications" to "foreign-notification\t1790770800000",
+                "people_held_notifications" to "legacy-notification",
+                "people_privacy" to "private",
+                "pinned_people" to "com.mail",
+                "people_aliases" to "com.mail\\tMail",
+                "people_show_apps" to true,
+                "people_batch_enabled" to true,
+                "people_batch_times" to "09:00,18:00",
                 "home_columns" to 5,
             ),
         )
 
-        val reopened = SettingsRepository(store)
-        assertThat(reopened.heldNotifications.first()).containsExactlyEntriesIn(held)
-        assertThat(reopened.settings.first().homeColumns).isEqualTo(5)
-    }
-
-    @Test
-    fun `restoring a foreign registry never creates held notifications on this device`() = runTest {
-        val repo = newRepository()
-
-        repo.importRaw(mapOf("people_held_notifications" to "foreign-notification\t1790770800000"))
-
-        assertThat(repo.heldNotifications.first()).isEmpty()
-        assertThat(repo.exportRaw()).doesNotContainKey("people_held_notifications")
+        assertThat(repo.settings.first().homeColumns).isEqualTo(5)
+        assertThat(repo.exportRaw().keys).containsNoneOf(
+            "people_held_notifications",
+            "people_privacy",
+            "pinned_people",
+            "people_aliases",
+            "people_show_apps",
+            "people_batch_enabled",
+            "people_batch_times",
+        )
     }
 
     @Test
@@ -484,17 +461,12 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun `themeAllIcons defaults to false, round-trips and restores from a backup`() = runTest {
+    fun `legacy theme all icons preference is ignored during restore`() = runTest {
         val repo = newRepository()
-        assertThat(repo.settings.first().themeAllIcons).isFalse()
+        repo.importRaw(mapOf("theme_all_icons" to true, "home_columns" to 5))
 
-        repo.setThemeAllIcons(true)
-        assertThat(repo.settings.first().themeAllIcons).isTrue()
-        assertThat(repo.exportRaw()["theme_all_icons"]).isEqualTo(true)
-
-        val restored = newRepository()
-        restored.importRaw(mapOf("theme_all_icons" to true))
-        assertThat(restored.settings.first().themeAllIcons).isTrue()
+        assertThat(repo.settings.first().homeColumns).isEqualTo(5)
+        assertThat(repo.exportRaw()).doesNotContainKey("theme_all_icons")
     }
 
     /** Issue #17: folder names show by default; each surface's switch round-trips and restores. */
@@ -734,23 +706,19 @@ class SettingsRepositoryTest {
     }
 
     @Test
-    fun `custom font path stays on this device and backup safely falls back to Geist`() = runTest {
+    fun `legacy custom font preferences are not restored from backups`() = runTest {
         val repo = newRepository()
-        assertThat(repo.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
-        repo.setCustomFontPath("/device/local/nomina_custom_font.ttf")
-        repo.setFontFamily(LauncherSettings.FONT_CUSTOM)
-        assertThat(repo.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_CUSTOM)
-        val exported = repo.exportRaw()
-        assertThat(exported).containsEntry("font_family", LauncherSettings.FONT_CUSTOM)
-        assertThat(exported).doesNotContainKey("custom_font_path")
+        repo.importRaw(
+            mapOf(
+                "font_family" to "custom",
+                "custom_font_path" to "/another/device/nomina_custom_font.ttf",
+                "home_columns" to 5,
+            ),
+        )
 
-        val restored = newRepository()
-        restored.importRaw(exported)
-        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
-        restored.importRaw(mapOf("font_family" to "comic"))
-        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
-        restored.importRaw(mapOf("font_family" to 7))
-        assertThat(restored.settings.first().fontFamily).isEqualTo(LauncherSettings.FONT_DEFAULT)
+        assertThat(repo.settings.first().homeColumns).isEqualTo(5)
+        assertThat(repo.exportRaw()).doesNotContainKey("font_family")
+        assertThat(repo.exportRaw()).doesNotContainKey("custom_font_path")
     }
 
     @Test

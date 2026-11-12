@@ -59,6 +59,7 @@ class SettingsRepository @Inject constructor(
             p.remove(stringPreferencesKey("pinned_people"))
             p.remove(stringPreferencesKey("people_aliases"))
             p.remove(booleanPreferencesKey("people_show_apps"))
+            p.remove(booleanPreferencesKey("theme_all_icons"))
             val stored = p.asMap()
             for (name in FLOAT_KEYS) {
                 val raw = stored[floatPreferencesKey(name)] ?: continue
@@ -693,7 +694,6 @@ class SettingsRepository @Inject constructor(
         val DRAWER_BLUR_STRENGTH = floatPreferencesKey("drawer_blur_strength")
         val DRAWER_BACKGROUND_COLOR = intPreferencesKey("drawer_background_color")
         val DRAWER_PICTURE_DIM = floatPreferencesKey("drawer_picture_dim")
-        val THEME_ALL_ICONS = booleanPreferencesKey("theme_all_icons")
         val LOCAL_LAST_BACKUP = longPreferencesKey("local_last_backup_time")
         val APP_LABEL_SCALE = floatPreferencesKey("app_label_scale")
         val DOCK_LABEL_SCALE = floatPreferencesKey("dock_label_scale")
@@ -771,7 +771,7 @@ class SettingsRepository @Inject constructor(
             "show_dock_labels", "show_home_labels", "show_drawer_labels", "show_page_indicator",
             "two_line_home_labels", "two_line_drawer_labels",
             "show_home_folder_names", "show_drawer_folder_names", "mix_drawer_folders", "blur_behind_drawer",
-            "theme_all_icons", "show_notif_dots", "notif_dot_count", "use_themed_icons", "auto_resize_icons",
+            "show_notif_dots", "notif_dot_count", "use_themed_icons", "auto_resize_icons",
             "desktop_locked", "double_tap_lock", "show_frequent_apps", "drawer_opens_at_top",
             "sort_drawer_folders", "show_weather", "widget_tonal_background", "infinite_scroll",
         )
@@ -844,6 +844,7 @@ class SettingsRepository @Inject constructor(
             "default_layout_seeded", "onboarding_done", "first_run_fresh", "people_held_notifications", "people_batch_enabled", "people_batch_times",
             "people_privacy", "pinned_people", "people_aliases", "people_show_apps",
             "default_reminder_dismissed", "left_swipe_app_key", "custom_font_path", "font_family",
+            "theme_all_icons",
             // Legacy settings from removed features must not reappear in backups or be restored.
             "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",
             "hide_system_status_bar", "status_bar_scrim", "lock_sound_uri", "unlock_sound_uri",

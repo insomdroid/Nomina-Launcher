@@ -63,7 +63,12 @@ class BackupRepositoryTest {
     fun restore_pointsSettingsAppKeysAtThisDevicesProfile() = runTest {
         resolver.ownSerial = 0L
         val backup = doc(
-            mapOf("dock_favorites" to "a/A/5\nw/W/12", "left_swipe_app_key" to "a/A/5"),
+            mapOf(
+                "dock_favorites" to "a/A/5\nw/W/12",
+                "weather_app_key" to "a/A/5",
+                "people_privacy" to "legacy-private",
+                "people_held_notifications" to "legacy-notification",
+            ),
             mainUserSerial = 5L,
         )
 
@@ -72,7 +77,9 @@ class BackupRepositoryTest {
         // The older file's dock key list restores as dock rows of this profile (DockBackupTest).
         assertThat(dao.getContainer(com.insomdroid.nomina.data.local.HomeItemEntity.DOCK).map { it.key }).containsExactly("a/A/0")
         assertThat(settings.legacyDockFavorites()).isEmpty()
-        assertThat(settings.settings.first().leftSwipeAppKey).isEqualTo("a/A/0")
+        assertThat(settings.settings.first().weatherAppKey).isEqualTo("a/A/0")
+        assertThat(settings.exportRaw()).doesNotContainKey("people_privacy")
+        assertThat(settings.exportRaw()).doesNotContainKey("people_held_notifications")
     }
 
     @Test

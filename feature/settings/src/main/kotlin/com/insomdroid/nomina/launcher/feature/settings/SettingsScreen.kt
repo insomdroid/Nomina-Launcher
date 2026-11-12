@@ -1205,7 +1205,12 @@ internal fun NothingSwitch(
     Box(
         modifier = modifier
             .size(width = 48.dp, height = 48.dp)
-            .androidxToggleable(checked, enabled, onCheckedChange),
+            .androidxToggleable(
+                value = checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onCheckedChange,
+            ),
         contentAlignment = Alignment.CenterStart,
     ) {
         Box(

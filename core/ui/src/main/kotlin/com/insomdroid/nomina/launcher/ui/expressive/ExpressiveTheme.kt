@@ -26,20 +26,32 @@ data class ExpressivePalette(
 )
 
 val DarkExpressivePalette = ExpressivePalette(
-    bg = Color(0xFF000000), surfaceHi = Color(0xFF171717), text = Color(0xFFF5F5F5),
-    dim = Color(0xFFA0A0A0), faint = Color(0xFF5A5A5A), trackOff = Color(0xFF2A2A2A),
-    thumbOff = Color(0xFFBDBDBD), btn = Color.White.copy(alpha = 0.05f), shadow = 0.dp,
+    bg = Color(0xFF000000),
+    surfaceHi = Color(0xFF0E0E0E),
+    text = Color(0xFFEDEDED),
+    dim = Color(0xFF8C8C8C),
+    faint = Color(0xFF5A5A5A),
+    trackOff = Color(0xFF222222),
+    thumbOff = Color(0xFF333333),
+    btn = Color(0xFF171717),
+    shadow = 0.dp,
 )
 
 val LightExpressivePalette = ExpressivePalette(
-    bg = Color(0xFFFFFFFF), surfaceHi = Color(0xFFF5F5F5), text = Color(0xFF171717),
-    dim = Color(0xFF777777), faint = Color(0xFF999999), trackOff = Color(0xFFD0D0D0),
-    thumbOff = Color(0xFFFFFFFF), btn = Color.Black.copy(alpha = 0.035f), shadow = 0.dp,
+    bg = Color(0xFFF2F2F2),
+    surfaceHi = Color(0xFFFFFFFF),
+    text = Color(0xFF1C1C1C),
+    dim = Color(0xFF585A5A),
+    faint = Color(0xFF9A9A9A),
+    trackOff = Color(0xFFE5E7EB),
+    thumbOff = Color(0xFFCFCFCF),
+    btn = Color(0xFFEDEDED),
+    shadow = 0.dp,
 )
 
 val LocalExpressivePalette = staticCompositionLocalOf { LightExpressivePalette }
 
-/** Provides the dark/light expressive palette by system theme. */
+/** Provides the shared dark/light palette by system theme. */
 @Composable
 fun ExpressiveTheme(content: @Composable () -> Unit) {
     val palette = if (isSystemInDarkTheme()) DarkExpressivePalette else LightExpressivePalette

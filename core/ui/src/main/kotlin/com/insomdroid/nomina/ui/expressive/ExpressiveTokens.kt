@@ -1,10 +1,11 @@
 package com.insomdroid.nomina.ui.expressive
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.ui.unit.dp
 
 /**
- * Shared spacing scale aligned with the Vibe Nothing layout rhythm.
- * Legacy semantic aliases remain available to avoid changing unrelated launcher surfaces.
+ * Shared spacing scale aligned with the Nothing-inspired layout rhythm.
+ * Legacy semantic aliases remain available to avoid changing unrelated launcher geometry.
  */
 object ExpressiveSpacing {
     val none = 0.dp
@@ -28,10 +29,17 @@ object ExpressiveSpacing {
     val xl = s24
 }
 
-/** Shared corner radii for controls and compact cards. */
+/** Shared corner radii: compact controls and cards use the same restrained geometry. */
 object ExpressiveRadius {
     val control = 6.dp
     val card = 8.dp
-    val panel = 16.dp
-    val sheet = 24.dp
+    val panel = 8.dp
+    val sheet = 8.dp
+}
+
+/** Shared timing and easing for UI micro-interactions and screen transitions. */
+object ExpressiveMotion {
+    const val microDurationMillis = 200
+    const val transitionDurationMillis = 400
+    val easeInOut = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 }

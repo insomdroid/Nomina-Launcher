@@ -830,7 +830,7 @@ fun HomeScreen(
             )
             val chevronRotation by animateFloatAsState(
                 targetValue = if (dockExpanded) 0f else 180f,
-                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                animationSpec = tween(durationMillis = ExpressiveMotion.microDurationMillis, easing = FastOutSlowInEasing),
             )
             val miniDockOffsetY by animateDpAsState(
                 targetValue = if (dockExpanded) 0.dp else (-16).dp,
@@ -940,8 +940,8 @@ fun HomeScreen(
             AnimatedVisibility(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 visible = settings.dockEnabled,
-                enter = fadeIn(tween(180)),
-                exit = fadeOut(tween(180)),
+                enter = fadeIn(tween(ExpressiveMotion.microDurationMillis)),
+                exit = fadeOut(tween(ExpressiveMotion.microDurationMillis)),
             ) {
                 // Compact Nothing-inspired mini dock: camera, app search and browser.
                 Surface(

@@ -45,7 +45,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run data module unit tests
-        run: ./gradlew :core:data:testDebugUnitTest --stacktrace
+        run: ./gradlew :core:data:testDebugUnitTest :feature:settings:testDebugUnitTest --stacktrace
 
       # Temporary signing key for this interim release only. It is deliberately not committed.
       # A future permanent release key must be stored as GitHub Actions secrets and reused.

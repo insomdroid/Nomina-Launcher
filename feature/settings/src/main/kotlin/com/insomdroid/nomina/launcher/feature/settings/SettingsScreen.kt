@@ -1278,7 +1278,6 @@ internal fun NothingSlider(
                 )
             }
             .semantics {
-                role = Role.Slider
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     value.coerceIn(valueRange.start, valueRange.endInclusive), valueRange, steps,
                 )

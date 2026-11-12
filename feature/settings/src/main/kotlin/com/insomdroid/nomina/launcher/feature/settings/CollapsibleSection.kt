@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.Role
 import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 
 /**
  * A settings category row that opens its own page.
@@ -41,15 +42,15 @@ internal fun CollapsibleSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 18.dp, bottom = 2.dp)
+                .padding(top = 16.dp, bottom = 0.dp)
                 .clickable(role = Role.Button) { onToggle(false) }
-                .padding(horizontal = 6.dp, vertical = 11.dp),
+                .padding(horizontal = 8.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 painter = painterResource(icon),
                 contentDescription = null,
-                tint = p.dim,
+                tint = p.text,
                 modifier = Modifier.size(18.dp),
             )
             Text(
@@ -57,13 +58,14 @@ internal fun CollapsibleSection(
                 color = p.text,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 1.15.sp,
+                letterSpacing = 0.8.sp,
+                fontFamily = launcherTechnicalFontFamily(),
                 modifier = Modifier.weight(1f).padding(start = 12.dp),
             )
             Icon(
                 painter = painterResource(LauncherIcons.ChevronRight),
                 contentDescription = null,
-                tint = p.dim,
+                tint = p.text,
                 modifier = Modifier.size(20.dp),
             )
         }

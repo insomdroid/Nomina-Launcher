@@ -131,8 +131,6 @@ fun SettingsScreen(
     // picker's result (an empty file in Downloads, no message).
     var showHiddenManager by rememberSaveable { mutableStateOf(false) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
-    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
-    var settingsSearch by rememberSaveable { mutableStateOf("") }
     var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
@@ -234,131 +232,6 @@ fun SettingsScreen(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 24.dp),
             ) {
-                BackHandler(enabled = selectedCategory != null) { selectedCategory = null }
-                if (selectedCategory == null) {
-                    Text(
-                        text = "N O M I N A  /  SYSTEM",
-                        color = palette.faint,
-                        style = LauncherTextStyles.settingsEyebrow,
-                        modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_title),
-                        color = palette.text,
-                        style = LauncherTextStyles.settingsTitle,
-                        modifier = Modifier.padding(start = 6.dp, bottom = 12.dp),
-                    )
-                    androidx.compose.material3.OutlinedTextField(
-                        value = settingsSearch,
-                        onValueChange = { settingsSearch = it },
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        singleLine = true,
-                        placeholder = { Text("Search settings…") },
-                    )
-                    val categories = listOf(
-                        Triple("home", "01", "Home screen|Layout, wallpaper, widgets"),
-                        Triple("dock", "02", "Dock|Visibility, spacing, behavior"),
-                        Triple("drawer", "03", "App drawer|Grid, sorting, search"),
-                        Triple("icons", "04", "Icons|Packs, shapes, appearance"),
-                        Triple("folders", "05", "Folders|Layout and appearance"),
-                        Triple("gestures", "06", "Gestures|Navigation and shortcuts"),
-                        Triple("notifications", "07", "Notifications|Badges and indicators"),
-                        Triple("widgets", "08", "Widgets|Clock, weather and information"),
-                        Triple("backup", "09", "Backup|Export and restore"),
-                        Triple("about", "10", "About|Version and feedback"),
-                    )
-                    val query = settingsSearch.trim().lowercase()
-                    val keywordMap = mapOf(
-                        "home" to listOf("grid", "columns", "rows", "wallpaper", "page", "status bar", "widget"),
-                        "dock" to listOf("auto hide", "opacity", "bottom spacing", "dock icons", "show dock"),
-                        "drawer" to listOf("search", "scrubber", "frequent apps", "hidden apps", "sorting"),
-                        "icons" to listOf("icon pack", "icon shape", "resize", "reshape", "legacy"),
-                        "folders" to listOf("folder", "folder columns", "folder names"),
-                        "gestures" to listOf("swipe", "double tap", "long press"),
-                        "notifications" to listOf("notification", "badge", "dot", "count"),
-                        "widgets" to listOf("weather", "calendar", "location", "permission", "background"),
-                        "backup" to listOf("export", "restore", "backup"),
-                        "about" to listOf("version", "feedback", "update"),
-                    )
-                    val filtered = categories.filter { row ->
-                        query.isBlank() || row.third.lowercase().contains(query) ||
-                            keywordMap[row.first].orEmpty().any { it.contains(query) || query.contains(it) }
-                    }
-                    if (query.isNotBlank()) {
-                        Text(
-                            text = "${filtered.size} RESULT${if (filtered.size == 1) "" else "S"} FOUND",
-                            color = palette.dim,
-                            style = LauncherTextStyles.settingsEyebrow,
-                            modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 8.dp),
-                        )
-                    }
-                    filtered.forEach { row ->
-                        val parts = row.third.split("|")
-                        Row(
-                            modifier = Modifier.fillMaxWidth().clickable { selectedCategory = row.first }
-                                .padding(horizontal = 6.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(row.second, color = palette.dim, modifier = Modifier.widthIn(min = 44.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(parts[0], color = palette.text, style = LauncherTextStyles.settingsRowLabel)
-                                Text(parts[1], color = palette.dim, style = LauncherTextStyles.settingsDescription)
-                            }
-                            Text("›", color = palette.text, fontSize = 24.sp)
-                        }
-                        androidx.compose.material3.HorizontalDivider(color = palette.trackOff.copy(alpha = 0.65f))
-                    }
-                    if (query.isNotBlank() && filtered.isEmpty()) {
-                        Text("No matching settings", color = palette.dim, modifier = Modifier.padding(12.dp))
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { selectedCategory = null }
-                            .padding(top = 18.dp, bottom = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text("‹", color = palette.text, fontSize = 28.sp, modifier = Modifier.padding(end = 16.dp))
-                        Text("SETTINGS  /  ${selectedCategory.uppercase()}", color = palette.dim, style = LauncherTextStyles.settingsEyebrow)
-                    }
-                    Text(
-                        text = when (selectedCategory) {
-                            "home" -> "Home screen"
-                            "dock" -> "Dock"
-                            "drawer" -> "App drawer"
-                            "icons" -> "Icons"
-                            "folders" -> "Folders"
-                            "gestures" -> "Gestures"
-                            "notifications" -> "Notifications"
-                            "widgets" -> "Widgets"
-                            "backup" -> "Backup"
-                            else -> "About"
-                        },
-                        color = palette.text,
-                        style = LauncherTextStyles.settingsTitle,
-                        modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
-                    )
-                    Text(
-                        text = when (selectedCategory) {
-                            "home" -> "Layout and behavior of your home screen."
-                            "dock" -> "Control the appearance and behavior of your dock."
-                            "drawer" -> "Organize apps and control the app drawer."
-                            "icons" -> "Choose icon packs, shapes and sizing."
-                            "folders" -> "Folder options are available in Home screen and App drawer."
-                            "gestures" -> "Control navigation gestures and shortcuts."
-                            "notifications" -> "Manage notification badges and indicators."
-                            "widgets" -> "Configure weather, wallpaper and permissions."
-                            "backup" -> "Export and restore your Nomina settings."
-                            else -> "Version information and feedback."
-                        },
-                        color = palette.dim,
-                        style = LauncherTextStyles.settingsDescription,
-                        modifier = Modifier.padding(start = 6.dp, bottom = 16.dp),
-                    )
-                    if (selectedCategory == "folders") {
-                        ExpressiveActionRow(label = "Home folder options", description = "Folder columns and names") { selectedCategory = "home" }
-                        ExpressiveActionRow(label = "App drawer folders", description = "Folder names and management") { selectedCategory = "drawer" }
-                    }
-                }
                 Text(
                     text = "N O M I N A  /  SYSTEM",
                     color = palette.faint,
@@ -372,13 +245,11 @@ fun SettingsScreen(
                     modifier = Modifier.padding(start = 6.dp, top = 0.dp, bottom = 6.dp),
                 )
 
-                if (selectedCategory == "home") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_home),
                     icon = LauncherIcons.Home,
                     collapsed = "home" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("home", it) },
-                }
                 ) {
                     StepperRow(stringResource(R.string.settings_columns), s.homeColumns, SettingsRepository.MIN_COLUMNS, SettingsRepository.MAX_COLUMNS, viewModel::setHomeColumns)
                     StepperRow(stringResource(R.string.settings_rows), s.homeRows, SettingsRepository.MIN_ROWS, SettingsRepository.MAX_ROWS, viewModel::setHomeRows)
@@ -425,13 +296,11 @@ fun SettingsScreen(
                     }
                 }
 
-                if (selectedCategory == "dock") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_dock),
                     icon = LauncherIcons.Dock,
                     collapsed = "dock" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("dock", it) },
-                }
                 ) {
                     SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
                     SwitchRow(stringResource(R.string.settings_dock_auto_hide), s.autoHideDock, viewModel::setAutoHideDock)
@@ -448,13 +317,11 @@ fun SettingsScreen(
                     DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
                 }
 
-                if (selectedCategory == "drawer") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_drawer),
                     icon = LauncherIcons.AppsGrid,
                     collapsed = "drawer" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("drawer", it) },
-                }
                 ) {
                     StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
@@ -504,13 +371,11 @@ fun SettingsScreen(
                     )
                 }
 
-                if (selectedCategory == "icons") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_icons_typography),
                     icon = LauncherIcons.Appearance,
                     collapsed = "icons" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("icons", it) },
-                }
                 ) {
                     SettingsGroupLabel(stringResource(R.string.settings_app_icons_group))
                     val iconPackName = iconPacks.firstOrNull { it.packageName == s.iconPackPackage }?.label
@@ -616,13 +481,11 @@ fun SettingsScreen(
                     }
                 }
 
-                if (selectedCategory == "widgets") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_wallpaper_background),
                     icon = LauncherIcons.Widgets,
                     collapsed = "wallpaper" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("wallpaper", it) },
-                }
                 ) {
                     DrawerBackdropRows(
                         settings = s,
@@ -640,13 +503,11 @@ fun SettingsScreen(
                     )
                 }
 
-                if (selectedCategory == "gestures") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_gestures_interaction),
                     icon = LauncherIcons.Gestures,
                     collapsed = "gestures" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("gestures", it) },
-                }
                 ) {
                     SwitchRow(stringResource(R.string.settings_swipe_up_drawer), s.swipeUpForDrawer, viewModel::setSwipeUp)
                     SwitchRow(stringResource(R.string.settings_swipe_down_notif), s.swipeDownForNotifications, viewModel::setSwipeDown)
@@ -671,13 +532,11 @@ fun SettingsScreen(
                     )
                 }
 
-                if (selectedCategory == "notifications") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_notifications),
                     icon = LauncherIcons.Notifications,
                     collapsed = "notifications" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("notifications", it) },
-                }
                 ) {
                     SwitchRow(stringResource(R.string.settings_notif_dots), s.showNotificationDots, viewModel::setShowNotificationDots)
                     SwitchRow(stringResource(R.string.settings_notif_count), s.notificationDotCount, viewModel::setNotificationDotCount)
@@ -696,13 +555,11 @@ fun SettingsScreen(
                     )
                 }
 
-                if (selectedCategory == "widgets") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_permissions),
                     icon = LauncherIcons.Permissions,
                     collapsed = "permissions" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("permissions", it) },
-                }
                 ) {
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_set_default),
@@ -734,13 +591,11 @@ fun SettingsScreen(
                     )
                 }
 
-                if (selectedCategory == "backup") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_backup_restore),
                     icon = LauncherIcons.Backup,
                     collapsed = "backup" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("backup", it) },
-                }
                 ) {
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_backup),
@@ -748,13 +603,11 @@ fun SettingsScreen(
                     ) { showBackup = true }
                 }
 
-                if (selectedCategory == "about") {
                 CollapsibleSection(
                     title = stringResource(R.string.settings_about),
                     icon = LauncherIcons.Info,
                     collapsed = "updates" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("updates", it) },
-                }
                 ) {
                     // Keep the installed app version with the other information about Nomina.
                     val installedVersion = remember(context) { installedVersionLabel(context) }

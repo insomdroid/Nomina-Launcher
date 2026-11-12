@@ -118,6 +118,7 @@ import com.insomdroid.nomina.ui.component.LocalIconShape
 import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import com.insomdroid.nomina.ui.component.NotificationBadge
+import com.insomdroid.nomina.ui.expressive.ExpressiveSwitch
 import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
@@ -1210,7 +1211,7 @@ private fun AlertDialog(
     }
 }
 
-/** Custom switch with a 48dp hit target and compact monochrome track. */
+/** Settings-sized wrapper around the shared switch; keeps the original 48dp touch target. */
 @Composable
 internal fun NothingSwitch(
     checked: Boolean,
@@ -1219,55 +1220,18 @@ internal fun NothingSwitch(
     modifier: Modifier = Modifier,
     interactive: Boolean = true,
 ) {
-    val p = LocalExpressivePalette.current
-    val trackColor by androidx.compose.animation.animateColorAsState(
-        targetValue = when {
-            !enabled -> p.trackOff.copy(alpha = 0.55f)
-            checked -> p.text
-            else -> p.trackOff
-        },
-        animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)),
-        label = "settingsSwitchTrack",
+    ExpressiveSwitch(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        enabled = enabled,
+        modifier = modifier,
+        interactive = interactive,
+        hitTargetWidth = 48.dp,
+        hitTargetHeight = 48.dp,
+        trackWidth = 42.dp,
+        trackHeight = 24.dp,
+        thumbSize = 18.dp,
     )
-    val thumbColor by androidx.compose.animation.animateColorAsState(
-        targetValue = when {
-            !enabled -> p.faint
-            checked -> p.bg
-            else -> p.thumbOff
-        },
-        animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)),
-        label = "settingsSwitchThumb",
-    )
-    val thumbX by androidx.compose.animation.core.animateDpAsState(
-        targetValue = if (checked) 21.dp else 3.dp,
-        animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)),
-        label = "settingsSwitchPosition",
-    )
-    Box(
-        modifier = modifier
-            .size(width = 48.dp, height = 48.dp)
-            .then(
-                if (interactive) {
-                    Modifier.androidxToggleable(
-                        value = checked,
-                        enabled = enabled,
-                        role = Role.Switch,
-                        onValueChange = onCheckedChange,
-                    )
-                } else {
-                    Modifier
-                },
-            ),
-        contentAlignment = Alignment.CenterStart,
-    ) {
-        Box(
-            Modifier.width(42.dp).height(24.dp).clip(CircleShape).background(trackColor),
-        ) {
-            Box(
-                Modifier.offset(x = thumbX, y = 3.dp).size(18.dp).clip(CircleShape).background(thumbColor),
-            )
-        }
-    }
 }
 
 /** Thin Nothing-style slider with keyboard/screen-reader progress semantics and step snapping. */

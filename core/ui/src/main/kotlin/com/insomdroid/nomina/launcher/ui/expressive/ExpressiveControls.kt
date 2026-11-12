@@ -129,36 +129,47 @@ fun ExpressiveSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    interactive: Boolean = true,
+    hitTargetWidth: androidx.compose.ui.unit.Dp = 42.dp,
+    hitTargetHeight: androidx.compose.ui.unit.Dp = 24.dp,
+    trackWidth: androidx.compose.ui.unit.Dp = 42.dp,
+    trackHeight: androidx.compose.ui.unit.Dp = 24.dp,
+    thumbSize: androidx.compose.ui.unit.Dp = 20.dp,
 ) {
     val p = LocalExpressivePalette.current
     val thumbOffset by animateDpAsState(
-        targetValue = if (checked) 20.dp else 2.dp,
+        targetValue = if (checked) trackWidth - thumbSize - 2.dp else 2.dp,
         animationSpec = tween(ExpressiveMotion.microDurationMillis, easing = ExpressiveMotion.easeInOut),
         label = "expressiveSwitchThumb",
     )
     Box(
         modifier = modifier
-            .size(width = 42.dp, height = 24.dp)
-            .clip(CircleShape)
-            .background(
-                color = if (checked) p.text else p.trackOff,
-                shape = CircleShape,
-            )
-            .toggleable(
-                value = checked,
-                enabled = enabled,
-                role = Role.Switch,
-                onValueChange = onCheckedChange,
+            .size(width = hitTargetWidth, height = hitTargetHeight)
+            .then(
+                if (interactive) Modifier.toggleable(
+                    value = checked,
+                    enabled = enabled,
+                    role = Role.Switch,
+                    onValueChange = onCheckedChange,
+                ) else Modifier
             ),
         contentAlignment = Alignment.CenterStart,
     ) {
         Box(
             modifier = Modifier
-                .offset(x = thumbOffset)
-                .size(20.dp)
+                .size(width = trackWidth, height = trackHeight)
                 .clip(CircleShape)
-                .background(if (checked) p.bg else p.thumbOff),
-        )
+                .background(if (checked) p.text else p.trackOff),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            Box(
+                modifier = Modifier
+                    .offset(x = thumbOffset)
+                    .size(thumbSize)
+                    .clip(CircleShape)
+                    .background(if (checked) p.bg else p.thumbOff),
+            )
+        }
     }
 }
 

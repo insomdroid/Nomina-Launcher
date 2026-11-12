@@ -1091,7 +1091,7 @@ private fun DoubleTapLockToggle(enabled: Boolean, onSetEnabled: (Boolean) -> Uni
 
 @Composable
 private fun RowLabel(text: String, modifier: Modifier = Modifier, color: Color = LocalExpressivePalette.current.text) {
-    Text(text, modifier = modifier, color = color, style = LauncherTextStyles.settingsRowLabel.copy(fontFamily = launcherTechnicalFontFamily(), fontSize = 13.sp, letterSpacing = 0.45.sp))
+    Text(text.uppercase(), modifier = modifier, color = color, style = LauncherTextStyles.settingsRowLabel.copy(fontFamily = launcherTechnicalFontFamily(), fontSize = 13.sp, letterSpacing = 0.45.sp))
 }
 
 @Composable
@@ -1677,7 +1677,7 @@ private fun FollowHomeChoiceCard(
 ) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = modifier,
     ) {
@@ -1707,7 +1707,7 @@ private fun FollowHomeChoiceCard(
 private fun DrawerLabelColorModeRow(mode: String, onPick: (String) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {
@@ -1743,7 +1743,7 @@ private fun DrawerLabelColorModeRow(mode: String, onPick: (String) -> Unit) {
 private fun LabelColorRow(label: String, selected: Int, onPick: (Int) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     ) {
@@ -1810,7 +1810,7 @@ private fun iconShapeNameRes(key: String): Int = when (key) {
 internal fun IconReshapeRow(selected: String, onPick: (String) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     ) {
@@ -1849,7 +1849,7 @@ internal fun IconReshapeRow(selected: String, onPick: (String) -> Unit) {
 internal fun IconShapeRow(selected: String, onPick: (String) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     ) {
@@ -1888,7 +1888,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
         if (uri != null) onPick(uri)
     }
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
     ) {
@@ -1932,7 +1932,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
 internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (Int?) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
     ) {
@@ -1973,7 +1973,7 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
 internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
     val p = LocalExpressivePalette.current
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
     ) {

@@ -1,4 +1,14 @@
-package com.insomdroid.nomina.feature.settings
+package com.inso                if (selectedCategory == "home") {
+                if (selectedCategory == "dock") {
+                if (selectedCategory == "drawer") {
+                if (selectedCategory == "icons") {
+                if (selectedCategory == "widgets") {
+                if (selectedCategory == "gestures") {
+                if (selectedCategory == "notifications") {
+                if (selectedCategory == "widgets") {
+                if (selectedCategory == "backup") {
+                if (selectedCategory == "updates") {
+mdroid.nomina.feature.settings
 
 import android.content.ComponentName
 import android.content.Intent
@@ -162,6 +172,367 @@ fun SettingsScreen(
         notifAccessGranted = isNotificationAccessGranted(context)
         onPauseOrDispose { }
     }
+    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
+    var settingsSearch by rememberSaveable { mutableStateOf("") }
+    val palette = if (isSystemInDarkTheme()) DarkExpressivePalette else LightExpressivePalette
+
+    CompositionLocalProvider(
+        LocalExpressivePalette provides palette,
+        // So AppIcons in the pickers (left-edge app, hidden apps) match the selected icon pack / themed
+        // icons like every other surface.
+        LocalIconPack provides s.iconPackPackage,
+        LocalIconShape provides s.iconShape,
+        LocalAutoResizeIcons provides s.autoResizeIcons,
+        LocalIconReshapeMode provides s.reshapeLegacyIcons,
+    ) {
+        if (showBackup) {
+            BackupScreen(onBack = { showBackup = false }, modifier = modifier.fillMaxSize())
+            return@CompositionLocalProvider
+        }
+
+        if (showHiddenManager) {
+            HiddenAppsManager(
+                apps = allApps,
+                hiddenKeys = hiddenKeys,
+                onSetHidden = viewModel::setAppHidden,
+                onBack = { showHiddenManager = false },
+                modifier = modifier.fillMaxSize(),
+            )
+            return@CompositionLocalProvider
+        }
+
+        if (showFolderManager) {
+            val newFolderName = stringResource(R.string.drawer_folder_default)
+            DrawerFoldersManager(
+                folders = drawerFolders,
+                apps = allApps,
+                hiddenKeys = hiddenKeys,
+                onCreate = { viewModel.createDrawerFolder(newFolderName) },
+                onRename = viewModel::renameDrawerFolder,
+                onDelete = viewModel::deleteDrawerFolder,
+                onSetMember = viewModel::setAppInDrawerFolder,
+                onBack = { showFolderManager = false },
+                modifier = modifier.fillMaxSize(),
+            )
+            return@CompositionLocalProvider
+        }
+
+        Surface(modifier = modifier.fillMaxSize(), color = palette.bg) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val spacing = 120.dp.toPx()
+                    val radius = 0.7.dp.toPx()
+                    var y = spacing / 2f
+                    while (y < size.height) {
+                        var x = spacing / 2f
+                        while (x < size.width) {
+                            drawCircle(
+                                color = palette.faint.copy(alpha = 0.13f),
+                                radius = radius,
+                                center = Offset(x, y),
+                            )
+                            x += spacing
+                        }
+                        y += spacing
+                    }
+                }
+                Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding()
+                    .verticalScroll(mainScrollState)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 24.dp),
+            ) {
+                BackHandler(enabled = selectedCategory != null) { selectedCategory = null }
+                if (selectedCategory == null) {
+                    Text(
+                        text = "N O M I N A  /  SYSTEM",
+                        color = palette.faint,
+                        style = LauncherTextStyles.settingsEyebrow,
+                        modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.settings_title),
+                        color = palette.text,
+                        style = LauncherTextStyles.settingsTitle,
+                        modifier = Modifier.padding(start = 6.dp, bottom = 12.dp),
+                    )
+                    androidx.compose.material3.OutlinedTextField(
+                        value = settingsSearch,
+                        onValueChange = { settingsSearch = it },
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                        singleLine = true,
+                        placeholder = { Text("Search settings…") },
+                    )
+                    val categories = listOf(
+                        Triple("home", "01", "Home screen|Layout, wallpaper, widgets"),
+                        Triple("dock", "02", "Dock|Visibility, spacing, behavior"),
+                        Triple("drawer", "03", "App drawer|Grid, sorting, search"),
+                        Triple("icons", "04", "Icons|Packs, shapes, appearance"),
+                        Triple("folders", "05", "Folders|Layout and appearance"),
+                        Triple("gestures", "06", "Gestures|Navigation and shortcuts"),
+                        Triple("notifications", "07", "Notifications|Badges and indicators"),
+                        Triple("widgets", "08", "Widgets|Clock, weather and information"),
+                        Triple("backup", "09", "Backup|Export and restore"),
+                        Triple("updates", "10", "About|Version and feedback"),
+                    )
+                    val query = settingsSearch.trim().lowercase()
+                    val filtered = categories.filter { row ->
+                        query.isBlank() || row.third.lowercase().contains(query) ||
+                            when (row.first) {
+                                "dock" -> listOf("auto hide", "opacity", "bottom spacing", "dock icons").any { it.contains(query) || query.contains(it) }
+                                "folders" -> listOf("folder columns", "folder names", "drawer folders").any { it.contains(query) || query.contains(it) }
+                                "widgets" -> listOf("weather", "calendar", "location", "wallpaper", "background").any { it.contains(query) || query.contains(it) }
+                                "icons" -> listOf("icon pack", "icon shape", "resize", "reshape").any { it.contains(query) || query.contains(it) }
+                                "drawer" -> listOf("hidden apps", "scrubber", "frequent apps", "drawer search").any { it.contains(query) || query.contains(it) }
+                                "notifications" -> listOf("notification dots", "badge", "notification count").any { it.contains(query) || query.contains(it) }
+                                "gestures" -> listOf("swipe", "double tap", "long press").any { it.contains(query) || query.contains(it) }
+                                "home" -> listOf("grid", "page indicator", "status bar", "widget").any { it.contains(query) || query.contains(it) }
+                                "backup" -> listOf("export", "restore").any { it.contains(query) || query.contains(it) }
+                                else -> listOf("version", "feedback", "update").any { it.contains(query) || query.contains(it) }
+                            }
+                    }
+                    filtered.forEach { row ->
+                        val parts = row.third.split("|")
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable { selectedCategory = row.first }
+                                .padding(horizontal = 6.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(row.second, color = palette.dim, modifier = Modifier.widthIn(min = 44.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(parts[0], color = palette.text, style = LauncherTextStyles.settingsRowLabel)
+                                Text(parts[1], color = palette.dim, style = LauncherTextStyles.settingsDescription)
+                            }
+                            Text("›", color = palette.text, fontSize = 24.sp)
+                        }
+                        androidx.compose.material3.HorizontalDivider(color = palette.trackOff.copy(alpha = 0.65f))
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clickable { selectedCategory = null }
+                            .padding(top = 18.dp, bottom = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("‹", color = palette.text, fontSize = 28.sp, modifier = Modifier.padding(end = 16.dp))
+                        Text("SETTINGS  /  ${selectedCategory.uppercase()}", color = palette.dim, style = LauncherTextStyles.settingsEyebrow)
+                    }
+                    Text(
+                        text = when (selectedCategory) {
+                            "home" -> "Home screen"
+                            "dock" -> "Dock"
+                            "drawer" -> "App drawer"
+                            "icons" -> "Icons"
+                            "folders" -> "Folders"
+                            "gestures" -> "Gestures"
+                            "notifications" -> "Notifications"
+                            "widgets" -> "Widgets"
+                            "backup" -> "Backup"
+                            else -> "About"
+                        },
+                        color = palette.text,
+                        style = LauncherTextStyles.settingsTitle,
+                        modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
+                    )
+                    Text(
+                        text = when (selectedCategory) {
+                            "home" -> "Layout and behavior of your home screen."
+                            "dock" -> "Control the appearance and behavior of your dock."
+                            "drawer" -> "Organize apps and control the app drawer."
+                            "icons" -> "Choose icon packs, shapes and sizing."
+                            "folders" -> "Folder controls are grouped with Home screen and App drawer."
+                            "gestures" -> "Control navigation gestures and shortcuts."
+                            "notifications" -> "Manage notification badges and indicators."
+                            "widgets" -> "Configure weather, wallpaper and supporting permissions."
+                            "backup" -> "Export and restore your Nomina settings."
+                            else -> "Version information, updates and feedback."
+                        },
+                        color = palette.dim,
+                        style = LauncherTextStyles.settingsDescription,
+                        modifier = Modifier.padding(start = 6.dp, bottom = 16.dp),
+                    )
+                    if (selectedCategory == "folders") {
+                        ExpressiveActionRow(label = "Home folder layout", description = "Folder columns and names") { selectedCategory = "home" }
+                        ExpressiveActionRow(label = "App drawer folders", description = "Folder names and folder manager") { selectedCategory = "drawer" }
+                    }
+                }
+                if (selectedCategory == "home") {
+                if (selectedCategory == "dock") {
+                if (selectedCategory == "drawer") {
+                if (selectedCategory == "icons") {
+                if (selectedCategory == "widgets") {
+                if (selectedCategory == "gestures") {
+                if (selectedCategory == "notifications") {
+                if (selectedCategory == "widgets") {
+                if (selectedCategory == "backup") {
+                if (selectedCategory == "updates") {
+mdroid.nomina.feature.settings
+
+import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.SystemClock
+import android.graphics.Bitmap
+import android.provider.Settings
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
+import com.insomdroid.nomina.ui.component.DrawerWallpaperPicture
+import com.insomdroid.nomina.data.DrawerWallpaper
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlin.math.roundToInt
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import com.insomdroid.nomina.data.SettingsRepository
+import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
+import com.insomdroid.nomina.feature.backup.BackupScreen
+import com.insomdroid.nomina.model.AppItem
+import com.insomdroid.nomina.model.LauncherSettings
+import com.insomdroid.nomina.model.drawerSurface
+import com.insomdroid.nomina.ui.DefaultLauncher
+import com.insomdroid.nomina.ui.LauncherIcons
+import com.insomdroid.nomina.ui.LongPressScale
+import com.insomdroid.nomina.ui.component.AppIcon
+import com.insomdroid.nomina.ui.component.LocalIconPack
+import com.insomdroid.nomina.ui.component.LocalIconShape
+import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
+import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
+import com.insomdroid.nomina.ui.component.NotificationBadge
+import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
+import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
+import com.insomdroid.nomina.ui.expressive.ExpressiveCard
+import com.insomdroid.nomina.ui.expressive.ExpressivePalette
+import com.insomdroid.nomina.ui.expressive.LightExpressivePalette
+import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
+
+@Composable
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
+    val s by viewModel.settings.collectAsStateWithLifecycle()
+    val drawerWallpaper by viewModel.drawerWallpaperPicture.collectAsStateWithLifecycle()
+    val allApps by viewModel.apps.collectAsStateWithLifecycle()
+    val hiddenKeys by viewModel.hiddenKeys.collectAsStateWithLifecycle()
+    val drawerFolders by viewModel.drawerFolders.collectAsStateWithLifecycle()
+    val iconPacks by viewModel.iconPacks.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val resources = context.resources
+    // Size multipliers read as whole percents, so 100 is the default and the number is easy to come back to.
+    val percentText: (Float) -> String = { resources.getString(R.string.settings_percent, scalePercent(it)) }
+    val previewIcon = rememberLauncherIconBitmap()
+    // Saveable: the activity is recreated on rotation and on a theme switch, and that can happen
+    // under the Backup page's file picker — a page that forgot it was open never received the
+    // picker's result (an empty file in Downloads, no message).
+    var showHiddenManager by rememberSaveable { mutableStateOf(false) }
+    var showFolderManager by rememberSaveable { mutableStateOf(false) }
+    var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
+    var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
+    var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
+    var showHomeMarkerPicker by rememberSaveable { mutableStateOf(false) }
+    var showBackup by rememberSaveable { mutableStateOf(false) }
+    // Hoisted above the subpage early-returns so the main list's scroll position survives a visit to
+    // the hidden-apps / backup subpage (an inline rememberScrollState would leave composition with the
+    // list and forget the position — the "settings always restart at the top" complaint). Saveable so
+    // it also survives activity recreation. A fresh Settings open starts where the list was left if
+    // that was less than five minutes ago (SettingsScrollMemory), else at the top.
+    val mainScrollState = rememberSaveable(saver = ScrollState.Saver) {
+        ScrollState(SettingsScrollMemory.restore(SystemClock.elapsedRealtime()))
+    }
+    var isDefaultLauncher by remember { mutableStateOf(DefaultLauncher.isDefault(context)) }
+    // The home app can also change in the system settings while this screen is behind them.
+    LifecycleResumeEffect(Unit) {
+        isDefaultLauncher = DefaultLauncher.isDefault(context)
+        // Leaving (HOME, Back, another app on top): note the place and the time for the next open.
+        onPauseOrDispose { SettingsScrollMemory.remember(mainScrollState.value, SystemClock.elapsedRealtime()) }
+    }
+    // Re-check after the user returns from the system "default home app" / role chooser.
+    val setDefaultLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { isDefaultLauncher = DefaultLauncher.isDefault(context) }
+    // Notification access is granted/revoked in the SYSTEM settings (plain startActivity, no result
+    // contract) — re-check on every resume so the row shows the fresh state when the user comes back.
+    var notifAccessGranted by remember { mutableStateOf(isNotificationAccessGranted(context)) }
+    LifecycleResumeEffect(Unit) {
+        notifAccessGranted = isNotificationAccessGranted(context)
+        onPauseOrDispose { }
+    }
+    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
+    var settingsSearch by rememberSaveable { mutableStateOf("") }
     val palette = if (isSystemInDarkTheme()) DarkExpressivePalette else LightExpressivePalette
 
     CompositionLocalProvider(
@@ -285,7 +656,9 @@ fun SettingsScreen(
                     SwitchRow(
                         stringResource(R.string.settings_widget_inset),
                         stringResource(R.string.settings_widget_inset_desc),
-                        s.widgetEdgesAlignWithIcons,
+                        s.widgetEdges                }
+
+AlignWithIcons,
                         viewModel::setWidgetEdgesAlignWithIcons,
                     )
                     WeatherToggle(enabled = s.showWeather, onSetEnabled = viewModel::setShowWeather)
@@ -310,7 +683,9 @@ fun SettingsScreen(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
                         style = LauncherTextStyles.settingsSupportingText,
                         color = palette.dim,
-                    )
+                    )                }
+
+
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
@@ -361,7 +736,9 @@ fun SettingsScreen(
                         stringResource(R.string.settings_sort_drawer_folders),
                         stringResource(R.string.settings_sort_drawer_folders_desc),
                         s.sortDrawerFolders,
-                        viewModel::setSortDrawerFolders,
+                        viewModel::se                }
+
+tSortDrawerFolders,
                     )
                     SwitchRow(
                         stringResource(R.string.settings_mix_drawer_folders),
@@ -473,7 +850,9 @@ fun SettingsScreen(
                         },
                     )
                     if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
-                        LabelColorRow(
+                                   }
+
+     LabelColorRow(
                             label = stringResource(R.string.settings_drawer_label_color),
                             selected = s.drawerLabelColor ?: s.appLabelColor,
                             onPick = viewModel::setDrawerLabelColor,
@@ -496,7 +875,9 @@ fun SettingsScreen(
                             onColorOpacity = viewModel::setDrawerBackgroundOpacity,
                             onPickPicture = viewModel::importDrawerWallpaper,
                             onClearPicture = viewModel::clearDrawerWallpaper,
-                            onPictureDim = viewModel::setDrawerPictureDim,
+                                    }
+
+        onPictureDim = viewModel::setDrawerPictureDim,
                             onBlur = viewModel::setBlurBehindDrawer,
                             onBlurStrength = viewModel::setDrawerBlurStrength,
                         ),
@@ -526,7 +907,9 @@ fun SettingsScreen(
                         description = stringResource(R.string.settings_long_press_delay_desc),
                         value = s.longPressScale,
                         onValueChange = viewModel::setLongPressScale,
-                        valueRange = LongPressScale.MIN..LongPressScale.MAX,
+                        valueRange = LongPressScale.MIN..LongP                }
+
+ressScale.MAX,
                         step = 0.1f,
                         valueText = { resources.getString(R.string.settings_millis, (systemLongPress * it).roundToInt()) },
                     )
@@ -549,7 +932,9 @@ fun SettingsScreen(
                     )
                     BadgePreview(
                         icon = previewIcon,
-                        showDots = s.showNotificationDots,
+                        showDots = s.showNotificationDots,                }
+
+
                         showCount = s.notificationDotCount,
                         scale = s.notificationDotScale,
                     )
@@ -587,7 +972,9 @@ fun SettingsScreen(
                     )
                     PermissionRow(
                         label = stringResource(R.string.settings_permission_location),
-                        permission = android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        p                }
+
+ermission = android.Manifest.permission.ACCESS_COARSE_LOCATION,
                     )
                 }
 
@@ -600,7 +987,9 @@ fun SettingsScreen(
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_backup),
                         description = "",
-                    ) { showBackup = true }
+                          }
+
+          ) { showBackup = true }
                 }
 
                 CollapsibleSection(
@@ -629,6 +1018,8 @@ fun SettingsScreen(
                     FeedbackRows(onOpen = { openLink(context, it) })
 
                 }
+                }
+
 
 
                 }

@@ -19,7 +19,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
@@ -826,15 +825,15 @@ fun HomeScreen(
             // Keep the chevron and compact dock in one smooth transition when the dock closes.
             val chevronOffsetY by animateDpAsState(
                 targetValue = if (dockExpanded) 0.dp else (-24).dp,
-                animationSpec = tween(durationMillis = ExpressiveMotion.microDurationMillis, easing = FastOutSlowInEasing),
+                animationSpec = tween(durationMillis = ExpressiveMotion.microDurationMillis, easing = ExpressiveMotion.easeInOut),
             )
             val chevronRotation by animateFloatAsState(
                 targetValue = if (dockExpanded) 0f else 180f,
-                animationSpec = tween(durationMillis = ExpressiveMotion.microDurationMillis, easing = FastOutSlowInEasing),
+                animationSpec = tween(durationMillis = ExpressiveMotion.microDurationMillis, easing = ExpressiveMotion.easeInOut),
             )
             val miniDockOffsetY by animateDpAsState(
                 targetValue = if (dockExpanded) 0.dp else (-16).dp,
-                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                animationSpec = tween(durationMillis = ExpressiveMotion.microDurationMillis, easing = ExpressiveMotion.easeInOut),
             )
 
             // The chevron stays above the expanded dock in both states.
@@ -1040,10 +1039,10 @@ fun HomeScreen(
         }
         AnimatedVisibility(
             visible = openFolder != null,
-            enter = fadeIn(tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)) +
-                scaleIn(initialScale = 0.96f, animationSpec = tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)),
-            exit = fadeOut(tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)) +
-                scaleOut(targetScale = 0.98f, animationSpec = tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)),
+            enter = fadeIn(tween(ExpressiveMotion.transitionDurationMillis, easing = ExpressiveMotion.easeInOut)) +
+                scaleIn(initialScale = 0.96f, animationSpec = tween(ExpressiveMotion.transitionDurationMillis, easing = ExpressiveMotion.easeInOut)),
+            exit = fadeOut(tween(ExpressiveMotion.transitionDurationMillis, easing = ExpressiveMotion.easeInOut)) +
+                scaleOut(targetScale = 0.98f, animationSpec = tween(ExpressiveMotion.transitionDurationMillis, easing = ExpressiveMotion.easeInOut)),
         ) {
             displayedFolder?.let { folder ->
                 FolderCard(

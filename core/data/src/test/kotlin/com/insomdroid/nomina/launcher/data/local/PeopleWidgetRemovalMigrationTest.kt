@@ -11,6 +11,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import java.io.File
+import kotlinx.coroutines.runBlocking
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -80,7 +81,7 @@ class PeopleWidgetRemovalMigrationTest {
             .build()
 
         try {
-            val items = database.homeItemDao().getAll()
+            val items = runBlocking { database.homeItemDao().getAll() }
             assertThat(items).hasSize(2)
             assertThat(items.map { it.packageName }).containsExactly("", "com.mail")
             assertThat(items.map { it.widgetProvider }.filterNotNull())

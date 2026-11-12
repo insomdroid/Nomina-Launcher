@@ -242,7 +242,7 @@ fun Dock(
                     // Hide the in-dock copy only once it's moving; the floating copy is drawn above.
                     // While merely lifted (menu showing) it stays visible.
                     .graphicsLayer { alpha = if (isDragging && dragController.moving) 0f else 1f }
-                    .tileHighlight(hoveredSlot, index, shape = RoundedCornerShape(16.dp))
+                    .tileHighlight(hoveredSlot, index, shape = RoundedCornerShape(ExpressiveRadius.panel))
                 when (entry) {
                     is DockApp -> DockAppSlot(
                         app = entry.app, index = index, slot = slot, dockIconSize = dockIconSize,

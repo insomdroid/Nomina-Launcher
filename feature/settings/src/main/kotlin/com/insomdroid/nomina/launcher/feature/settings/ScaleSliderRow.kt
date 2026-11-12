@@ -30,6 +30,7 @@ import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
+import com.insomdroid.nomina.ui.launcherDisplayFontFamily
 import kotlin.math.roundToInt
 
 /** Slider tick count that lands the thumb on multiples of [step] across [range] (Material counts
@@ -95,7 +96,7 @@ internal fun ScaleSliderRow(
             .padding(bottom = 8.dp)
             
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(label, color = p.text, style = LauncherTextStyles.settingsRowLabel, modifier = Modifier.weight(1f))
                 Text(
@@ -103,7 +104,7 @@ internal fun ScaleSliderRow(
                     color = p.text,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    fontFamily = launcherTechnicalFontFamily(),
+                    fontFamily = launcherDisplayFontFamily(),
                     modifier = Modifier.padding(start = 12.dp),
                 )
             }

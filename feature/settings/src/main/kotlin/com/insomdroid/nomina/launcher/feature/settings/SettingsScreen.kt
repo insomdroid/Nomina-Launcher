@@ -1661,7 +1661,6 @@ private fun FollowHomeChoiceCard(
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = modifier,
     ) {
         Column(Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = 14.dp)) {
@@ -1692,7 +1691,6 @@ private fun DrawerLabelColorModeRow(mode: String, onPick: (String) -> Unit) {
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
     ) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
@@ -1729,7 +1727,6 @@ private fun LabelColorRow(label: String, selected: Int, onPick: (Int) -> Unit) {
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
@@ -1797,9 +1794,7 @@ internal fun IconReshapeRow(selected: String, onPick: (String) -> Unit) {
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            .border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
     ) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_reshape_legacy_icons))
@@ -1838,9 +1833,7 @@ internal fun IconShapeRow(selected: String, onPick: (String) -> Unit) {
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-            .border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
     ) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(stringResource(R.string.settings_icon_shape))
@@ -1879,7 +1872,6 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
@@ -1924,7 +1916,6 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
@@ -1966,7 +1957,6 @@ internal fun DrawerLabelColorRow(selected: Int?, onPick: (Int?) -> Unit) {
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {

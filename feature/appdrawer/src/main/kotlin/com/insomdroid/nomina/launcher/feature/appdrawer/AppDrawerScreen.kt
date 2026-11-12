@@ -2,6 +2,7 @@ package com.insomdroid.nomina.feature.appdrawer
 
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

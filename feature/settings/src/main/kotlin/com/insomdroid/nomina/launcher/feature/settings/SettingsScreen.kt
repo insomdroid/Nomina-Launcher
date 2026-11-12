@@ -1217,6 +1217,7 @@ internal fun NothingSwitch(
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    interactive: Boolean = true,
 ) {
     val p = LocalExpressivePalette.current
     val trackColor by androidx.compose.animation.animateColorAsState(
@@ -1245,11 +1246,17 @@ internal fun NothingSwitch(
     Box(
         modifier = modifier
             .size(width = 48.dp, height = 48.dp)
-            .androidxToggleable(
-                value = checked,
-                enabled = enabled,
-                role = Role.Switch,
-                onValueChange = onCheckedChange,
+            .then(
+                if (interactive) {
+                    Modifier.androidxToggleable(
+                        value = checked,
+                        enabled = enabled,
+                        role = Role.Switch,
+                        onValueChange = onCheckedChange,
+                    )
+                } else {
+                    Modifier
+                },
             ),
         contentAlignment = Alignment.CenterStart,
     ) {

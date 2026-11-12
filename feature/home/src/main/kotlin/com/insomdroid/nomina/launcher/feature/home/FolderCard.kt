@@ -30,9 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -100,6 +98,8 @@ import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.iconSizeForCell
 import com.insomdroid.nomina.ui.component.labelBlockHeight
 import com.insomdroid.nomina.ui.component.labelFontFactor
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextField
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -278,11 +278,11 @@ internal fun FolderCard(
                             // The folder's icon: a tap picks another (Nova and Lawnchair let folders have one).
                             FolderIconButton(icon = folder.icon, preview = preview, onPick = onSetIcon)
                             Spacer(Modifier.width(8.dp))
-                            OutlinedTextField(
+                            ExpressiveTextField(
                                 value = name,
                                 onValueChange = { name = it; onRename(it) },
                                 singleLine = true,
-                                label = { Text(stringResource(R.string.folder_name_label)) },
+                                placeholder = stringResource(R.string.folder_name_label),
                                 modifier = Modifier.weight(1f),
                             )
                             IconButton(onClick = { editing = false }) {
@@ -498,9 +498,11 @@ internal fun FolderCard(
                     }
                 }
                 if (editing) {
-                    TextButton(onClick = { confirmDelete = true }, modifier = Modifier.align(Alignment.End)) {
-                        Text(stringResource(R.string.folder_delete))
-                    }
+                    ExpressiveTextButton(
+                        text = stringResource(R.string.folder_delete),
+                        onClick = { confirmDelete = true },
+                        modifier = Modifier.align(Alignment.End),
+                    )
                 }
             }
         }
@@ -512,15 +514,19 @@ internal fun FolderCard(
             title = { Text(stringResource(R.string.folder_delete_title)) },
             text = { Text(stringResource(R.string.folder_delete_home_text, folder.name)) },
             confirmButton = {
-                TextButton(
+                ExpressiveTextButton(
+                    text = stringResource(R.string.folder_delete_confirm),
                     onClick = {
                         confirmDelete = false
                         onDelete()
                     },
-                ) { Text(stringResource(R.string.folder_delete_confirm)) }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) }
+                ExpressiveTextButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = { confirmDelete = false },
+                )
             },
         )
     }

@@ -43,8 +43,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -85,6 +83,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.ui.platform.LocalDensity
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
@@ -1501,8 +1502,8 @@ internal fun DefaultLauncherReminder(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(28.dp),
-        shadowElevation = 8.dp,
+        shape = RoundedCornerShape(ExpressiveRadius.card),
+        shadowElevation = 0.dp,
         modifier = modifier,
     ) {
         Column(
@@ -1522,13 +1523,15 @@ internal fun DefaultLauncherReminder(
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(20.dp))
-            Button(onClick = onSetDefault) {
-                Text(stringResource(R.string.onboarding_set_default))
-            }
+            ExpressiveButton(
+                text = stringResource(R.string.onboarding_set_default),
+                onClick = onSetDefault,
+            )
             // Issue #6: the card covered the middle of home with no way to close it.
-            TextButton(onClick = onNotNow) {
-                Text(stringResource(R.string.default_reminder_not_now))
-            }
+            ExpressiveTextButton(
+                text = stringResource(R.string.default_reminder_not_now),
+                onClick = onNotNow,
+            )
         }
     }
 }

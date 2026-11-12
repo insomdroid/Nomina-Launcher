@@ -606,59 +606,43 @@ private fun AppDrawerContent(
             DragHandle()
             if (showSearch) {
                 val searchPalette = LocalExpressivePalette.current
-                // Compact monochrome search: a quiet magnifier, clear hierarchy and no Material underline.
-                TextField(
-                    value = query,
-                    onValueChange = onQueryChange,
-                    singleLine = true,
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.app_drawer_search_hint),
-                            fontSize = 14.sp,
-                            letterSpacing = 0.1.sp,
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_search),
-                            contentDescription = null,
-                            tint = searchPalette.dim,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    },
-                    trailingIcon = {
-                        if (query.isNotEmpty()) {
-                            IconButton(onClick = { onQueryChange("") }) {
-                                Icon(
-                                    painter = painterResource(LauncherIcons.Close),
-                                    contentDescription = stringResource(R.string.search_clear),
-                                    tint = searchPalette.text,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            }
-                        }
-                    },
-                    shape = RoundedCornerShape(ExpressiveRadius.control),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = searchPalette.surfaceHi,
-                        unfocusedContainerColor = searchPalette.surfaceHi,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = searchPalette.text,
-                        focusedTextColor = searchPalette.text,
-                        unfocusedTextColor = searchPalette.text,
-                        focusedPlaceholderColor = searchPalette.dim,
-                        unfocusedPlaceholderColor = searchPalette.dim,
-                    ),
+                // Shared flat search field: icon, text entry and clear action use the same monochrome surface.
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 14.dp, vertical = 8.dp)
+                        .background(searchPalette.surfaceHi, RoundedCornerShape(ExpressiveRadius.control))
                         .border(
                             0.75.dp,
                             searchPalette.trackOff.copy(alpha = 0.8f),
                             RoundedCornerShape(ExpressiveRadius.control),
                         ),
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = null,
+                        tint = searchPalette.dim,
+                        modifier = Modifier.padding(start = 12.dp).size(18.dp),
+                    )
+                    ExpressiveTextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        singleLine = true,
+                        placeholder = stringResource(R.string.app_drawer_search_hint),
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { onQueryChange("") }) {
+                            Icon(
+                                painter = painterResource(LauncherIcons.Close),
+                                contentDescription = stringResource(R.string.search_clear),
+                                tint = searchPalette.text,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    }
+                }
             }
             val context = LocalContext.current
             val searching = query.isNotBlank()

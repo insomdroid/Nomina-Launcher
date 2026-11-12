@@ -19,7 +19,7 @@ object ExpressiveSpacing {
 
 /** Shared corner radii for controls, cards, and larger panels. */
 object ExpressiveRadius {
-    val control = 8.dp
+    val control = 6.dp
     val card = 8.dp
     val panel = 16.dp
     val sheet = 24.dp

@@ -33,8 +33,8 @@ import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 
 /**
- * A flat, collapsible settings section. Each category uses the same monochrome
- * outline icon family as the rest of Nomina; expansion state remains model-owned.
+ * A settings category row that opens its own page. The selected category displays
+ * its existing settings content without changing any setting behavior.
  */
 @Composable
 internal fun CollapsibleSection(
@@ -52,7 +52,7 @@ internal fun CollapsibleSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 18.dp, bottom = 2.dp)
-            .clickable(enabled = collapsed, role = if (collapsed) Role.Button else Role.Header) { onToggle(false) }
+            .clickable(enabled = collapsed, role = Role.Button) { onToggle(false) }
             .semantics { stateDescription = state }
             .padding(horizontal = 6.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,

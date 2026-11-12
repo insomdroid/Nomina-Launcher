@@ -1,9 +1,12 @@
 name: Nomina Release APK
 
+# Build automatically whenever main changes, while keeping manual runs available.
 on:
   push:
     branches:
       - main
+    # Reference images and screenshots do not affect the APK.
+    # A push containing source/config changes still triggers the build.
     paths-ignore:
       - '**/*.png'
       - '**/*.jpg'
@@ -41,39 +44,35 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Validate permanent release signing secrets
+      # Temporary signing key for this interim release only. It is deliberately not committed.
+      # A future permanent release key must be stored as GitHub Actions secrets and reused.
+      - name: Create temporary release signing key
         shell: bash
-        env:
-          NOMINA_RELEASE_KEYSTORE_BASE64: ${{ secrets.NOMINA_RELEASE_KEYSTORE_BASE64 }}
-          NOMINA_RELEASE_STORE_PASSWORD: ${{ secrets.NOMINA_RELEASE_STORE_PASSWORD }}
-          NOMINA_RELEASE_KEY_ALIAS: ${{ secrets.NOMINA_RELEASE_KEY_ALIAS }}
-          NOMINA_RELEASE_KEY_PASSWORD: ${{ secrets.NOMINA_RELEASE_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          for name in NOMINA_RELEASE_KEYSTORE_BASE64 NOMINA_RELEASE_STORE_PASSWORD NOMINA_RELEASE_KEY_ALIAS NOMINA_RELEASE_KEY_PASSWORD; do
-            if [[ -z "${!name}" ]]; then
-              echo "::error::Missing GitHub Actions secret: $name"
-              exit 1
-            fi
-          done
-          printf '%s' "$NOMINA_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/nomina-release.jks"
-          keytool -list -keystore "$RUNNER_TEMP/nomina-release.jks" -storepass "$NOMINA_RELEASE_STORE_PASSWORD" >/dev/null
-          {
-            printf 'storeFile=%s\n' "$RUNNER_TEMP/nomina-release.jks"
-            printf 'storePassword=%s\n' "$NOMINA_RELEASE_STORE_PASSWORD"
-            printf 'keyAlias=%s\n' "$NOMINA_RELEASE_KEY_ALIAS"
-            printf 'keyPassword=%s\n' "$NOMINA_RELEASE_KEY_PASSWORD"
-          } > keystore.properties
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/nomina-temporary-release.jks" \
+            -storepass "nomina-temporary-pass" \
+            -keypass "nomina-temporary-pass" \
+            -alias "nomina-temporary" \
+            -keyalg RSA -keysize 2048 -validity 3650 \
+            -dname "CN=Nomina Temporary Release, OU=Interim, O=Nomina, L=Unknown, ST=Unknown, C=ID"
+          cat > keystore.properties <<EOF
+          storeFile=$RUNNER_TEMP/nomina-temporary-release.jks
+          storePassword=nomina-temporary-pass
+          keyAlias=nomina-temporary
+          keyPassword=nomina-temporary-pass
+          EOF
 
       - name: Build minified release APK
         shell: bash
         run: ./gradlew :app:assembleRelease --stacktrace
 
       - name: Upload signed release APK
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nomina-release-apk
+          name: nomina-release-apk-temporary-signing
           path: app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: error
-          retention-days: 14
+          if-no-files-found: ignore
+          retention-days: 7

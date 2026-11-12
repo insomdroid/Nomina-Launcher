@@ -29,12 +29,13 @@ object ExpressiveSpacing {
     val xl = s24
 }
 
-/** Shared corner radii: compact controls and cards use the same restrained geometry. */
+/** Shared corner radii for controls and compact cards. */
 object ExpressiveRadius {
     val control = 6.dp
     val card = 8.dp
-    val panel = 8.dp
-    val sheet = 8.dp
+    // Preserve existing panel and sheet geometry until each screen is deliberately adapted.
+    val panel = 16.dp
+    val sheet = 24.dp
 }
 
 /** Shared timing and easing for UI micro-interactions and screen transitions. */

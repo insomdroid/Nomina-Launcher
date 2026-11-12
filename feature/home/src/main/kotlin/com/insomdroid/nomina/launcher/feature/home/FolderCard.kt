@@ -510,6 +510,7 @@ internal fun FolderCard(
 
     if (confirmDelete) {
         AlertDialog(
+            shape = RoundedCornerShape(8.dp),
             onDismissRequest = { confirmDelete = false },
             title = { Text(stringResource(R.string.folder_delete_title)) },
             text = { Text(stringResource(R.string.folder_delete_home_text, folder.name)) },

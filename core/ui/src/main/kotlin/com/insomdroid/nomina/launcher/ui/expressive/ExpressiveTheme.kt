@@ -26,8 +26,8 @@ data class ExpressivePalette(
 )
 
 val DarkExpressivePalette = ExpressivePalette(
-    bg = Color(0xFF101010), surfaceHi = Color(0xFF191919), text = Color(0xFFF5F5F5),
-    dim = Color(0xFFA0A0A0), faint = Color(0xFF707070), trackOff = Color(0xFF303030),
+    bg = Color(0xFF000000), surfaceHi = Color(0xFF171717), text = Color(0xFFF5F5F5),
+    dim = Color(0xFFA0A0A0), faint = Color(0xFF5A5A5A), trackOff = Color(0xFF2A2A2A),
     thumbOff = Color(0xFFBDBDBD), btn = Color.White.copy(alpha = 0.05f), shadow = 0.dp,
 )
 

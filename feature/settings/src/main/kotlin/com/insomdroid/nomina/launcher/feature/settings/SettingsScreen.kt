@@ -136,6 +136,7 @@ fun SettingsScreen(
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
     var showHomeMarkerPicker by rememberSaveable { mutableStateOf(false) }
     var showBackup by rememberSaveable { mutableStateOf(false) }
+    var selectedSection by rememberSaveable { mutableStateOf<String?>(null) }
     // Hoisted above the subpage early-returns so the main list's scroll position survives a visit to
     // the hidden-apps / backup subpage (an inline rememberScrollState would leave composition with the
     // list and forget the position — the "settings always restart at the top" complaint). Saveable so
@@ -163,6 +164,8 @@ fun SettingsScreen(
         onPauseOrDispose { }
     }
     val palette = if (isSystemInDarkTheme()) DarkExpressivePalette else LightExpressivePalette
+
+    BackHandler(enabled = selectedSection != null) { selectedSection = null }
 
     CompositionLocalProvider(
         LocalExpressivePalette provides palette,
@@ -244,12 +247,21 @@ fun SettingsScreen(
                     style = LauncherTextStyles.settingsTitle,
                     modifier = Modifier.padding(start = 6.dp, top = 0.dp, bottom = 6.dp),
                 )
+                if (selectedSection != null) {
+                    TextButton(
+                        onClick = { selectedSection = null },
+                        modifier = Modifier.padding(start = 0.dp, bottom = 4.dp),
+                    ) {
+                        Text(text = "‹ ${stringResource(R.string.settings_title)}", color = palette.dim)
+                    }
+                }
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_home),
                     icon = LauncherIcons.Home,
-                    collapsed = "home" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("home", it) },
+                    visible = selectedSection == null || selectedSection == "home",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "home" },
                 ) {
                     StepperRow(stringResource(R.string.settings_columns), s.homeColumns, SettingsRepository.MIN_COLUMNS, SettingsRepository.MAX_COLUMNS, viewModel::setHomeColumns)
                     StepperRow(stringResource(R.string.settings_rows), s.homeRows, SettingsRepository.MIN_ROWS, SettingsRepository.MAX_ROWS, viewModel::setHomeRows)
@@ -299,8 +311,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_dock),
                     icon = LauncherIcons.Dock,
-                    collapsed = "dock" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("dock", it) },
+                    visible = selectedSection == null || selectedSection == "dock",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "dock" },
                 ) {
                     SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
                     SwitchRow(stringResource(R.string.settings_dock_auto_hide), s.autoHideDock, viewModel::setAutoHideDock)
@@ -320,8 +333,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_drawer),
                     icon = LauncherIcons.AppsGrid,
-                    collapsed = "drawer" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("drawer", it) },
+                    visible = selectedSection == null || selectedSection == "drawer",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "drawer" },
                 ) {
                     StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
@@ -374,8 +388,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_icons_typography),
                     icon = LauncherIcons.Appearance,
-                    collapsed = "icons" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("icons", it) },
+                    visible = selectedSection == null || selectedSection == "icons",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "icons" },
                 ) {
                     SettingsGroupLabel(stringResource(R.string.settings_app_icons_group))
                     val iconPackName = iconPacks.firstOrNull { it.packageName == s.iconPackPackage }?.label
@@ -484,8 +499,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_wallpaper_background),
                     icon = LauncherIcons.Widgets,
-                    collapsed = "wallpaper" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("wallpaper", it) },
+                    visible = selectedSection == null || selectedSection == "wallpaper",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "wallpaper" },
                 ) {
                     DrawerBackdropRows(
                         settings = s,
@@ -506,8 +522,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_gestures_interaction),
                     icon = LauncherIcons.Gestures,
-                    collapsed = "gestures" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("gestures", it) },
+                    visible = selectedSection == null || selectedSection == "gestures",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "gestures" },
                 ) {
                     SwitchRow(stringResource(R.string.settings_swipe_up_drawer), s.swipeUpForDrawer, viewModel::setSwipeUp)
                     SwitchRow(stringResource(R.string.settings_swipe_down_notif), s.swipeDownForNotifications, viewModel::setSwipeDown)
@@ -535,8 +552,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_notifications),
                     icon = LauncherIcons.Notifications,
-                    collapsed = "notifications" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("notifications", it) },
+                    visible = selectedSection == null || selectedSection == "notifications",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "notifications" },
                 ) {
                     SwitchRow(stringResource(R.string.settings_notif_dots), s.showNotificationDots, viewModel::setShowNotificationDots)
                     SwitchRow(stringResource(R.string.settings_notif_count), s.notificationDotCount, viewModel::setNotificationDotCount)
@@ -558,8 +576,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_permissions),
                     icon = LauncherIcons.Permissions,
-                    collapsed = "permissions" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("permissions", it) },
+                    visible = selectedSection == null || selectedSection == "permissions",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "permissions" },
                 ) {
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_set_default),
@@ -594,8 +613,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_backup_restore),
                     icon = LauncherIcons.Backup,
-                    collapsed = "backup" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("backup", it) },
+                    visible = selectedSection == null || selectedSection == "backup",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "backup" },
                 ) {
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_backup),
@@ -606,8 +626,9 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_about),
                     icon = LauncherIcons.Info,
-                    collapsed = "updates" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("updates", it) },
+                    visible = selectedSection == null || selectedSection == "updates",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "updates" },
                 ) {
                     // Keep the installed app version with the other information about Nomina.
                     val installedVersion = remember(context) { installedVersionLabel(context) }

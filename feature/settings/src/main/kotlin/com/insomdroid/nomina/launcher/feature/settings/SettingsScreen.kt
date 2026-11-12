@@ -245,7 +245,7 @@ fun SettingsScreen(
                     text = "N O M I N A  /  SYSTEM",
                     color = palette.faint,
                     style = LauncherTextStyles.settingsEyebrow.copy(fontFamily = launcherTechnicalFontFamily()),
-                    modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
+                    modifier = Modifier.padding(start = 8.dp, top = 16.dp, bottom = 4.dp),
                 )
                 val pageTitle = when (selectedSection) {
                     "home" -> stringResource(R.string.settings_home)
@@ -1177,7 +1177,7 @@ private fun StepperRow(label: String, value: Int, min: Int, max: Int, onValueCha
         RowLabel(label, Modifier.weight(1f))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             StepButton(LauncherIcons.Remove, stringResource(R.string.settings_step_decrease), enabled = value > min) {
                 if (value > min) onValueChange(value - 1)
@@ -1428,7 +1428,7 @@ private fun SettingsGroupLabel(text: String) {
         text = text.uppercase(),
         color = p.dim,
         style = LauncherTextStyles.settingsGroupLabel,
-        modifier = Modifier.padding(start = 6.dp, top = 12.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 8.dp, top = 12.dp, bottom = 8.dp),
     )
 }
 
@@ -1443,7 +1443,7 @@ private fun FollowHomeScaleRow(
     valueRange: ClosedFloatingPointRange<Float>,
     valueText: (Float) -> String,
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
         FollowHomeChoiceCard(
             label = label,
             followsHome = followsHome,
@@ -1476,11 +1476,11 @@ private fun FollowHomeColorRow(
         followsHome = followsHome,
         onFollowHome = onFollowHome,
         onCustom = onCustom,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
     ) {
         if (!followsHome) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(top = 14.dp).horizontalScroll(rememberScrollState()),
             ) {
                 COLOR_SWATCHES.forEach { color ->

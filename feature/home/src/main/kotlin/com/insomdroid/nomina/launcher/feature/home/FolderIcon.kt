@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.component.AppLabel
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.component.PickedIcon
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 
 /**
  * A home-screen folder: a rounded tile showing a 2×2 preview of the first four contained app icons
@@ -74,7 +76,7 @@ private fun FolderPreview(apps: List<AppItem>, size: Dp, contentDescription: Str
         modifier = Modifier
             .size(size)
             .then(if (contentDescription == null) Modifier else Modifier.semantics { this.contentDescription = contentDescription })
-            .background(Color.White.copy(alpha = 0.22f), RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(ExpressiveRadius.card))
             .padding(6.dp * scale),
         contentAlignment = Alignment.Center,
     ) {

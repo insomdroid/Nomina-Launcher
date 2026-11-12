@@ -36,6 +36,9 @@ object ExpressiveRadius {
     // Preserve existing panel and sheet geometry until each screen is deliberately adapted.
     val panel = 16.dp
     val sheet = 24.dp
+    // Deliberate launcher capsule geometry; distinct from ordinary cards and sheets.
+    val dock = 30.dp
+    val miniDock = 18.dp
 }
 
 /** Shared timing and easing for UI micro-interactions and screen transitions. */

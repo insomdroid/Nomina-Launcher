@@ -34,6 +34,7 @@ import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextField
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 
 /**
  * "Edit" on an app, as in Lawnchair and Nova Launcher: its icon — tap it to pick another (see
@@ -65,7 +66,7 @@ fun EditAppDialog(
         onDismiss()
     }
     AlertDialog(
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         onDismissRequest = { leave(app.customIcon) },
         title = { Text(stringResource(R.string.edit_title)) },
         text = {

@@ -66,6 +66,7 @@ import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import javax.inject.Inject
 import com.insomdroid.nomina.ui.themedTextStyle
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 
 @HiltViewModel
 class NotificationsWidgetViewModel @Inject constructor(
@@ -177,7 +178,7 @@ fun NotificationsWidget(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .background(widgetSurfaceColor(), RoundedCornerShape(8.dp))
+                    .background(widgetSurfaceColor(), RoundedCornerShape(ExpressiveRadius.card))
                     .clickable(interactionSource = noIndication, indication = null) {
                         openNotificationListenerSettings(context)
                     }

@@ -62,6 +62,7 @@ import com.insomdroid.nomina.ui.IconPressOutcome
 import com.insomdroid.nomina.ui.appLaunchTouch
 import com.insomdroid.nomina.ui.awaitIconPress
 import com.insomdroid.nomina.ui.component.AppIcon
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.component.LocalAppLabelLines
 import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.iconSizeForCell
@@ -155,7 +156,7 @@ fun Dock(
         nominalIconSize
     }
 
-    val shape = RoundedCornerShape(30.dp)
+    val shape = RoundedCornerShape(ExpressiveRadius.dock)
     // Live drop feedback: the bar lights up while an item from another surface hovers it and has
     // somewhere to land (Launcher3's onDragEnter/acceptDrop); the tile a drop would fold into or
     // join lights up on its own. derivedStateOf so we recompose only when these change, not per frame.

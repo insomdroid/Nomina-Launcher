@@ -62,7 +62,7 @@ fun EditIconDialog(
         onDismiss()
     }
     AlertDialog(
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         onDismissRequest = { leave(icon) },
         title = { Text(stringResource(R.string.edit_title)) },
         text = {

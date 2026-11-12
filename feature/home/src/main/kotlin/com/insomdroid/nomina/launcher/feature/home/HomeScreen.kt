@@ -15,6 +15,8 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -86,6 +88,7 @@ import androidx.compose.ui.platform.LocalDensity
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import com.insomdroid.nomina.ui.expressive.ExpressiveMotion
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
@@ -823,7 +826,7 @@ fun HomeScreen(
             // Keep the chevron and compact dock in one smooth transition when the dock closes.
             val chevronOffsetY by animateDpAsState(
                 targetValue = if (dockExpanded) 0.dp else (-24).dp,
-                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                animationSpec = tween(durationMillis = ExpressiveMotion.microDurationMillis, easing = FastOutSlowInEasing),
             )
             val chevronRotation by animateFloatAsState(
                 targetValue = if (dockExpanded) 0f else 180f,
@@ -885,8 +888,8 @@ fun HomeScreen(
                 }
                 AnimatedVisibility(
                     visible = dockExpanded,
-                    enter = fadeIn(tween(180)),
-                    exit = fadeOut(tween(180)),
+                    enter = fadeIn(tween(ExpressiveMotion.microDurationMillis)),
+                    exit = fadeOut(tween(ExpressiveMotion.microDurationMillis)),
                 ) {
                     CompositionLocalProvider(
                         LocalIconScale provides settings.dockIconScale,
@@ -947,7 +950,7 @@ fun HomeScreen(
                         .padding(top = 0.dp, bottom = 12.dp)
                         .offset(y = miniDockOffsetY),
                 color = (if (miniDockUsesLightBackground) Color.White else Color.Black).copy(alpha = 0.25f),
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(ExpressiveRadius.miniDock),
                 shadowElevation = 0.dp,
             ) {
                 Row(
@@ -1031,40 +1034,52 @@ fun HomeScreen(
         LaunchedEffect(openFolderId, openFolder == null) {
             if (openFolderId != null && openFolder == null) openFolderId = null
         }
-        if (openFolder != null) {
-            FolderCard(
-                folder = openFolder,
-                badges = badges,
-                badgeShowCount = badgeShowCount,
-                badgeScale = badgeScale,
-                locked = settings.desktopLocked,
-                dragController = dragController,
-                onRename = { viewModel.renameFolder(openFolder.id, it) },
-                onSetIcon = { viewModel.setFolderIcon(openFolder.id, it) },
-                showName = settings.showHomeFolderNames,
-                columns = settings.folderColumns,
-                onAppClick = launchApp,
-                onRenameApp = { renameTarget = it },
-                onRemoveFromFolder = { viewModel.removeFromFolder(it, openFolder.id) },
-                onPinShortcut = { viewModel.pinShortcut(it) },
-                onReorder = { app, before -> viewModel.reorderInFolder(openFolder.id, app, before) },
-                onDropOnHome = { app, page, cx, cy -> viewModel.moveOutOfFolder(app, openFolder.id, page, cx, cy, defaultFolderName) },
-                onDropOnDock = { app, target -> dropOnDock(app, target, DragSource.Folder) },
-                onDropOnRemove = { viewModel.removeFromFolderEntirely(it, openFolder.id) },
-                // Whatever the drop was, a drag that left the card closed the folder.
-                onDragOutEnd = { openFolderId = null },
-                onDelete = {
-                    viewModel.deleteFolder(openFolder.id)
-                    openFolderId = null
-                },
-                // The card would cover the picker: close it first.
-                onWidgets = if (settings.desktopLocked) null else ({ app ->
-                    openFolderId = null
-                    widgetPickerPackage = app.packageName
-                    showWidgetPicker = true
-                }),
-                onDismiss = { openFolderId = null },
-            )
+        var displayedFolder by remember { mutableStateOf<PlacedFolder?>(null) }
+        LaunchedEffect(openFolder) {
+            openFolder?.let { displayedFolder = it }
+        }
+        AnimatedVisibility(
+            visible = openFolder != null,
+            enter = fadeIn(tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)) +
+                scaleIn(initialScale = 0.96f, animationSpec = tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)),
+            exit = fadeOut(tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)) +
+                scaleOut(targetScale = 0.98f, animationSpec = tween(ExpressiveMotion.transitionDurationMillis, easing = FastOutSlowInEasing)),
+        ) {
+            displayedFolder?.let { folder ->
+                FolderCard(
+                    folder = folder,
+                    badges = badges,
+                    badgeShowCount = badgeShowCount,
+                    badgeScale = badgeScale,
+                    locked = settings.desktopLocked,
+                    dragController = dragController,
+                    onRename = { viewModel.renameFolder(folder.id, it) },
+                    onSetIcon = { viewModel.setFolderIcon(folder.id, it) },
+                    showName = settings.showHomeFolderNames,
+                    columns = settings.folderColumns,
+                    onAppClick = launchApp,
+                    onRenameApp = { renameTarget = it },
+                    onRemoveFromFolder = { viewModel.removeFromFolder(it, folder.id) },
+                    onPinShortcut = { viewModel.pinShortcut(it) },
+                    onReorder = { app, before -> viewModel.reorderInFolder(folder.id, app, before) },
+                    onDropOnHome = { app, page, cx, cy -> viewModel.moveOutOfFolder(app, folder.id, page, cx, cy, defaultFolderName) },
+                    onDropOnDock = { app, target -> dropOnDock(app, target, DragSource.Folder) },
+                    onDropOnRemove = { viewModel.removeFromFolderEntirely(it, folder.id) },
+                    // Whatever the drop was, a drag that left the card closed the folder.
+                    onDragOutEnd = { openFolderId = null },
+                    onDelete = {
+                        viewModel.deleteFolder(folder.id)
+                        openFolderId = null
+                    },
+                    // The card would cover the picker: close it first.
+                    onWidgets = if (settings.desktopLocked) null else ({ app ->
+                        openFolderId = null
+                        widgetPickerPackage = app.packageName
+                        showWidgetPicker = true
+                    }),
+                    onDismiss = { openFolderId = null },
+                )
+            }
         }
 
         // Drop-to-remove zone: a "Poista" pill at the top during any removable home drag (an app, or a

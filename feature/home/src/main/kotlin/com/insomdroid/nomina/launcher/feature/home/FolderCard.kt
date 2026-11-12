@@ -100,6 +100,8 @@ import com.insomdroid.nomina.ui.component.labelBlockHeight
 import com.insomdroid.nomina.ui.component.labelFontFactor
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextField
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import com.insomdroid.nomina.ui.expressive.ExpressiveMotion
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -178,7 +180,7 @@ internal fun FolderCard(
     var dragOut by remember { mutableStateOf(false) }
     val dragOutAlpha = remember { Animatable(1f) }
     LaunchedEffect(dragOut) {
-        if (dragOut) dragOutAlpha.animateTo(0f, tween(durationMillis = 180))
+        if (dragOut) dragOutAlpha.animateTo(0f, tween(durationMillis = ExpressiveMotion.microDurationMillis))
     }
 
     // The long-pressed app and its icon's root bounds, for the menu's anchor.
@@ -229,7 +231,7 @@ internal fun FolderCard(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(ExpressiveRadius.card),
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .padding(16.dp)

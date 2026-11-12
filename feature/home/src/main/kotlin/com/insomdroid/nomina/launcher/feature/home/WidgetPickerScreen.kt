@@ -45,6 +45,7 @@ import com.insomdroid.nomina.ui.CoverSystemBars
 import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextField
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 
 internal data class WidgetGroup(val packageName: String, val label: String, val widgets: List<WidgetOption>)
 internal data class WidgetOption(val choice: WidgetChoice, val label: String)
@@ -114,7 +115,7 @@ fun WidgetPickerScreen(
                 Text(stringResource(R.string.widget_picker_title), style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.weight(1f).padding(8.dp))
                 Box(
-                    Modifier.size(40.dp).clip(RoundedCornerShape(6.dp)).clickable(onClick = onDismiss),
+                    Modifier.size(40.dp).clip(RoundedCornerShape(ExpressiveRadius.control)).clickable(onClick = onDismiss),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(painterResource(LauncherIcons.Close), stringResource(R.string.widget_picker_close))
@@ -201,7 +202,7 @@ private fun WidgetCard(
     val sx = defaultX.coerceIn(1, columns.coerceAtLeast(1))
     val sy = defaultY.coerceIn(1, rows.coerceAtLeast(1))
     var snapshot by remember(option.choice) { mutableStateOf<(() -> Bitmap?)?>(null) }
-    Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
+    Surface(shape = RoundedCornerShape(ExpressiveRadius.card), color = MaterialTheme.colorScheme.surfaceContainer) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Box(
                 // The ratio alone bounds the height. A heightIn() in front of aspectRatio() does not: a

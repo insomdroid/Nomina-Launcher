@@ -1,6 +1,12 @@
 package com.insomdroid.nomina.feature.settings
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -20,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.semantics.Role
 import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.expressive.ExpressiveMotion
+import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 
 /**
@@ -42,9 +50,9 @@ internal fun CollapsibleSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 0.dp)
+                .padding(top = ExpressiveSpacing.md, bottom = 0.dp)
                 .clickable(role = Role.Button) { onToggle(false) }
-                .padding(horizontal = 8.dp, vertical = 12.dp),
+                .padding(horizontal = ExpressiveSpacing.xs, vertical = ExpressiveSpacing.sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -69,11 +77,19 @@ internal fun CollapsibleSection(
                 modifier = Modifier.size(20.dp),
             )
         }
-    } else {
+    }
+
+    AnimatedVisibility(
+        visible = !collapsed,
+        enter = expandVertically(animationSpec = tween(ExpressiveMotion.transitionDurationMillis)) +
+            fadeIn(animationSpec = tween(ExpressiveMotion.transitionDurationMillis)),
+        exit = shrinkVertically(animationSpec = tween(ExpressiveMotion.transitionDurationMillis)) +
+            fadeOut(animationSpec = tween(ExpressiveMotion.transitionDurationMillis)),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
+                .padding(top = ExpressiveSpacing.xs),
             content = content,
         )
     }

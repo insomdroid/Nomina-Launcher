@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import com.insomdroid.nomina.feature.appdrawer.AppDrawerScreen
 import com.insomdroid.nomina.feature.home.HomeScreen
+import com.insomdroid.nomina.ui.expressive.ExpressiveMotion
 import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconScale
@@ -107,7 +108,7 @@ fun LauncherShell(
     // Smoothly cross-fade the drawer out as a drag-out begins (instead of a hard cut), then reset.
     val dragOutAlpha = remember { Animatable(1f) }
     LaunchedEffect(draggingFromDrawer) {
-        if (draggingFromDrawer) dragOutAlpha.animateTo(0f, tween(durationMillis = 180))
+        if (draggingFromDrawer) dragOutAlpha.animateTo(0f, tween(durationMillis = ExpressiveMotion.microDurationMillis))
         else dragOutAlpha.snapTo(1f)
     }
 

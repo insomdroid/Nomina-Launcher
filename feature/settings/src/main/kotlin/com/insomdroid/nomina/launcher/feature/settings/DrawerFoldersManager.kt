@@ -45,6 +45,8 @@ import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.component.AppIcon
 import com.insomdroid.nomina.ui.expressive.ExpressivePalette
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 
 internal const val FOLDER_MANAGER_FOLDER_ROW_TAG = "folder-manager-folder"
@@ -124,7 +126,7 @@ private fun FolderList(
                 text = stringResource(R.string.settings_drawer_folders_empty),
                 color = p.dim,
                 fontSize = 14.sp,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                modifier = Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md),
             )
         }
         LazyColumn(modifier = Modifier.weight(1f)) {
@@ -204,7 +206,7 @@ private fun FolderPage(
             palette = p,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.sm)
                 .testTag(FOLDER_MANAGER_SEARCH_TAG),
         )
         if (offered.isEmpty()) {
@@ -222,7 +224,7 @@ private fun FolderPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .toggleable(value = member, role = Role.Switch, onValueChange = { onSetMember(app.key, it) })
-                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.xs)
                         .testTag(FOLDER_MANAGER_APP_ROW_TAG),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -293,7 +295,7 @@ private fun FolderTextField(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(ExpressiveRadius.control))
                         .background(palette.surfaceHi)
                         .border(1.dp, palette.trackOff, RoundedCornerShape(6.dp))
                         .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -351,9 +353,9 @@ private fun FolderDeleteDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             color = palette.surfaceHi,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(ExpressiveRadius.card),
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(ExpressiveSpacing.xl)) {
                 Text(
                     text = stringResource(R.string.settings_folder_delete_title),
                     color = palette.text,

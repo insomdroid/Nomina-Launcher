@@ -57,6 +57,8 @@ import com.insomdroid.nomina.data.PinRequest
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveButtonStyle
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
 
 /**
  * A requested widget's preview: the provider for [WidgetPreview] (its own preview, as the widget
@@ -122,15 +124,15 @@ internal fun PinRequestSheet(
     // Fully open at once: the sheet is short, and a half state would only hide the buttons.
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
-    ModalBottomSheet(onDismissRequest = onCancel, sheetState = sheetState, shape = RoundedCornerShape(24.dp)) {
+    ModalBottomSheet(onDismissRequest = onCancel, sheetState = sheetState, shape = RoundedCornerShape(ExpressiveRadius.sheet)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 // A widget's card can outgrow a short window (a phone on its side): the content
                 // scrolls then, and the sheet still follows a drag down from its top.
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp)
+                .padding(horizontal = ExpressiveSpacing.xl)
+                .padding(bottom = ExpressiveSpacing.xl)
                 .navigationBarsPadding(),
         ) {
             when (state) {
@@ -200,7 +202,7 @@ private fun ConfirmContent(state: PinRequestUiState.Confirm, onAdd: () -> Unit, 
                     modifier = Modifier
                         .heightIn(max = PREVIEW_MAX_HEIGHT)
                         .aspectRatio((widget.widthDp / widget.heightDp).coerceIn(1.5f, 3f))
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(ExpressiveRadius.card))
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                         .testTag(PIN_WIDGET_PREVIEW_TAG),
                     contentAlignment = Alignment.Center,

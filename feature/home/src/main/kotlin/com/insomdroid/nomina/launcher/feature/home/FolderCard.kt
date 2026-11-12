@@ -250,7 +250,7 @@ internal fun FolderCard(
                     Box(
                         Modifier.background(
                             if (icon == null) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
-                            RoundedCornerShape(8.dp),
+                            RoundedCornerShape(ExpressiveRadius.card),
                         ),
                     ) {
                         FolderIcon(
@@ -512,7 +512,7 @@ internal fun FolderCard(
 
     if (confirmDelete) {
         AlertDialog(
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(ExpressiveRadius.card),
             onDismissRequest = { confirmDelete = false },
             title = { Text(stringResource(R.string.folder_delete_title)) },
             text = { Text(stringResource(R.string.folder_delete_home_text, folder.name)) },

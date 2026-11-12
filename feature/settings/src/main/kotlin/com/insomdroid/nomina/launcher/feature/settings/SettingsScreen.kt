@@ -1134,7 +1134,6 @@ private fun SettingsFilterChip(
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
         LocalTextStyle provides LocalTextStyle.current.copy(
-            fontFamily = launcherTechnicalFontFamily(),
             fontSize = 11.sp,
             letterSpacing = 0.45.sp,
         ),
@@ -1166,7 +1165,6 @@ private fun SettingsTextButton(
     CompositionLocalProvider(
         LocalContentColor provides p.text,
         LocalTextStyle provides LocalTextStyle.current.copy(
-            fontFamily = launcherTechnicalFontFamily(),
             fontSize = 11.sp,
             letterSpacing = 0.5.sp,
         ),

@@ -233,7 +233,7 @@ private fun FolderPage(
                         color = p.text,
                         fontSize = 16.sp,
                     )
-                    NothingSwitch(checked = member, onCheckedChange = { onSetMember(app.key, it) })
+                    NothingSwitch(checked = member, onCheckedChange = {}, interactive = false)
                 }
             }
         }

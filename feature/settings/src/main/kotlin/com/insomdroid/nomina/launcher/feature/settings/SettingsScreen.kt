@@ -256,16 +256,16 @@ fun SettingsScreen(
                         placeholder = { Text("Search settings…") },
                     )
                     val categories = listOf(
-                        Triple("home", "01", "Home screen|Layout, wallpaper, widgets"),
-                        Triple("dock", "02", "Dock|Visibility, spacing, behavior"),
-                        Triple("drawer", "03", "App drawer|Grid, sorting, search"),
-                        Triple("icons", "04", "Icons|Packs, shapes, appearance"),
-                        Triple("folders", "05", "Folders|Layout and appearance"),
-                        Triple("gestures", "06", "Gestures|Navigation and shortcuts"),
-                        Triple("notifications", "07", "Notifications|Badges and indicators"),
-                        Triple("widgets", "08", "Widgets|Clock, weather and information"),
-                        Triple("backup", "09", "Backup|Export and restore"),
-                        Triple("about", "10", "About|Version and feedback"),
+                        Triple("home", "", "Home screen|Layout, wallpaper, widgets"),
+                        Triple("dock", "", "Dock|Visibility, spacing, behavior"),
+                        Triple("drawer", "", "App drawer|Grid, sorting, search"),
+                        Triple("icons", "", "Icons|Packs, shapes, appearance"),
+                        Triple("folders", "", "Folders|Layout and appearance"),
+                        Triple("gestures", "", "Gestures|Navigation and shortcuts"),
+                        Triple("notifications", "", "Notifications|Badges and indicators"),
+                        Triple("widgets", "", "Widgets|Clock, weather and information"),
+                        Triple("backup", "", "Backup|Export and restore"),
+                        Triple("about", "", "About|Version and feedback"),
                     )
                     val query = settingsSearch.trim().lowercase()
                     val keywords = mapOf(
@@ -299,7 +299,6 @@ fun SettingsScreen(
                                 .padding(horizontal = 6.dp, vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(row.second, color = palette.dim, modifier = Modifier.widthIn(min = 44.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(parts[0], color = palette.text, style = LauncherTextStyles.settingsRowLabel)
                                 Text(parts[1], color = palette.dim, style = LauncherTextStyles.settingsDescription)
@@ -318,7 +317,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("‹", color = palette.text, fontSize = 28.sp, modifier = Modifier.padding(end = 16.dp))
-                        Text("SETTINGS  /  ${selectedCategory.uppercase()}", color = palette.dim, style = LauncherTextStyles.settingsEyebrow)
+                        Text("SETTINGS  /  ${selectedCategory?.uppercase().orEmpty()}", color = palette.dim, style = LauncherTextStyles.settingsEyebrow)
                     }
                     Text(
                         text = when (selectedCategory) {

@@ -205,7 +205,6 @@ fun ExpressiveSlider(
                 }
             }
             .semantics {
-                role = Role.Slider
                 progressBarRangeInfo = ProgressBarRangeInfo(value, valueRange)
                 setProgress { requested ->
                     if (!enabled || valueRange.endInclusive <= valueRange.start) {

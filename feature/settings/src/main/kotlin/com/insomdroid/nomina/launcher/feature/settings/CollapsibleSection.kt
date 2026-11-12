@@ -40,17 +40,19 @@ import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 internal fun CollapsibleSection(
     title: String,
     @DrawableRes icon: Int,
+    visible: Boolean = true,
     collapsed: Boolean,
     onToggle: (Boolean) -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    if (!visible) return
     val p = LocalExpressivePalette.current
     val state = stringResource(if (collapsed) R.string.settings_section_collapsed else R.string.settings_section_expanded)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 18.dp, bottom = 2.dp)
-            .clickable(role = Role.Button) { onToggle(!collapsed) }
+            .clickable(enabled = collapsed, role = if (collapsed) Role.Button else Role.Header) { onToggle(false) }
             .semantics { stateDescription = state }
             .padding(horizontal = 6.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -69,7 +71,7 @@ internal fun CollapsibleSection(
             letterSpacing = 1.15.sp,
             modifier = Modifier.weight(1f).padding(start = 12.dp),
         )
-        val turn by animateFloatAsState(targetValue = if (collapsed) 0f else 180f, label = "chevron")
+        val turn by animateFloatAsState(targetValue = if (collapsed) -90f else 0f, label = "chevron")
         Icon(
             painter = painterResource(LauncherIcons.ExpandMore),
             contentDescription = null,

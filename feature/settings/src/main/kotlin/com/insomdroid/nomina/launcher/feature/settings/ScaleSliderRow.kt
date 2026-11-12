@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
@@ -93,10 +94,10 @@ internal fun ScaleSliderRow(
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
+            .padding(bottom = ExpressiveSpacing.xs)
             
     ) {
-        Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = ExpressiveSpacing.xl, vertical = ExpressiveSpacing.md)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(label, color = p.text, style = LauncherTextStyles.settingsRowLabel, modifier = Modifier.weight(1f))
                 Text(
@@ -105,11 +106,11 @@ internal fun ScaleSliderRow(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     fontFamily = launcherDisplayFontFamily(),
-                    modifier = Modifier.padding(start = 12.dp),
+                    modifier = Modifier.padding(start = ExpressiveSpacing.sm),
                 )
             }
             if (description != null) {
-                Text(description, color = p.dim, style = LauncherTextStyles.settingsDescription, modifier = Modifier.padding(top = 4.dp))
+                Text(description, color = p.dim, style = LauncherTextStyles.settingsDescription, modifier = Modifier.padding(top = ExpressiveSpacing.xxs))
             }
             NothingSlider(
                 value = value,
@@ -125,7 +126,7 @@ internal fun ScaleSliderRow(
                         modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable {
                             change(default)
                             feltBase = null
-                        }.padding(horizontal = 10.dp, vertical = 8.dp),
+                        }.padding(horizontal = ExpressiveSpacing.sm, vertical = ExpressiveSpacing.xs),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(

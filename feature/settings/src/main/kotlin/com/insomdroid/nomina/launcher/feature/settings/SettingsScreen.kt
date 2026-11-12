@@ -1173,7 +1173,7 @@ private fun SettingsTextButton(
     ) {
         Row(
             modifier = modifier
-                .clip(RoundedCornerShape(6.dp))
+                .clip(RoundedCornerShape(ExpressiveRadius.control))
                 .clickable(role = Role.Button, onClick = onClick)
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -1195,9 +1195,9 @@ private fun AlertDialog(
         Surface(
             modifier = Modifier.widthIn(min = 280.dp, max = 560.dp),
             color = containerColor,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(ExpressiveRadius.card),
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(modifier = Modifier.padding(ExpressiveSpacing.xl)) {
                 CompositionLocalProvider(LocalContentColor provides LocalExpressivePalette.current.text) { title() }
                 Spacer(Modifier.height(16.dp))
                 text()

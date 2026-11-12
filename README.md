@@ -11,7 +11,3 @@ APK builds are available from [GitHub Actions](https://github.com/insomdroid/Nom
 ## Credits and license
 
 Based on ARK Launcher, licensed under the [Apache License 2.0](LICENSE). Original notices and attributions are retained in [NOTICE](NOTICE).
-
-## Development workflow
-
-For the project-specific ChatGPT workflow, audit checklist, copy-ready prompts, and verification rules, see [CHATGPT_DEVELOPMENT_GUIDE.md](CHATGPT_DEVELOPMENT_GUIDE.md).

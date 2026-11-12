@@ -1,5 +1,6 @@
 package com.insomdroid.nomina.feature.settings
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -28,8 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import com.insomdroid.nomina.ui.expressive.Accent
+import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 import kotlin.math.roundToInt
 
 /** Slider tick count that lands the thumb on multiples of [step] across [range] (Material counts
@@ -89,23 +92,27 @@ internal fun ScaleSliderRow(
     }
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+            .border(1.dp, p.trackOff.copy(alpha = 0.72f), RoundedCornerShape(16.dp)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(label, color = p.text, fontSize = 16.sp, modifier = Modifier.weight(1f))
+                Text(label, color = p.text, style = LauncherTextStyles.settingsRowLabel, modifier = Modifier.weight(1f))
                 Text(
                     shown,
                     color = p.text,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = launcherTechnicalFontFamily(),
                     modifier = Modifier.padding(start = 12.dp),
                 )
             }
             if (description != null) {
-                Text(description, color = p.dim, fontSize = 13.sp, modifier = Modifier.padding(top = 2.dp))
+                Text(description, color = p.dim, style = LauncherTextStyles.settingsDescription, modifier = Modifier.padding(top = 4.dp))
             }
             Slider(
                 value = value,
@@ -114,11 +121,14 @@ internal fun ScaleSliderRow(
                 valueRange = valueRange,
                 steps = scaleSliderSteps(valueRange, step),
                 colors = SliderDefaults.colors(
-                    thumbColor = Accent,
-                    activeTrackColor = Accent,
+                    thumbColor = p.text,
+                    activeTrackColor = p.text,
                     inactiveTrackColor = p.trackOff,
-                    activeTickColor = Accent,
-                    inactiveTickColor = p.trackOff,
+                    activeTickColor = p.text,
+                    inactiveTickColor = p.faint,
+                    disabledThumbColor = p.faint,
+                    disabledActiveTrackColor = p.faint,
+                    disabledInactiveTrackColor = p.trackOff,
                 ),
             )
             // Below the slider, so its appearance never moves the thumb away from the finger.
@@ -130,8 +140,15 @@ internal fun ScaleSliderRow(
                             feltBase = null
                         },
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                        colors = TextButtonDefaults.textButtonColors(contentColor = p.text),
                     ) {
-                        Text(stringResource(R.string.settings_reset_default, valueText(default)), color = Accent, fontSize = 13.sp)
+                        Text(
+                            stringResource(R.string.settings_reset_default, valueText(default)),
+                            color = p.text,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = launcherTechnicalFontFamily(),
+                        )
                     }
                 }
             }

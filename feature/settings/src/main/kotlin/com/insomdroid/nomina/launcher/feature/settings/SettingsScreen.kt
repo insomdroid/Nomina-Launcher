@@ -113,7 +113,7 @@ import com.insomdroid.nomina.ui.expressive.LightExpressivePalette
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
-import com.insomdroid.nomina.ui.launcherDisplayFontFamily
+import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 
 @Composable
 fun SettingsScreen(
@@ -243,7 +243,7 @@ fun SettingsScreen(
                 Text(
                     text = "N O M I N A  /  SYSTEM",
                     color = palette.faint,
-                    style = LauncherTextStyles.settingsEyebrow.copy(fontFamily = launcherDisplayFontFamily()),
+                    style = LauncherTextStyles.settingsEyebrow.copy(fontFamily = launcherTechnicalFontFamily()),
                     modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
                 )
                 val pageTitle = when (selectedSection) {
@@ -755,7 +755,7 @@ private fun ChoicePicker(
             }
         },
         confirmButton = {
-            SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
+            SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close)) }
         },
     )
 }
@@ -1745,11 +1745,11 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
                     onClick = { runCatching { gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) } },
                     modifier = Modifier.testTag(DRAWER_WALLPAPER_PICK_TAG),
                 ) {
-                    Text(stringResource(R.string.settings_drawer_wallpaper_pick), color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.settings_drawer_wallpaper_pick))
                 }
                 if (wallpaper != null) {
                     SettingsTextButton(onClick = onClear, modifier = Modifier.testTag(DRAWER_WALLPAPER_REMOVE_TAG)) {
-                        Text(stringResource(R.string.settings_drawer_wallpaper_remove), color = MaterialTheme.colorScheme.onSurface)
+                        Text(stringResource(R.string.settings_drawer_wallpaper_remove))
                     }
                 }
             }

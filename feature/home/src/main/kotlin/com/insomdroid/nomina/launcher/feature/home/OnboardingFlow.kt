@@ -29,12 +29,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -58,6 +55,8 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.insomdroid.nomina.ui.CoverSystemBars
 import com.insomdroid.nomina.ui.DefaultLauncher
 import com.insomdroid.nomina.ui.LauncherIcons
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 
 /** Nomina monochrome setup palette with a restrained Nothing Red accent. */
 private val AURORA_BASE = Color(0xFF080808)
@@ -109,9 +108,7 @@ fun OnboardingFlow(
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = onFinish) {
-                    Text(stringResource(R.string.onboarding_skip), color = Color.White.copy(alpha = 0.8f))
-                }
+                ExpressiveTextButton(text = stringResource(R.string.onboarding_skip), onClick = onFinish)
             }
             Crossfade(
                 targetState = page,
@@ -130,9 +127,7 @@ fun OnboardingFlow(
             ) {
                 // A visible back button — the system back gesture is unreliable on a HOME activity.
                 if (page > 0) {
-                    TextButton(onClick = { page-- }) {
-                        Text(stringResource(R.string.onboarding_back), color = Color.White.copy(alpha = 0.85f))
-                    }
+                    ExpressiveTextButton(text = stringResource(R.string.onboarding_back), onClick = { page-- })
                     Spacer(Modifier.width(10.dp))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -148,15 +143,10 @@ fun OnboardingFlow(
                     }
                 }
                 Spacer(Modifier.weight(1f))
-                Button(
+                ExpressiveButton(
+                    text = stringResource(if (page < 2) R.string.onboarding_next else R.string.onboarding_finish),
                     onClick = { if (page < 2) page++ else onFinish() },
-                    colors = ButtonDefaults.buttonColors(containerColor = ONBOARDING_INVERSE, contentColor = Color.Black),
-                ) {
-                    Text(
-                        stringResource(if (page < 2) R.string.onboarding_next else R.string.onboarding_finish),
-                        color = Color.White,
-                    )
-                }
+                )
             }
         }
     }
@@ -166,14 +156,14 @@ fun OnboardingFlow(
 @Composable
 private fun DotMatrixBackground() {
     Canvas(Modifier.fillMaxSize()) {
-        val spacing = 22.dp.toPx()
-        val radius = 1.1.dp.toPx()
+        val spacing = 40.dp.toPx()
+        val radius = 0.8.dp.toPx()
         var y = spacing * 0.7f
         while (y < size.height) {
             var x = spacing * 0.7f
             while (x < size.width) {
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.12f),
+                    color = Color.White.copy(alpha = 0.075f),
                     radius = radius,
                     center = Offset(x, y),
                 )
@@ -221,12 +211,10 @@ private fun WelcomePage() {
                 style = MaterialTheme.typography.titleMedium,
             )
         } else {
-            Button(
+            ExpressiveButton(
+                text = stringResource(R.string.onboarding_set_default),
                 onClick = { runCatching { setDefault.launch(DefaultLauncher.requestIntent(context)) } },
-                colors = ButtonDefaults.buttonColors(containerColor = ONBOARDING_INVERSE, contentColor = Color.Black),
-            ) {
-                Text(stringResource(R.string.onboarding_set_default), color = Color.White)
-            }
+            )
         }
     }
 }
@@ -367,19 +355,14 @@ private fun PermissionsPage() {
         )
         Spacer(Modifier.height(20.dp))
         if (!(calendar && location && notifAccess)) {
-            Button(
+            ExpressiveButton(
+                text = stringResource(R.string.onboarding_grant_all),
                 onClick = {
                     openNotifAfterChain = true
-                    val perms = arrayOf(
-                        Manifest.permission.READ_CALENDAR,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                    )
+                    val perms = arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.ACCESS_COARSE_LOCATION)
                     permissionsLauncher.launch(perms)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = ONBOARDING_INVERSE, contentColor = Color.Black),
-            ) {
-                Text(stringResource(R.string.onboarding_grant_all), color = Color.White)
-            }
+            )
         }
     }
 }

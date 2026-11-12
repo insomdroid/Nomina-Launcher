@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import com.google.common.truth.Truth.assertThat
 import com.insomdroid.nomina.data.di.MIGRATION_7_8
+import com.insomdroid.nomina.data.di.MIGRATION_8_9
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.Test
@@ -48,7 +49,7 @@ class AppLabelMigrationTest {
         }
 
         val database = Room.databaseBuilder(context, LauncherDatabase::class.java, file.absolutePath)
-            .addMigrations(MIGRATION_7_8)
+            .addMigrations(MIGRATION_7_8, MIGRATION_8_9)
             .allowMainThreadQueries()
             .build()
         try {
@@ -61,7 +62,7 @@ class AppLabelMigrationTest {
                 assertThat(database.appLabelDao().getAll("en-US").map { it.label })
                     .containsExactly("Mail")
             }
-            assertThat(database.openHelper.readableDatabase.version).isEqualTo(8)
+            assertThat(database.openHelper.readableDatabase.version).isEqualTo(9)
         } finally {
             database.close()
         }

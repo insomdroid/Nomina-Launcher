@@ -1235,12 +1235,12 @@ internal fun NothingSwitch(
             checked -> p.bg
             else -> p.thumbOff
         },
-        animationSpec = androidx.compose.animation.core.tween(180),
+        animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)),
         label = "settingsSwitchThumb",
     )
     val thumbX by androidx.compose.animation.core.animateDpAsState(
         targetValue = if (checked) 21.dp else 3.dp,
-        animationSpec = androidx.compose.animation.core.tween(180),
+        animationSpec = tween(durationMillis = 200, easing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)),
         label = "settingsSwitchPosition",
     )
     Box(

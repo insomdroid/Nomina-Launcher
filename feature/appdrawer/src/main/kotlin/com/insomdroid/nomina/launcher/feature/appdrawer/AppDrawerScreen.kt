@@ -43,7 +43,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -139,6 +138,7 @@ import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
+import com.insomdroid.nomina.ui.expressive.ExpressiveCheckbox
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextField
@@ -1125,7 +1125,7 @@ private fun DrawerFolderSheet(
     var showAdd by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     // The sheet is its own window: re-apply the long-press delay setting for the members' long-press.
-    ModalBottomSheet(onDismissRequest = onDismiss) { LongPressDelay {
+    ModalBottomSheet(onDismissRequest = onDismiss, shape = RoundedCornerShape(ExpressiveRadius.sheet)) { LongPressDelay {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1209,6 +1209,7 @@ private fun DrawerFolderSheet(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
+            shape = RoundedCornerShape(ExpressiveRadius.card),
             title = { Text(stringResource(R.string.folder_delete_title)) },
             text = { Text(stringResource(R.string.folder_delete_text, folder.name)) },
             confirmButton = {
@@ -1249,6 +1250,7 @@ private fun AddAppsDialog(apps: List<AppItem>, onConfirm: (List<String>) -> Unit
     }
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         title = { Text(stringResource(R.string.folder_add_apps)) },
         text = {
             Column(modifier = Modifier.heightIn(max = 420.dp)) {
@@ -1278,7 +1280,7 @@ private fun AddAppsDialog(apps: List<AppItem>, onConfirm: (List<String>) -> Unit
                                 .testTag(ADD_APPS_ROW_TAG),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Checkbox(
+                            ExpressiveCheckbox(
                                 checked = checked,
                                 onCheckedChange = { if (it) selected.add(app.key) else selected.remove(app.key) },
                             )

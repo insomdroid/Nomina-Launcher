@@ -306,3 +306,50 @@ fun ExpressiveStatus(
         )
     }
 }
+
+
+/** Compact monochrome checkbox shared by selection lists and dialogs. */
+@Composable
+fun ExpressiveCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val p = LocalExpressivePalette.current
+    Canvas(
+        modifier = modifier
+            .size(20.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .toggleable(
+                value = checked,
+                enabled = enabled,
+                role = Role.Checkbox,
+                onValueChange = onCheckedChange,
+            ),
+    ) {
+        val inset = 1.dp.toPx()
+        val radius = 3.dp.toPx()
+        if (checked) {
+            drawRoundRect(
+                color = p.text,
+                topLeft = Offset(inset, inset),
+                size = androidx.compose.ui.geometry.Size(size.width - inset * 2, size.height - inset * 2),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius, radius),
+            )
+            val start = Offset(size.width * 0.27f, size.height * 0.52f)
+            val middle = Offset(size.width * 0.44f, size.height * 0.68f)
+            val end = Offset(size.width * 0.75f, size.height * 0.34f)
+            drawLine(p.bg, start, middle, strokeWidth = 1.8.dp.toPx())
+            drawLine(p.bg, middle, end, strokeWidth = 1.8.dp.toPx())
+        } else {
+            drawRoundRect(
+                color = if (enabled) p.dim else p.faint,
+                topLeft = Offset(inset, inset),
+                size = androidx.compose.ui.geometry.Size(size.width - inset * 2, size.height - inset * 2),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius, radius),
+                style = Stroke(width = 1.5.dp.toPx()),
+            )
+        }
+    }
+}

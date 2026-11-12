@@ -253,7 +253,7 @@ fun SettingsScreen(
             Box(modifier = Modifier.fillMaxSize().background(palette.bg).graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val spacing = 120.dp.toPx()
-                    val radius = 0.7.dp.toPx()
+                    val radius = 0.65.dp.toPx()
                     var y = spacing / 2f
                     while (y < size.height) {
                         var x = spacing / 2f
@@ -299,7 +299,7 @@ fun SettingsScreen(
                 Text(
                     text = pageTitle,
                     color = palette.text,
-                    style = LauncherTextStyles.settingsTitle,
+                    style = LauncherTextStyles.settingsTitle.copy(fontSize = 32.sp, fontWeight = FontWeight.SemiBold),
                     modifier = Modifier.padding(start = 6.dp, top = 0.dp, bottom = 6.dp),
                 )
 

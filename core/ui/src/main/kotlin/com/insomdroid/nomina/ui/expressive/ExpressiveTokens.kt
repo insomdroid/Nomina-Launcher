@@ -32,6 +32,6 @@ object ExpressiveSpacing {
 object ExpressiveRadius {
     val control = 6.dp
     val card = 8.dp
-    val panel = 8.dp
-    val sheet = 8.dp
+    val panel = 16.dp
+    val sheet = 24.dp
 }

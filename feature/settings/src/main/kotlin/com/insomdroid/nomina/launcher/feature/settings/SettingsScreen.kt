@@ -15,6 +15,21 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.compose.foundation.Canvas
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.selection.toggleable as androidxToggleable
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.setProgress
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,10 +58,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import com.insomdroid.nomina.ui.component.DrawerWallpaperPicture
 import com.insomdroid.nomina.data.DrawerWallpaper
@@ -56,15 +68,11 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.testTag
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.window.Dialog
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,8 +81,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
@@ -214,7 +225,7 @@ fun SettingsScreen(
         }
 
         Surface(modifier = modifier.fillMaxSize(), color = palette.bg) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val spacing = 120.dp.toPx()
                     val radius = 0.7.dp.toPx()
@@ -223,9 +234,10 @@ fun SettingsScreen(
                         var x = spacing / 2f
                         while (x < size.width) {
                             drawCircle(
-                                color = palette.faint.copy(alpha = 0.13f),
+                                color = Color.White.copy(alpha = 0.12f),
                                 radius = radius,
                                 center = Offset(x, y),
+                                blendMode = BlendMode.Difference,
                             )
                             x += spacing
                         }
@@ -1088,22 +1100,26 @@ private fun SettingsFilterChip(
     enabled: Boolean = true,
 ) {
     val p = LocalExpressivePalette.current
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = label,
-        modifier = modifier,
-        enabled = enabled,
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = p.surfaceHi,
-            labelColor = p.text,
-            selectedContainerColor = p.text,
-            selectedLabelColor = p.bg,
-            disabledContainerColor = p.surfaceHi,
-            disabledLabelColor = p.faint,
-            disabledSelectedContainerColor = p.trackOff,
-        ),
-    )
+    val contentColor = when {
+        !enabled -> p.faint
+        selected -> p.bg
+        else -> p.text
+    }
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
+        Row(
+            modifier = modifier
+                .clip(CircleShape)
+                .background(if (selected) p.text else p.surfaceHi)
+                .border(
+                    width = if (selected) 0.dp else 1.dp,
+                    color = if (enabled) p.trackOff else p.trackOff.copy(alpha = 0.45f),
+                    shape = CircleShape,
+                )
+                .clickable(enabled = enabled, role = Role.Checkbox, onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) { label() }
+    }
 }
 
 @Composable
@@ -1113,12 +1129,179 @@ private fun SettingsTextButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     val p = LocalExpressivePalette.current
-    TextButton(
-        onClick = onClick,
-        modifier = modifier,
-        colors = ButtonDefaults.textButtonColors(contentColor = p.text),
+    CompositionLocalProvider(LocalContentColor provides p.text) {
+        Row(
+            modifier = modifier
+                .clip(RoundedCornerShape(6.dp))
+                .clickable(role = Role.Button, onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            content = content,
+        )
+    }
+}
+
+/** Flat monochrome dialog that retains the current picker content and dismissal behavior. */
+@Composable
+private fun AlertDialog(
+    onDismissRequest: () -> Unit,
+    containerColor: Color,
+    title: @Composable () -> Unit,
+    text: @Composable () -> Unit,
+    confirmButton: @Composable () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Surface(
+            modifier = Modifier.widthIn(min = 280.dp, max = 560.dp),
+            color = containerColor,
+            shape = RoundedCornerShape(8.dp),
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                CompositionLocalProvider(LocalContentColor provides LocalExpressivePalette.current.text) { title() }
+                Spacer(Modifier.height(16.dp))
+                text()
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) { confirmButton() }
+            }
+        }
+    }
+}
+
+/** Custom switch with a 48dp hit target and compact monochrome track. */
+@Composable
+internal fun NothingSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
+    val p = LocalExpressivePalette.current
+    val trackColor by androidx.compose.animation.animateColorAsState(
+        targetValue = when {
+            !enabled -> p.trackOff.copy(alpha = 0.55f)
+            checked -> p.text
+            else -> p.trackOff
+        },
+        animationSpec = androidx.compose.animation.core.tween(180),
+        label = "settingsSwitchTrack",
+    )
+    val thumbColor by androidx.compose.animation.animateColorAsState(
+        targetValue = when {
+            !enabled -> p.faint
+            checked -> p.bg
+            else -> p.thumbOff
+        },
+        animationSpec = androidx.compose.animation.core.tween(180),
+        label = "settingsSwitchThumb",
+    )
+    val thumbX by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (checked) 21.dp else 3.dp,
+        animationSpec = androidx.compose.animation.core.tween(180),
+        label = "settingsSwitchPosition",
+    )
+    Box(
+        modifier = modifier
+            .size(width = 48.dp, height = 48.dp)
+            .androidxToggleable(checked, enabled, onCheckedChange),
+        contentAlignment = Alignment.CenterStart,
     ) {
-        content()
+        Box(
+            Modifier.width(42.dp).height(24.dp).clip(CircleShape).background(trackColor),
+        ) {
+            Box(
+                Modifier.offset(x = thumbX, y = 3.dp).size(18.dp).clip(CircleShape).background(thumbColor),
+            )
+        }
+    }
+}
+
+/** Thin Nothing-style slider with keyboard/screen-reader progress semantics and step snapping. */
+@Composable
+internal fun NothingSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int = 0,
+    onValueChangeFinished: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    val p = LocalExpressivePalette.current
+    val thumbRadius = with(androidx.compose.ui.platform.LocalDensity.current) { 6.dp.toPx() }
+    var canvasWidth by remember { mutableIntStateOf(0) }
+
+    fun snap(raw: Float): Float {
+        val bounded = raw.coerceIn(valueRange.start, valueRange.endInclusive)
+        if (steps <= 0) return bounded
+        val intervals = steps + 1
+        val length = (valueRange.endInclusive - valueRange.start).coerceAtLeast(0.000001f)
+        val fraction = (bounded - valueRange.start) / length
+        return (valueRange.start + (fraction * intervals).roundToInt().toFloat() / intervals * length)
+            .coerceIn(valueRange.start, valueRange.endInclusive)
+    }
+    fun updateAt(x: Float) {
+        val usable = (canvasWidth.toFloat() - thumbRadius * 2f).coerceAtLeast(1f)
+        val fraction = ((x - thumbRadius) / usable).coerceIn(0f, 1f)
+        onValueChange(snap(valueRange.start + fraction * (valueRange.endInclusive - valueRange.start)))
+    }
+    val length = (valueRange.endInclusive - valueRange.start).coerceAtLeast(0.000001f)
+    val fraction = ((value.coerceIn(valueRange.start, valueRange.endInclusive) - valueRange.start) / length)
+        .coerceIn(0f, 1f)
+
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .onSizeChanged { canvasWidth = it.width }
+            .pointerInput(canvasWidth, valueRange, steps) {
+                detectTapGestures {
+                    updateAt(it.x)
+                    onValueChangeFinished()
+                }
+            }
+            .pointerInput(canvasWidth, valueRange, steps) {
+                detectDragGestures(
+                    onDragStart = { updateAt(it.x) },
+                    onDragEnd = onValueChangeFinished,
+                    onDragCancel = onValueChangeFinished,
+                    onDrag = { change, _ ->
+                        updateAt(change.position.x)
+                        change.consume()
+                    },
+                )
+            }
+            .semantics {
+                role = Role.Slider
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    value.coerceIn(valueRange.start, valueRange.endInclusive), valueRange, steps,
+                )
+                setProgress { target ->
+                    onValueChange(snap(target))
+                    onValueChangeFinished()
+                    true
+                }
+            },
+    ) {
+        val cy = size.height / 2f
+        val usable = (size.width - thumbRadius * 2f).coerceAtLeast(1f)
+        val thumbX = thumbRadius + usable * fraction
+        drawLine(
+            color = p.trackOff,
+            start = Offset(thumbRadius, cy),
+            end = Offset(size.width - thumbRadius, cy),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = p.text,
+            start = Offset(thumbRadius, cy),
+            end = Offset(thumbX, cy),
+            strokeWidth = 2.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+        drawCircle(color = p.text, radius = thumbRadius, center = Offset(thumbX, cy))
     }
 }
 
@@ -1146,25 +1329,7 @@ internal fun SwitchRow(
                 Text(description, color = p.dim, style = LauncherTextStyles.settingsDescription)
             }
         }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            enabled = enabled,
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = p.text,
-                checkedThumbColor = p.bg,
-                checkedBorderColor = p.text,
-                uncheckedTrackColor = p.trackOff,
-                uncheckedThumbColor = p.thumbOff,
-                uncheckedBorderColor = p.trackOff,
-                disabledCheckedTrackColor = p.trackOff,
-                disabledCheckedThumbColor = p.faint,
-                disabledCheckedBorderColor = p.trackOff,
-                disabledUncheckedTrackColor = p.trackOff.copy(alpha = 0.55f),
-                disabledUncheckedThumbColor = p.faint,
-                disabledUncheckedBorderColor = p.trackOff.copy(alpha = 0.55f),
-            ),
-        )
+        NothingSwitch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
     }
 }
 
@@ -1398,23 +1563,11 @@ private fun SliderRow(
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(1.dp, p.trackOff.copy(alpha = 0.72f), RoundedCornerShape(ExpressiveRadius.card)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(label)
-            Slider(
-                value = value,
-                onValueChange = onValueChange,
-                valueRange = valueRange,
-                colors = SliderDefaults.colors(
-                    thumbColor = p.text,
-                    activeTrackColor = p.text,
-                    inactiveTrackColor = p.trackOff,
-                    activeTickColor = p.text,
-                    inactiveTickColor = p.faint,
-                ),
-            )
+            NothingSlider(value = value, onValueChange = onValueChange, valueRange = valueRange)
         }
     }
 }
@@ -1572,7 +1725,7 @@ private fun LabelColorRow(label: String, selected: Int, onPick: (Int) -> Unit) {
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(label)
@@ -1871,23 +2024,9 @@ private fun HiddenAppsManager(
                             color = p.text,
                             fontSize = 16.sp,
                         )
-                        Switch(
+                        NothingSwitch(
                             checked = app.key in hiddenKeys,
                             onCheckedChange = { onSetHidden(app.key, it) },
-                            colors = SwitchDefaults.colors(
-                                checkedTrackColor = p.text,
-                                checkedThumbColor = p.bg,
-                                checkedBorderColor = p.text,
-                                uncheckedTrackColor = p.trackOff,
-                                uncheckedThumbColor = p.thumbOff,
-                                uncheckedBorderColor = p.trackOff,
-                                disabledCheckedTrackColor = p.trackOff,
-                                disabledCheckedThumbColor = p.faint,
-                                disabledCheckedBorderColor = p.trackOff,
-                                disabledUncheckedTrackColor = p.trackOff.copy(alpha = 0.55f),
-                                disabledUncheckedThumbColor = p.faint,
-                                disabledUncheckedBorderColor = p.trackOff.copy(alpha = 0.55f),
-                            ),
                         )
                     }
                 }

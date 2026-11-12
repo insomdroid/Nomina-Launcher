@@ -50,15 +50,18 @@ import androidx.compose.material3.Surface
 import com.insomdroid.nomina.ui.component.DrawerWallpaperPicture
 import com.insomdroid.nomina.data.DrawerWallpaper
 import androidx.activity.result.PickVisualMediaRequest
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.testTag
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -109,6 +112,7 @@ import com.insomdroid.nomina.ui.expressive.LightExpressivePalette
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
+import com.insomdroid.nomina.ui.launcherDisplayFontFamily
 
 @Composable
 fun SettingsScreen(
@@ -238,7 +242,7 @@ fun SettingsScreen(
                 Text(
                     text = "N O M I N A  /  SYSTEM",
                     color = palette.faint,
-                    style = LauncherTextStyles.settingsEyebrow,
+                    style = LauncherTextStyles.settingsEyebrow.copy(fontFamily = launcherDisplayFontFamily()),
                     modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
                 )
                 val pageTitle = when (selectedSection) {
@@ -750,7 +754,7 @@ private fun ChoicePicker(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
+            SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
         },
     )
 }
@@ -1075,6 +1079,50 @@ private fun RowLabel(text: String, modifier: Modifier = Modifier, color: Color =
 }
 
 @Composable
+private fun SettingsFilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val p = LocalExpressivePalette.current
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = label,
+        modifier = modifier,
+        enabled = enabled,
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = p.surfaceHi,
+            labelColor = p.text,
+            selectedContainerColor = p.text,
+            selectedLabelColor = p.bg,
+            disabledContainerColor = p.surfaceHi,
+            disabledLabelColor = p.faint,
+            disabledSelectedContainerColor = p.trackOff,
+            disabledSelectedLabelColor = p.dim,
+        ),
+    )
+}
+
+@Composable
+private fun SettingsTextButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val p = LocalExpressivePalette.current
+    TextButton(
+        onClick = onClick,
+        modifier = modifier,
+        colors = TextButtonDefaults.textButtonColors(contentColor = p.text),
+    ) {
+        content()
+    }
+}
+
+@Composable
 private fun SwitchRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) =
     SwitchRow(label, description = null, checked, onCheckedChange)
 
@@ -1109,6 +1157,12 @@ internal fun SwitchRow(
                 uncheckedTrackColor = p.trackOff,
                 uncheckedThumbColor = p.thumbOff,
                 uncheckedBorderColor = p.trackOff,
+                disabledCheckedTrackColor = p.trackOff,
+                disabledCheckedThumbColor = p.faint,
+                disabledCheckedBorderColor = p.trackOff,
+                disabledUncheckedTrackColor = p.trackOff.copy(alpha = 0.55f),
+                disabledUncheckedThumbColor = p.faint,
+                disabledUncheckedBorderColor = p.trackOff.copy(alpha = 0.55f),
             ),
         )
     }
@@ -1123,7 +1177,7 @@ private fun StepperRow(label: String, value: Int, min: Int, max: Int, onValueCha
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            StepButton(LauncherIcons.Remove, stringResource(R.string.settings_step_decrease)) {
+            StepButton(LauncherIcons.Remove, stringResource(R.string.settings_step_decrease), enabled = value > min) {
                 if (value > min) onValueChange(value - 1)
             }
             Text(
@@ -1134,7 +1188,7 @@ private fun StepperRow(label: String, value: Int, min: Int, max: Int, onValueCha
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
             )
-            StepButton(LauncherIcons.Add, stringResource(R.string.settings_step_increase)) {
+            StepButton(LauncherIcons.Add, stringResource(R.string.settings_step_increase), enabled = value < max) {
                 if (value < max) onValueChange(value + 1)
             }
         }
@@ -1142,20 +1196,26 @@ private fun StepperRow(label: String, value: Int, min: Int, max: Int, onValueCha
 }
 
 @Composable
-private fun StepButton(@DrawableRes icon: Int, contentDescription: String, onClick: () -> Unit) {
+private fun StepButton(
+    @DrawableRes icon: Int,
+    contentDescription: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
     val p = LocalExpressivePalette.current
     Box(
         modifier = Modifier
             .size(36.dp)
             .clip(CircleShape)
             .background(p.btn)
-            .clickable(onClick = onClick),
+            .border(1.dp, p.trackOff.copy(alpha = if (enabled) 0.8f else 0.35f), CircleShape)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = painterResource(icon),
             contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = if (enabled) p.text else p.faint,
             modifier = Modifier.size(20.dp),
         )
     }
@@ -1339,7 +1399,7 @@ private fun SliderRow(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
         shadowElevation = p.shadow,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)).border(0.5.dp, p.trackOff.copy(alpha = 0.7f), RoundedCornerShape(ExpressiveRadius.card)),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).border(1.dp, p.trackOff.copy(alpha = 0.72f), RoundedCornerShape(ExpressiveRadius.card)),
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             RowLabel(label)
@@ -1351,6 +1411,8 @@ private fun SliderRow(
                     thumbColor = p.text,
                     activeTrackColor = p.text,
                     inactiveTrackColor = p.trackOff,
+                    activeTickColor = p.text,
+                    inactiveTickColor = p.faint,
                 ),
             )
         }
@@ -1450,7 +1512,7 @@ private fun FollowHomeChoiceCard(
                 horizontalArrangement = Arrangement.spacedBy(ExpressiveSpacing.xs),
                 modifier = Modifier.padding(top = 10.dp),
             ) {
-                FilterChip(
+                SettingsFilterChip(
                     selected = followsHome,
                     onClick = onFollowHome,
                     label = { Text(stringResource(R.string.settings_follow_home)) },
@@ -1819,6 +1881,12 @@ private fun HiddenAppsManager(
                                 uncheckedTrackColor = p.trackOff,
                                 uncheckedThumbColor = p.thumbOff,
                                 uncheckedBorderColor = p.trackOff,
+                                disabledCheckedTrackColor = p.trackOff,
+                                disabledCheckedThumbColor = p.faint,
+                                disabledCheckedBorderColor = p.trackOff,
+                                disabledUncheckedTrackColor = p.trackOff.copy(alpha = 0.55f),
+                                disabledUncheckedThumbColor = p.faint,
+                                disabledUncheckedBorderColor = p.trackOff.copy(alpha = 0.55f),
                             ),
                         )
                     }

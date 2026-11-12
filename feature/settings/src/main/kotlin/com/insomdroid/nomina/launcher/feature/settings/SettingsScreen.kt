@@ -73,6 +73,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -227,7 +228,7 @@ fun SettingsScreen(
         }
 
         Surface(modifier = modifier.fillMaxSize(), color = palette.bg) {
-            Box(modifier = Modifier.fillMaxSize().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
+            Box(modifier = Modifier.fillMaxSize().background(palette.bg).graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val spacing = 120.dp.toPx()
                     val radius = 0.7.dp.toPx()
@@ -1107,7 +1108,14 @@ private fun SettingsFilterChip(
         selected -> p.bg
         else -> p.text
     }
-    CompositionLocalProvider(LocalContentColor provides contentColor) {
+    CompositionLocalProvider(
+        LocalContentColor provides contentColor,
+        LocalTextStyle provides LocalTextStyle.current.copy(
+            fontFamily = launcherTechnicalFontFamily(),
+            fontSize = 11.sp,
+            letterSpacing = 0.45.sp,
+        ),
+    ) {
         Row(
             modifier = modifier
                 .clip(CircleShape)
@@ -1132,7 +1140,14 @@ private fun SettingsTextButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     val p = LocalExpressivePalette.current
-    CompositionLocalProvider(LocalContentColor provides p.text) {
+    CompositionLocalProvider(
+        LocalContentColor provides p.text,
+        LocalTextStyle provides LocalTextStyle.current.copy(
+            fontFamily = launcherTechnicalFontFamily(),
+            fontSize = 11.sp,
+            letterSpacing = 0.5.sp,
+        ),
+    ) {
         Row(
             modifier = modifier
                 .clip(RoundedCornerShape(6.dp))

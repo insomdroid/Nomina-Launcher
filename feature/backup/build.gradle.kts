@@ -4,7 +4,6 @@ plugins {
 
 android {
     namespace = "com.insomdroid.nomina.feature.backup"
-    testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 dependencies {
@@ -14,10 +13,4 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(libs.androidx.core.ktx)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.google.truth)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.robolectric)
-    testImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

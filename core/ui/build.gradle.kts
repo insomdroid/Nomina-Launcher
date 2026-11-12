@@ -47,7 +47,6 @@ val generateLauncherFonts = tasks.register<GenerateLauncherFonts>("generateLaunc
 
 android {
     namespace = "com.insomdroid.nomina.ui"
-    testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 androidComponents {
@@ -66,10 +65,4 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.activity.compose)
 
-    // JVM unit tests (pure icon/label sizing); Robolectric for the shortcut popup and LauncherApps calls.
-    testImplementation(libs.junit)
-    testImplementation(libs.google.truth)
-    testImplementation(libs.robolectric)
-    testImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

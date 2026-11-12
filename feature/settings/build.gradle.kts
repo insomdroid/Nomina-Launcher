@@ -5,19 +5,6 @@ plugins {
 android {
     namespace = "com.insomdroid.nomina.feature.settings"
     defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    testOptions.unitTests.isIncludeAndroidResources = true
-}
-
-
-tasks.withType<Test>().configureEach {
-    testLogging {
-        events("failed")
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        showExceptions = true
-        showCauses = true
-        showStackTraces = true
     }
 }
 
@@ -29,12 +16,4 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":feature:backup"))
     implementation(libs.androidx.core.ktx)
-    testImplementation(libs.junit)
-    testImplementation(libs.google.truth)
-    testImplementation(libs.robolectric)
-    testImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.google.truth)
 }

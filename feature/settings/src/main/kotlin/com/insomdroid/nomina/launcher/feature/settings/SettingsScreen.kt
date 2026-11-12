@@ -182,7 +182,29 @@ fun SettingsScreen(
         notifAccessGranted = isNotificationAccessGranted(context)
         onPauseOrDispose { }
     }
-    val palette = if (isSystemInDarkTheme()) DarkExpressivePalette else LightExpressivePalette
+    val palette = if (isSystemInDarkTheme()) {
+        DarkExpressivePalette.copy(
+            bg = Color(0xFF000000),
+            surfaceHi = Color(0xFF0E0E0E),
+            text = Color(0xFFEDEDED),
+            dim = Color(0xFF8C8C8C),
+            faint = Color(0xFF5A5A5A),
+            trackOff = Color(0xFF222222),
+            thumbOff = Color(0xFF333333),
+            btn = Color(0xFF171717),
+        )
+    } else {
+        LightExpressivePalette.copy(
+            bg = Color(0xFFF2F2F2),
+            surfaceHi = Color(0xFFFFFFFF),
+            text = Color(0xFF1C1C1C),
+            dim = Color(0xFF585A5A),
+            faint = Color(0xFF9A9A9A),
+            trackOff = Color(0xFFE5E7EB),
+            thumbOff = Color(0xFFCFCFCF),
+            btn = Color(0xFFEDEDED),
+        )
+    }
 
     BackHandler(enabled = selectedSection != null) { selectedSection = null }
 

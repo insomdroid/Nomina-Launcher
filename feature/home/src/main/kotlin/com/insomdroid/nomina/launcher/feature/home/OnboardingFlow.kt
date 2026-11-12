@@ -45,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
@@ -62,7 +61,9 @@ import com.insomdroid.nomina.ui.LauncherIcons
 
 /** Nomina monochrome setup palette with a restrained Nothing Red accent. */
 private val AURORA_BASE = Color(0xFF080808)
-private val AURORA_BLUE = Color(0xFFE31B3D)
+private val ONBOARDING_INVERSE = Color(0xFFEDEDED)
+private val ONBOARDING_SURFACE = Color(0xFF0E0E0E)
+private val ONBOARDING_MUTED = Color(0xFF8C8C8C)
 
 /**
  * First-run intro shown once on a fresh install, over the whole home screen: welcome +
@@ -140,7 +141,7 @@ fun OnboardingFlow(
                             Modifier
                                 .size(8.dp)
                                 .background(
-                                    if (i == page) AURORA_BLUE else Color.White.copy(alpha = 0.28f),
+                                    if (i == page) ONBOARDING_INVERSE else Color.White.copy(alpha = 0.28f),
                                     CircleShape,
                                 ),
                         )
@@ -149,7 +150,7 @@ fun OnboardingFlow(
                 Spacer(Modifier.weight(1f))
                 Button(
                     onClick = { if (page < 2) page++ else onFinish() },
-                    colors = ButtonDefaults.buttonColors(containerColor = AURORA_BLUE),
+                    colors = ButtonDefaults.buttonColors(containerColor = ONBOARDING_INVERSE, contentColor = Color.Black),
                 ) {
                     Text(
                         stringResource(if (page < 2) R.string.onboarding_next else R.string.onboarding_finish),
@@ -218,20 +219,20 @@ private fun WelcomePage() {
         Text(
             text = stringResource(R.string.onboarding_welcome_text),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White.copy(alpha = 0.85f),
+            color = ONBOARDING_MUTED,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(28.dp))
         if (isDefault) {
             Text(
                 text = stringResource(R.string.onboarding_default_done),
-                color = AURORA_GREEN_LIGHT,
+                color = Color.White,
                 style = MaterialTheme.typography.titleMedium,
             )
         } else {
             Button(
                 onClick = { runCatching { setDefault.launch(DefaultLauncher.requestIntent(context)) } },
-                colors = ButtonDefaults.buttonColors(containerColor = AURORA_BLUE),
+                colors = ButtonDefaults.buttonColors(containerColor = ONBOARDING_INVERSE, contentColor = Color.Black),
             ) {
                 Text(stringResource(R.string.onboarding_set_default), color = Color.White)
             }
@@ -239,7 +240,7 @@ private fun WelcomePage() {
     }
 }
 
-private val AURORA_GREEN_LIGHT = Color(0xFF8FD89E)
+
 
 @Composable
 private fun GesturesPage() {
@@ -267,7 +268,7 @@ private fun GesturesPage() {
             Spacer(Modifier.width(16.dp))
             Text(
                 text = stringResource(R.string.onboarding_gesture_hold),
-                color = Color.White.copy(alpha = 0.9f),
+                color = ONBOARDING_MUTED,
                 style = MaterialTheme.typography.bodyLarge,
             )
         }
@@ -384,7 +385,7 @@ private fun PermissionsPage() {
                     )
                     permissionsLauncher.launch(perms)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = AURORA_BLUE),
+                colors = ButtonDefaults.buttonColors(containerColor = ONBOARDING_INVERSE, contentColor = Color.Black),
             ) {
                 Text(stringResource(R.string.onboarding_grant_all), color = Color.White)
             }
@@ -398,7 +399,7 @@ private fun PermissionRow(title: String, description: String, granted: Boolean, 
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .background(ONBOARDING_SURFACE, RoundedCornerShape(8.dp))
             .clickable(enabled = !granted, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -407,13 +408,13 @@ private fun PermissionRow(title: String, description: String, granted: Boolean, 
             Text(title, color = Color.White, style = MaterialTheme.typography.titleSmall)
             Text(
                 description,
-                color = Color.White.copy(alpha = 0.75f),
+                color = ONBOARDING_MUTED,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
         Text(
             text = if (granted) stringResource(R.string.onboarding_granted) else stringResource(R.string.onboarding_grant),
-            color = if (granted) AURORA_GREEN_LIGHT else Color.White.copy(alpha = 0.9f),
+            color = if (granted) Color.White else ONBOARDING_MUTED,
             style = MaterialTheme.typography.labelLarge,
         )
     }

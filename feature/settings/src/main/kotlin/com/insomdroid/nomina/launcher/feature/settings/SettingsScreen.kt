@@ -62,7 +62,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextButtonDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -1083,7 +1083,7 @@ private fun RowLabel(text: String, modifier: Modifier = Modifier, color: Color =
 private fun SettingsFilterChip(
     selected: Boolean,
     onClick: () -> Unit,
-    label: @Composable RowScope.() -> Unit,
+    label: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
@@ -1102,7 +1102,6 @@ private fun SettingsFilterChip(
             disabledContainerColor = p.surfaceHi,
             disabledLabelColor = p.faint,
             disabledSelectedContainerColor = p.trackOff,
-            disabledSelectedLabelColor = p.dim,
         ),
     )
 }
@@ -1117,7 +1116,7 @@ private fun SettingsTextButton(
     TextButton(
         onClick = onClick,
         modifier = modifier,
-        colors = TextButtonDefaults.textButtonColors(contentColor = p.text),
+        colors = ButtonDefaults.textButtonColors(contentColor = p.text),
     ) {
         content()
     }

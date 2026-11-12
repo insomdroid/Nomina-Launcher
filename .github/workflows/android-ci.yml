@@ -1,6 +1,5 @@
 name: Nomina Release APK
 
-# Build automatically whenever main changes, while keeping manual runs available.
 on:
   push:
     branches:
@@ -17,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: nomina-release-${'{'}{ github.ref } ${'}'}
+  group: nomina-release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,10 +44,10 @@ jobs:
       - name: Validate permanent release signing secrets
         shell: bash
         env:
-          NOMINA_RELEASE_KEYSTORE_BASE64: ${'{'}{ secrets.NOMINA_RELEASE_KEYSTORE_BASE64 } ${'}'}
-          NOMINA_RELEASE_STORE_PASSWORD: ${'{'}{ secrets.NOMINA_RELEASE_STORE_PASSWORD } ${'}'}
-          NOMINA_RELEASE_KEY_ALIAS: ${'{'}{ secrets.NOMINA_RELEASE_KEY_ALIAS } ${'}'}
-          NOMINA_RELEASE_KEY_PASSWORD: ${'{'}{ secrets.NOMINA_RELEASE_KEY_PASSWORD } ${'}'}
+          NOMINA_RELEASE_KEYSTORE_BASE64: ${{ secrets.NOMINA_RELEASE_KEYSTORE_BASE64 }}
+          NOMINA_RELEASE_STORE_PASSWORD: ${{ secrets.NOMINA_RELEASE_STORE_PASSWORD }}
+          NOMINA_RELEASE_KEY_ALIAS: ${{ secrets.NOMINA_RELEASE_KEY_ALIAS }}
+          NOMINA_RELEASE_KEY_PASSWORD: ${{ secrets.NOMINA_RELEASE_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           for name in NOMINA_RELEASE_KEYSTORE_BASE64 NOMINA_RELEASE_STORE_PASSWORD NOMINA_RELEASE_KEY_ALIAS NOMINA_RELEASE_KEY_PASSWORD; do

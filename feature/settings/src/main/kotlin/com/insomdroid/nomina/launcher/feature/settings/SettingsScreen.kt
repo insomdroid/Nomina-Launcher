@@ -316,7 +316,6 @@ if (selectedCategory == null) {
                                     viewModel::setInfiniteScroll,
                                 )
                                 SwitchRow(stringResource(R.string.settings_lock_desktop), s.desktopLocked, viewModel::setDesktopLocked)
-                                }
             ExpressiveActionRow(
                 label = stringResource(R.string.settings_set_default),
                 description = stringResource(if (isDefaultLauncher) R.string.settings_default_current else R.string.settings_default_tap),

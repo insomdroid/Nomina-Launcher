@@ -13,6 +13,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.insomdroid.nomina.ui.LauncherIcons
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -37,7 +38,7 @@ class CollapsibleSectionTest {
 
     private fun show() {
         compose.setContent {
-            CollapsibleSection(title = "Dock", collapsed = collapsed, onToggle = { toggles += it; collapsed = it }) {
+            CollapsibleSection(title = "Dock", icon = LauncherIcons.Dock, collapsed = collapsed, onToggle = { toggles += it; collapsed = it }) {
                 Text("Show the dock")
             }
         }

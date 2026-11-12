@@ -43,7 +43,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,7 +54,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -141,6 +139,9 @@ import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextField
 import com.insomdroid.nomina.ui.expressive.ExpressiveCard
 import com.insomdroid.nomina.ui.expressive.ExpressiveTheme
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
@@ -637,7 +638,7 @@ private fun AppDrawerContent(
                             }
                         }
                     },
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(ExpressiveRadius.control),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = searchPalette.surfaceHi,
                         unfocusedContainerColor = searchPalette.surfaceHi,
@@ -655,7 +656,7 @@ private fun AppDrawerContent(
                         .border(
                             0.75.dp,
                             searchPalette.trackOff.copy(alpha = 0.8f),
-                            RoundedCornerShape(10.dp),
+                            RoundedCornerShape(ExpressiveRadius.control),
                         ),
                 )
             }
@@ -1158,11 +1159,11 @@ private fun DrawerFolderSheet(
                     onPick = onSetIcon,
                 )
                 Spacer(Modifier.width(8.dp))
-                OutlinedTextField(
+                ExpressiveTextField(
                     value = name,
                     onValueChange = { name = it; onRename(it) },
                     singleLine = true,
-                    label = { Text(stringResource(R.string.folder_name_label)) },
+                    placeholder = stringResource(R.string.folder_name_label),
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -1199,8 +1200,8 @@ private fun DrawerFolderSheet(
             }
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { showAdd = true }) { Text(stringResource(R.string.folder_add_apps)) }
-                TextButton(onClick = { confirmDelete = true }) { Text(stringResource(R.string.folder_delete)) }
+                ExpressiveButton(text = stringResource(R.string.folder_add_apps), onClick = { showAdd = true })
+                ExpressiveTextButton(text = stringResource(R.string.folder_delete), onClick = { confirmDelete = true })
             }
             // A row of its own: beside the two text buttons the chevrons overflowed the sheet in
             // Finnish and French (and in English at a large font scale).
@@ -1227,15 +1228,16 @@ private fun DrawerFolderSheet(
             title = { Text(stringResource(R.string.folder_delete_title)) },
             text = { Text(stringResource(R.string.folder_delete_text, folder.name)) },
             confirmButton = {
-                TextButton(
+                ExpressiveTextButton(
+                    text = stringResource(R.string.folder_delete_confirm),
                     onClick = {
                         confirmDelete = false
                         onDelete()
                     },
-                ) { Text(stringResource(R.string.folder_delete_confirm)) }
+                )
             },
             dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.folder_cancel)) }
+                ExpressiveTextButton(text = stringResource(R.string.folder_cancel), onClick = { confirmDelete = false })
             },
         )
     }
@@ -1266,14 +1268,12 @@ private fun AddAppsDialog(apps: List<AppItem>, onConfirm: (List<String>) -> Unit
         title = { Text(stringResource(R.string.folder_add_apps)) },
         text = {
             Column(modifier = Modifier.heightIn(max = 420.dp)) {
-                OutlinedTextField(
+                ExpressiveTextField(
                     value = query,
                     onValueChange = { query = it },
                     singleLine = true,
-                    placeholder = { Text(stringResource(R.string.app_drawer_search_hint)) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(ADD_APPS_SEARCH_TAG),
+                    placeholder = stringResource(R.string.app_drawer_search_hint),
+                    modifier = Modifier.fillMaxWidth().testTag(ADD_APPS_SEARCH_TAG),
                 )
                 if (shown.isEmpty()) {
                     Text(
@@ -1310,12 +1310,13 @@ private fun AddAppsDialog(apps: List<AppItem>, onConfirm: (List<String>) -> Unit
             }
         },
         confirmButton = {
-            TextButton(
+            ExpressiveButton(
+                text = stringResource(R.string.folder_add),
                 onClick = { onConfirm(selected.toList()) },
                 enabled = selected.isNotEmpty(),
-            ) { Text(stringResource(R.string.folder_add)) }
+            )
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.folder_cancel)) } },
+        dismissButton = { ExpressiveTextButton(text = stringResource(R.string.folder_cancel), onClick = onDismiss) },
     )
 }
 
@@ -1339,7 +1340,7 @@ internal fun FrequentAppsCard(
     Surface(
         color = p.surfaceHi,
         shape = RoundedCornerShape(ExpressiveRadius.card),
-        shadowElevation = p.shadow,
+        shadowElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 10.dp),

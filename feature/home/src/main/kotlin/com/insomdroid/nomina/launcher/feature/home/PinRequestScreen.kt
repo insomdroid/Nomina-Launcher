@@ -26,10 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
@@ -57,6 +54,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.insomdroid.nomina.data.PinRequest
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveButtonStyle
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 
 /**
  * A requested widget's preview: the provider for [WidgetPreview] (its own preview, as the widget
@@ -235,21 +235,18 @@ private fun ConfirmContent(state: PinRequestUiState.Confirm, onAdd: () -> Unit, 
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         // Neutral, not the theme's secondary container: that is green in both of ARK's schemes,
         // and the agreed look has a quiet Cancel next to a filled Add.
-        FilledTonalButton(
-            shape = RoundedCornerShape(6.dp),
+        ExpressiveTextButton(
+            text = stringResource(R.string.cancel),
             onClick = onCancel,
             enabled = !state.busy,
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                contentColor = MaterialTheme.colorScheme.primary,
-            ),
-        ) {
-            Text(stringResource(R.string.cancel))
-        }
+        )
         Spacer(Modifier.width(12.dp))
-        Button(onClick = onAdd, enabled = !state.busy, shape = RoundedCornerShape(6.dp)) {
-            Text(stringResource(R.string.pin_request_add))
-        }
+        ExpressiveButton(
+            text = stringResource(R.string.pin_request_add),
+            onClick = onAdd,
+            enabled = !state.busy,
+            style = ExpressiveButtonStyle.Primary,
+        )
     }
 }
 
@@ -262,7 +259,10 @@ private fun NoticeContent(title: String, text: String?, onClose: () -> Unit) {
     }
     Spacer(Modifier.height(24.dp))
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        Button(onClick = onClose, shape = RoundedCornerShape(6.dp)) { Text(stringResource(R.string.pin_request_close)) }
+        ExpressiveButton(
+            text = stringResource(R.string.pin_request_close),
+            onClick = onClose,
+        )
     }
 }
 

@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +28,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.insomdroid.nomina.model.CustomIcon
 import com.insomdroid.nomina.ui.component.PickedIcon
+import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 
 /**
  * The icon editor of something that has no name to edit: a pinned shortcut (issue #23, a browser's
@@ -92,18 +93,27 @@ fun EditIconDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                onSave(picked)
-                leave(picked)
-            }) { Text(stringResource(R.string.rename_save)) }
+            ExpressiveButton(
+                text = stringResource(R.string.rename_save),
+                onClick = {
+                    onSave(picked)
+                    leave(picked)
+                },
+            )
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TextButton(onClick = {
-                    onReset()
-                    leave(null)
-                }) { Text(stringResource(R.string.rename_reset)) }
-                TextButton(onClick = { leave(icon) }) { Text(stringResource(R.string.rename_cancel)) }
+                ExpressiveTextButton(
+                    text = stringResource(R.string.rename_reset),
+                    onClick = {
+                        onReset()
+                        leave(null)
+                    },
+                )
+                ExpressiveTextButton(
+                    text = stringResource(R.string.rename_cancel),
+                    onClick = { leave(icon) },
+                )
             }
         },
     )

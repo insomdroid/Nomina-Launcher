@@ -13,7 +13,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextButtonDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -140,7 +140,7 @@ internal fun ScaleSliderRow(
                             feltBase = null
                         },
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-                        colors = TextButtonDefaults.textButtonColors(contentColor = p.text),
+                        colors = ButtonDefaults.textButtonColors(contentColor = p.text),
                     ) {
                         Text(
                             stringResource(R.string.settings_reset_default, valueText(default)),

@@ -5,7 +5,6 @@ plugins {
     id("arkikeskus.android.application")
     id("arkikeskus.android.compose")
     id("arkikeskus.android.hilt")
-    alias(libs.plugins.baselineprofile)
 }
 
 val keystorePropsFile = rootProject.file("keystore.properties")
@@ -15,7 +14,6 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.insomdroid.nomina"
-    testOptions.unitTests.isIncludeAndroidResources = true
 
     defaultConfig {
         manifestPlaceholders["appLabel"] = "@string/app_name"
@@ -73,24 +71,6 @@ android {
     }
 }
 
-androidComponents {
-    finalizeDsl { extension ->
-        for (name in listOf("nonMinifiedRelease", "benchmarkRelease")) {
-            extension.buildTypes.findByName(name)?.apply {
-                applicationIdSuffix = ".bench"
-                manifestPlaceholders["appLabel"] = "Nomina bench"
-            }
-        }
-    }
-}
-
-baselineProfile {
-    automaticGenerationDuringBuild = false
-    saveInSrc = true
-    mergeIntoMain = true
-    dexLayoutOptimization = true
-}
-
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
@@ -113,10 +93,4 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.profileinstaller)
-    baselineProfile(project(":baselineprofile"))
-    testImplementation(libs.junit)
-    testImplementation(libs.google.truth)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.datastore.preferences)
-    testImplementation(libs.kotlinx.coroutines.test)
 }

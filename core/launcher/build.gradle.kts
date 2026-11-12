@@ -5,17 +5,10 @@ plugins {
 
 android {
     namespace = "com.insomdroid.nomina.launcher"
-    testOptions.unitTests.isIncludeAndroidResources = true
 }
 
 dependencies {
     implementation(project(":core:model"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
-
-    // Robolectric for the lock/unlock sound receiver.
-    testImplementation(libs.junit)
-    testImplementation(libs.google.truth)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.kotlinx.coroutines.test)
 }

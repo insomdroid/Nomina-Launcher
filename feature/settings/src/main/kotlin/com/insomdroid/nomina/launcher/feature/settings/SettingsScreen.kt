@@ -558,6 +558,7 @@ fun SettingsScreen(
                     collapsed = "wallpaper" in s.collapsedSettingsSections,
                     onToggle = { viewModel.setSectionCollapsed("wallpaper", it) },
                 ) {
+                    SettingsGroupLabel(stringResource(R.string.settings_wallpaper_background))
                     DrawerBackdropRows(
                         settings = s,
                         wallpaper = drawerWallpaper,
@@ -660,6 +661,7 @@ fun SettingsScreen(
                         collapsed = "folders" in s.collapsedSettingsSections,
                         onToggle = { viewModel.setSectionCollapsed("folders", it) },
                     ) {
+                        SettingsGroupLabel("Home screen folders")
                         SwitchRow(stringResource(R.string.settings_show_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
                         StepperRow(
                             stringResource(R.string.settings_folder_columns),
@@ -668,6 +670,7 @@ fun SettingsScreen(
                             SettingsRepository.MAX_FOLDER_COLUMNS,
                             viewModel::setFolderColumns,
                         )
+                        SettingsGroupLabel("App drawer folders")
                         SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
                         ExpressiveActionRow(
                             label = stringResource(R.string.settings_drawer_folders),

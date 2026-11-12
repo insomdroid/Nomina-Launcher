@@ -1,19 +1,13 @@
 package com.insomdroid.nomina.feature.settings
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -32,6 +26,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.insomdroid.nomina.designsystem.theme.LauncherTextStyles
 import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import com.insomdroid.nomina.ui.launcherTechnicalFontFamily
 import kotlin.math.roundToInt
 
@@ -92,12 +89,11 @@ internal fun ScaleSliderRow(
     }
     Surface(
         color = p.surfaceHi,
-        shape = RoundedCornerShape(16.dp),
-        shadowElevation = p.shadow,
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .border(1.dp, p.trackOff.copy(alpha = 0.72f), RoundedCornerShape(16.dp)),
+            
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -114,33 +110,22 @@ internal fun ScaleSliderRow(
             if (description != null) {
                 Text(description, color = p.dim, style = LauncherTextStyles.settingsDescription, modifier = Modifier.padding(top = 4.dp))
             }
-            Slider(
+            NothingSlider(
                 value = value,
                 onValueChange = change,
-                onValueChangeFinished = { feltBase = null },
                 valueRange = valueRange,
                 steps = scaleSliderSteps(valueRange, step),
-                colors = SliderDefaults.colors(
-                    thumbColor = p.text,
-                    activeTrackColor = p.text,
-                    inactiveTrackColor = p.trackOff,
-                    activeTickColor = p.text,
-                    inactiveTickColor = p.faint,
-                    disabledThumbColor = p.faint,
-                    disabledActiveTrackColor = p.faint,
-                    disabledInactiveTrackColor = p.trackOff,
-                ),
+                onValueChangeFinished = { feltBase = null },
             )
             // Below the slider, so its appearance never moves the thumb away from the finger.
             if (shown != valueText(default)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(
-                        onClick = {
+                    Row(
+                        modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable {
                             change(default)
                             feltBase = null
-                        },
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-                        colors = ButtonDefaults.textButtonColors(contentColor = p.text),
+                        }.padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             stringResource(R.string.settings_reset_default, valueText(default)),

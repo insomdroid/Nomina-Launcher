@@ -454,7 +454,6 @@ class BackupMapperTest {
             "hidden_apps" to "com.w/W/12",
             "custom_labels" to "com.a/A/5\tMail",
             "drawer_folders" to "1\tF\tcom.a/A/5\tcom.w/W/12",
-            "left_swipe_app_key" to "com.w/W/12",
             "weather_app_key" to "com.a/A/5",
             "home_columns" to 5,
         )
@@ -464,7 +463,6 @@ class BackupMapperTest {
             "hidden_apps", "",
             "custom_labels", "com.a/A/0\tMail",
             "drawer_folders", "1\tF\tcom.a/A/0",
-            "left_swipe_app_key", "",
             "weather_app_key", "com.a/A/0",
             "home_columns", 5,
         )

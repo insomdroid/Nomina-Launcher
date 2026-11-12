@@ -353,7 +353,7 @@ class SettingsRepository @Inject constructor(
     }
     suspend fun setAutoResizeIcons(value: Boolean) = edit { it[Keys.AUTO_RESIZE_ICONS] = value }
     suspend fun setReshapeLegacyIcons(value: String) = edit {
-        it[Keys.RESHAPE_LEGACY_ICONS] = if (value in LauncherSettings.RESHAPE_LEGACY_MODES) value else LauncherSettings.RESHAPE_UNTHEMED
+        it[Keys.RESHAPE_LEGACY_ICONS] = if (value in LauncherSettings.RESHAPE_LEGACY_MODES) value else LauncherSettings.RESHAPE_OFF
     }
     suspend fun setInfiniteScroll(value: Boolean) = edit { it[Keys.INFINITE_SCROLL] = value }
     suspend fun setShowNotificationDots(value: Boolean) = edit { it[Keys.SHOW_NOTIF_DOTS] = value }

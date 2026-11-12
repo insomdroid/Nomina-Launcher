@@ -864,7 +864,7 @@ class SettingsRepositoryTest {
         assertThat(settings.drawerColumns).isEqualTo(5)
         assertThat(settings.appLabelColor).isEqualTo(0xFF000000.toInt())
         assertThat(settings.drawerLabelColor).isEqualTo(0xFFFFFFFF.toInt())
-        assertThat(settings.dockBackgroundOpacity).isEqualTo(0.35f) // not a number: dropped, the default is back
+        assertThat(settings.dockBackgroundOpacity).isEqualTo(LauncherSettings.DEFAULT_DOCK_BACKGROUND) // not a number: dropped, the default is back
     }
     @Test
     fun reshapeLegacyIconsDefaultsToOffAndRoundTrips() = runTest {

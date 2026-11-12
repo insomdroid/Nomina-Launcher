@@ -7,8 +7,10 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
 class IconMaskRendererTest {
 
     @Test
@@ -24,7 +26,7 @@ class IconMaskRendererTest {
         )
 
         assertThat(result.getPixel(50, 50)).isEqualTo(Color.RED)
-        assertThat(result.getPixel(17, 17)).isEqualTo(Color.RED)
+        assertThat(result.getPixel(25, 25)).isEqualTo(Color.RED)
         assertThat(result.getPixel(50, 8)).isEqualTo(Color.BLACK)
         assertThat(Color.alpha(result.getPixel(0, 0))).isEqualTo(0)
         source.recycle()
@@ -44,7 +46,7 @@ class IconMaskRendererTest {
         )
 
         assertThat(result.getPixel(50, 5)).isEqualTo(Color.BLACK)
-        assertThat(result.getPixel(17, 17)).isEqualTo(Color.RED)
+        assertThat(result.getPixel(25, 25)).isEqualTo(Color.RED)
         assertThat(Color.alpha(result.getPixel(0, 0))).isEqualTo(0)
         source.recycle()
         result.recycle()

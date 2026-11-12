@@ -34,6 +34,7 @@ class AppLabelMigrationTest {
                 home.getJSONArray("indices").getJSONObject(0).getString("createSql")
                     .replace("${'$'}{TABLE_NAME}", home.getString("tableName")),
             )
+            db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
             val setupQueries = schema.getJSONArray("setupQueries")
             for (index in 0 until setupQueries.length()) {
                 db.execSQL(setupQueries.getString(index))

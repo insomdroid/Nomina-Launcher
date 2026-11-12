@@ -110,6 +110,20 @@ import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveSpacing
 
+private fun settingsCategoryHeader(category: String): Pair<String, String> = when (category) {
+    "home" -> "Home screen" to "Layout, pages and behavior"
+    "dock" -> "Dock" to "Visibility, spacing and behavior"
+    "drawer" -> "App drawer" to "Grid, search and background"
+    "icons" -> "Icons" to "Packs, shapes and appearance"
+    "folders" -> "Folders" to "Home screen and app drawer folders"
+    "gestures" -> "Gestures" to "Navigation and shortcuts"
+    "notifications" -> "Notifications" to "Badges and indicators"
+    "widgets" -> "Widgets" to "Weather and widget permissions"
+    "backup" -> "Backup" to "Export and restore"
+    "about" -> "About" to "Version and feedback"
+    else -> "" to ""
+}
+
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
@@ -132,7 +146,7 @@ fun SettingsScreen(
     var showHiddenManager by rememberSaveable { mutableStateOf(false) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
-    var settingsSearch by rememberSaveable { mutableStateOf("") }
+    var settingsSearch by rememberSaveable { mutableStateOf("")
     var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
@@ -234,549 +248,374 @@ fun SettingsScreen(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 24.dp),
             ) {
-                BackHandler(enabled = selectedCategory != null) { selectedCategory = null }
-                if (selectedCategory == null) {
-                    Text(
-                        text = "N O M I N A  /  SYSTEM",
-                        color = palette.faint,
-                        style = LauncherTextStyles.settingsEyebrow,
-                        modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_title),
-                        color = palette.text,
-                        style = LauncherTextStyles.settingsTitle,
-                        modifier = Modifier.padding(start = 6.dp, bottom = 12.dp),
-                    )
-                    androidx.compose.material3.OutlinedTextField(
-                        value = settingsSearch,
-                        onValueChange = { settingsSearch = it },
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                        singleLine = true,
-                        placeholder = { Text("Search settings…") },
-                    )
-                    val categories = listOf(
-                        Triple("home", "", "Home screen|Layout, pages and behavior"),
-                        Triple("dock", "", "Dock|Visibility, spacing, behavior"),
-                        Triple("drawer", "", "App drawer|Grid, search and background"),
-                        Triple("icons", "", "Icons|Packs, shapes, appearance"),
-                        Triple("folders", "", "Folders|Layout and appearance"),
-                        Triple("gestures", "", "Gestures|Navigation and shortcuts"),
-                        Triple("notifications", "", "Notifications|Badges and indicators"),
-                        Triple("widgets", "", "Widgets|Weather and widget appearance"),
-                        Triple("backup", "", "Backup|Export and restore"),
-                        Triple("about", "", "About|Version and feedback"),
-                    )
-                    val query = settingsSearch.trim().lowercase()
-                    val keywords = mapOf(
-                        "home" to listOf("grid", "columns", "rows", "page", "status bar", "default launcher"),
-                        "dock" to listOf("auto hide", "opacity", "bottom spacing", "dock icons", "show dock"),
-                        "drawer" to listOf("search", "scrubber", "frequent apps", "hidden apps", "sorting", "wallpaper", "background", "blur"),
-                        "icons" to listOf("icon pack", "icon shape", "resize", "reshape", "legacy"),
-                        "folders" to listOf("folder", "folder columns", "folder names"),
-                        "gestures" to listOf("swipe", "double tap", "long press"),
-                        "notifications" to listOf("notification", "badge", "dot", "count"),
-                        "widgets" to listOf("weather", "calendar", "location", "widget background", "widget inset"),
-                        "backup" to listOf("export", "restore", "backup"),
-                        "about" to listOf("version", "feedback", "update"),
-                    )
-                    val filtered = categories.filter { row ->
-                        query.isBlank() || row.third.lowercase().contains(query) ||
-                            keywords[row.first].orEmpty().any { it.contains(query) || query.contains(it) }
-                    }
-                    if (query.isNotBlank()) {
-                        Text(
-                            text = "${filtered.size} RESULT${if (filtered.size == 1) "" else "S"} FOUND",
-                            color = palette.dim,
-                            style = LauncherTextStyles.settingsEyebrow,
-                            modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 8.dp),
-                        )
-                    }
-                    filtered.forEach { row ->
-                        val parts = row.third.split("|")
-                        Row(
-                            modifier = Modifier.fillMaxWidth().clickable { selectedCategory = row.first }
-                                .padding(horizontal = 6.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(parts[0], color = palette.text, style = LauncherTextStyles.settingsRowLabel)
-                                Text(parts[1], color = palette.dim, style = LauncherTextStyles.settingsDescription)
-                            }
-                            Text("›", color = palette.text, fontSize = 24.sp)
-                        }
-                        androidx.compose.material3.HorizontalDivider(color = palette.trackOff.copy(alpha = 0.65f))
-                    }
-                    if (query.isNotBlank() && filtered.isEmpty()) {
-                        Text("No matching settings", color = palette.dim, modifier = Modifier.padding(12.dp))
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { selectedCategory = null }
-                            .padding(top = 18.dp, bottom = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text("‹", color = palette.text, fontSize = 28.sp, modifier = Modifier.padding(end = 16.dp))
-                        Text("SETTINGS  /  ${selectedCategory?.uppercase().orEmpty()}", color = palette.dim, style = LauncherTextStyles.settingsEyebrow)
-                    }
-                    Text(
-                        text = when (selectedCategory) {
-                            "home" -> "Home screen"
-                            "dock" -> "Dock"
-                            "drawer" -> "App drawer"
-                            "icons" -> "Icons"
-                            "folders" -> "Folders"
-                            "gestures" -> "Gestures"
-                            "notifications" -> "Notifications"
-                            "widgets" -> "Widgets"
-                            "backup" -> "Backup"
-                            else -> "About"
-                        },
-                        color = palette.text,
-                        style = LauncherTextStyles.settingsTitle,
-                        modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
-                    )
-                    Text(
-                        text = when (selectedCategory) {
-                            "home" -> "Layout and behavior of your home screen."
-                            "dock" -> "Control the appearance and behavior of your dock."
-                            "drawer" -> "Organize apps and control the app drawer."
-                            "icons" -> "Choose icon packs, shapes and sizing."
-                            "folders" -> "Manage folder layout, names and app drawer folders."
-                            "gestures" -> "Control navigation gestures and shortcuts."
-                            "notifications" -> "Manage notification badges and indicators."
-                            "widgets" -> "Configure weather and widget appearance."
-                            "backup" -> "Export and restore your Nomina settings."
-                            else -> "Version information and feedback."
-                        },
-                        color = palette.dim,
-                        style = LauncherTextStyles.settingsDescription,
-                        modifier = Modifier.padding(start = 6.dp, bottom = 16.dp),
-                    )
-                }
-                if (selectedCategory == "home") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_home),
-                    icon = LauncherIcons.Home,
-                    collapsed = "home" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("home", it) },
-                ) {
-                    StepperRow(stringResource(R.string.settings_columns), s.homeColumns, SettingsRepository.MIN_COLUMNS, SettingsRepository.MAX_COLUMNS, viewModel::setHomeColumns)
-                    StepperRow(stringResource(R.string.settings_rows), s.homeRows, SettingsRepository.MIN_ROWS, SettingsRepository.MAX_ROWS, viewModel::setHomeRows)
-                    SwitchRow(stringResource(R.string.settings_show_labels), s.showHomeLabels, viewModel::setShowHomeLabels)
-                    SwitchRow("Hide status bar", s.hideStatusBar, viewModel::setHideStatusBar)
-                    SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineHomeLabels, viewModel::setTwoLineHomeLabels)
-                    SwitchRow(stringResource(R.string.settings_page_indicator), s.showPageIndicator, viewModel::setShowPageIndicator)
-                    if (s.showPageIndicator) {
-                        ExpressiveActionRow(
-                            label = stringResource(R.string.settings_home_page_marker),
-                            description = stringResource(
-                                when (s.homePageMarker) {
-                                    LauncherSettings.MARKER_HOUSE -> R.string.settings_home_page_marker_house
-                                    else -> R.string.settings_home_page_marker_ring
-                                },
-                            ),
-                        ) { showHomeMarkerPicker = true }
-                    }
-                    PageSwitchSpeedRow(selected = s.pageSwitchSpeed) { showPageSpeedPicker = true }
-                    SwitchRow(
-                        stringResource(R.string.settings_infinite_scroll),
-                        stringResource(R.string.settings_infinite_scroll_desc),
-                        s.infiniteScroll,
-                        viewModel::setInfiniteScroll,
-                    )
-                    SwitchRow(stringResource(R.string.settings_lock_desktop), s.desktopLocked, viewModel::setDesktopLocked)
-                }
-                }
 
-                if (selectedCategory == "dock") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_dock),
-                    icon = LauncherIcons.Dock,
-                    collapsed = "dock" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("dock", it) },
-                ) {
-                    SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
-                    SwitchRow(stringResource(R.string.settings_dock_auto_hide), s.autoHideDock, viewModel::setAutoHideDock)
-                    StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 10, viewModel::setDockColumns)
-                    Text(
-                        text = stringResource(R.string.settings_dock_icons_desc),
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
-                        style = LauncherTextStyles.settingsSupportingText,
-                        color = palette.dim,
-                    )
-                    SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
-                    DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
-                    DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
-                    DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
-                }
-                }
+BackHandler(enabled = selectedCategory != null) { selectedCategory = null }
+if (selectedCategory == null) {
+    Text("N O M I N A  / SYSTEM", color = palette.faint, style = LauncherTextStyles.settingsEyebrow, modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 2.dp))
+    Text(stringResource(R.string.settings_title), color = palette.text, style = LauncherTextStyles.settingsTitle, modifier = Modifier.padding(start = 6.dp, bottom = 12.dp))
+    androidx.compose.material3.OutlinedTextField(value = settingsSearch, onValueChange = { settingsSearch = it }, modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), singleLine = true, placeholder = { Text("Search settings…") })
+    val categories = listOf(
+        Triple("home", "Home screen|Layout, pages and behavior", "grid columns rows page status bar default launcher"),
+        Triple("dock", "Dock|Visibility, spacing and behavior", "auto hide opacity bottom spacing dock icons"),
+        Triple("drawer", "App drawer|Grid, search and background", "search scrubber frequent apps hidden apps sorting wallpaper background blur"),
+        Triple("icons", "Icons|Packs, shapes and appearance", "icon pack icon shape resize reshape legacy"),
+        Triple("folders", "Folders|Home screen and app drawer folders", "folder folder columns folder names"),
+        Triple("gestures", "Gestures|Navigation and shortcuts", "swipe double tap long press"),
+        Triple("notifications", "Notifications|Badges and indicators", "notification badge dot count access"),
+        Triple("widgets", "Widgets|Weather and widget permissions", "weather calendar location widget background widget inset"),
+        Triple("backup", "Backup|Export and restore", "export restore backup"),
+        Triple("about", "About|Version and feedback", "version feedback update"),
+    )
+    val query = settingsSearch.trim().lowercase()
+    val filtered = categories.filter { row -> query.isBlank() || row.second.lowercase().contains(query) || row.third.split(" ").any { it.contains(query) || query.contains(it) } }
+    if (query.isNotBlank()) Text("${filtered.size} RESULT${if (filtered.size == 1) "" else "S"} FOUND", color = palette.dim, style = LauncherTextStyles.settingsEyebrow, modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 8.dp))
+    filtered.forEach { row ->
+        val parts = row.second.split("|")
+        Row(modifier = Modifier.fillMaxWidth().clickable { selectedCategory = row.first }.padding(horizontal = 6.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(parts[0], color = palette.text, style = LauncherTextStyles.settingsRowLabel)
+                Text(parts[1], color = palette.dim, style = LauncherTextStyles.settingsDescription)
+            }
+            Text("›", color = palette.text, fontSize = 24.sp)
+        }
+        androidx.compose.material3.HorizontalDivider(color = palette.trackOff.copy(alpha = 0.65f))
+    }
+    if (query.isNotBlank() && filtered.isEmpty()) Text("No matching settings", color = palette.dim, modifier = Modifier.padding(12.dp))
+} else {
+    Row(modifier = Modifier.fillMaxWidth().clickable { selectedCategory = null }.padding(top = 18.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("‹", color = palette.text, fontSize = 28.sp, modifier = Modifier.padding(end = 16.dp))
+        Text("SETTINGS", color = palette.dim, style = LauncherTextStyles.settingsEyebrow)
+    }
+    val page = settingsCategoryHeader(selectedCategory.orEmpty())
+    Text(page.first, color = palette.text, style = LauncherTextStyles.settingsTitle, modifier = Modifier.padding(start = 6.dp, bottom = 8.dp))
+    Text(page.second, color = palette.dim, style = LauncherTextStyles.settingsDescription, modifier = Modifier.padding(start = 6.dp, bottom = 16.dp))
+    if (selectedCategory == "home") {
+        Column {
+                                StepperRow(stringResource(R.string.settings_columns), s.homeColumns, SettingsRepository.MIN_COLUMNS, SettingsRepository.MAX_COLUMNS, viewModel::setHomeColumns)
+                                StepperRow(stringResource(R.string.settings_rows), s.homeRows, SettingsRepository.MIN_ROWS, SettingsRepository.MAX_ROWS, viewModel::setHomeRows)
+                                SwitchRow(stringResource(R.string.settings_show_labels), s.showHomeLabels, viewModel::setShowHomeLabels)
+                                SwitchRow("Hide status bar", s.hideStatusBar, viewModel::setHideStatusBar)
+                                SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineHomeLabels, viewModel::setTwoLineHomeLabels)
+                                SwitchRow(stringResource(R.string.settings_page_indicator), s.showPageIndicator, viewModel::setShowPageIndicator)
+                                if (s.showPageIndicator) {
+                                    ExpressiveActionRow(
+                                        label = stringResource(R.string.settings_home_page_marker),
+                                        description = stringResource(
+                                            when (s.homePageMarker) {
+                                                LauncherSettings.MARKER_HOUSE -> R.string.settings_home_page_marker_house
+                                                else -> R.string.settings_home_page_marker_ring
+                                            },
+                                        ),
+                                    ) { showHomeMarkerPicker = true }
+                                }
+                                PageSwitchSpeedRow(selected = s.pageSwitchSpeed) { showPageSpeedPicker = true }
+                                SwitchRow(
+                                    stringResource(R.string.settings_infinite_scroll),
+                                    stringResource(R.string.settings_infinite_scroll_desc),
+                                    s.infiniteScroll,
+                                    viewModel::setInfiniteScroll,
+                                )
+                                SwitchRow(stringResource(R.string.settings_lock_desktop), s.desktopLocked, viewModel::setDesktopLocked)
+                                }
+            ExpressiveActionRow(
+                label = stringResource(R.string.settings_set_default),
+                description = stringResource(if (isDefaultLauncher) R.string.settings_default_current else R.string.settings_default_tap),
+            ) { runCatching { setDefaultLauncher.launch(DefaultLauncher.requestIntent(context)) } }
+        }
+    }
 
-                if (selectedCategory == "drawer") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_drawer),
-                    icon = LauncherIcons.AppsGrid,
-                    collapsed = "drawer" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("drawer", it) },
-                ) {
-                    StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
-                    SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
-                    SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
-                    SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
-                    SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
-                    SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
-                    SwitchRow(
-                        stringResource(R.string.settings_hide_home_apps),
-                        stringResource(R.string.settings_hide_home_apps_desc),
-                        s.hideHomeAppsFromDrawer,
-                        viewModel::setHideHomeAppsFromDrawer,
-                    )
-                    SwitchRow(stringResource(R.string.settings_drawer_open_top), s.drawerOpensAtTop, viewModel::setDrawerOpensAtTop)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_hidden_apps),
-                        description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
-                    ) { showHiddenManager = true }
-                }
-                }
+    if (selectedCategory == "dock") {
+        Column {
+                                SwitchRow(stringResource(R.string.settings_dock_show), s.dockEnabled, viewModel::setDockEnabled)
+                                SwitchRow(stringResource(R.string.settings_dock_auto_hide), s.autoHideDock, viewModel::setAutoHideDock)
+                                StepperRow(stringResource(R.string.settings_dock_icons), s.dockColumns, 3, 10, viewModel::setDockColumns)
+                                Text(
+                                    text = stringResource(R.string.settings_dock_icons_desc),
+                                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp),
+                                    style = LauncherTextStyles.settingsSupportingText,
+                                    color = palette.dim,
+                                )
+                                SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
+                                DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
+                                DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
+                                DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
+        }
+    }
 
-                if (selectedCategory == "icons") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_icons_typography),
-                    icon = LauncherIcons.Appearance,
-                    collapsed = "icons" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("icons", it) },
-                ) {
-                    SettingsGroupLabel(stringResource(R.string.settings_app_icons_group))
-                    val iconPackName = iconPacks.firstOrNull { it.packageName == s.iconPackPackage }?.label
-                        ?: stringResource(R.string.settings_icon_pack_system)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_icon_pack),
-                        description = iconPackName,
-                    ) { showIconPackPicker = true }
-                    IconShapeRow(selected = s.iconShape, onPick = viewModel::setIconShape)
-                    SwitchRow(
-                        stringResource(R.string.settings_auto_resize_icons),
-                        stringResource(R.string.settings_auto_resize_icons_desc),
-                        s.autoResizeIcons,
-                        viewModel::setAutoResizeIcons,
-                    )
-                    IconReshapeRow(
-                        selected = s.reshapeLegacyIcons,
-                        onPick = viewModel::setReshapeLegacyIcons,
-                    )
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_home_icon_size),
-                        value = s.iconScale,
-                        onValueChange = viewModel::setIconScale,
-                        valueRange = 0.8f..1.3f,
-                        valueText = percentText,
-                    )
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_dock_icon_size),
-                        value = s.dockIconScale,
-                        followsHome = s.dockIconScaleFollowsHome,
-                        onFollowHome = { viewModel.setDockIconScale(null) },
-                        onCustom = { viewModel.setDockIconScale(s.dockIconScale) },
-                        onValueChange = viewModel::setDockIconScale,
-                        valueRange = 0.8f..1.3f,
-                        valueText = percentText,
-                    )
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_drawer_icon_size),
-                        value = s.drawerIconScale,
-                        followsHome = s.drawerIconScaleFollowsHome,
-                        onFollowHome = { viewModel.setDrawerIconScale(null) },
-                        onCustom = { viewModel.setDrawerIconScale(s.drawerIconScale) },
-                        onValueChange = viewModel::setDrawerIconScale,
-                        valueRange = 0.8f..1.3f,
-                        valueText = percentText,
-                    )
+    if (selectedCategory == "drawer") {
+        Column {
+                                StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
+                                SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
+                                SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
+                                SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
+                                SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
+                                SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
+                                SwitchRow(
+                                    stringResource(R.string.settings_hide_home_apps),
+                                    stringResource(R.string.settings_hide_home_apps_desc),
+                                    s.hideHomeAppsFromDrawer,
+                                    viewModel::setHideHomeAppsFromDrawer,
+                                )
+                                SwitchRow(stringResource(R.string.settings_drawer_open_top), s.drawerOpensAtTop, viewModel::setDrawerOpensAtTop)
+                                ExpressiveActionRow(
+                                    label = stringResource(R.string.settings_hidden_apps),
+                                    description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
+                                ) { showHiddenManager = true }
+                                DrawerBackdropRows(
+                                    settings = s,
+                                    wallpaper = drawerWallpaper,
+                                    blurAvailability = rememberBlurAvailability(),
+                                    actions = DrawerBackdropActions(
+                                        onColor = viewModel::setDrawerBackgroundColor,
+                                        onColorOpacity = viewModel::setDrawerBackgroundOpacity,
+                                        onPickPicture = viewModel::importDrawerWallpaper,
+                                        onClearPicture = viewModel::clearDrawerWallpaper,
+                                        onPictureDim = viewModel::setDrawerPictureDim,
+                                        onBlur = viewModel::setBlurBehindDrawer,
+                                        onBlurStrength = viewModel::setDrawerBlurStrength,
+                                    ),
+                                )
+        }
+    }
 
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_home_label_size),
-                        value = s.appLabelTextScale,
-                        onValueChange = viewModel::setAppLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_dock_label_size),
-                        value = s.dockLabelTextScale,
-                        followsHome = s.dockLabelTextScaleFollowsHome,
-                        onFollowHome = { viewModel.setDockLabelTextScale(null) },
-                        onCustom = { viewModel.setDockLabelTextScale(s.dockLabelTextScale) },
-                        onValueChange = viewModel::setDockLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_drawer_label_size),
-                        value = s.drawerLabelTextScale,
-                        followsHome = s.drawerLabelTextScaleFollowsHome,
-                        onFollowHome = { viewModel.setDrawerLabelTextScale(null) },
-                        onCustom = { viewModel.setDrawerLabelTextScale(s.drawerLabelTextScale) },
-                        onValueChange = viewModel::setDrawerLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    LabelColorRow(
-                        label = stringResource(R.string.settings_home_label_color),
-                        selected = s.appLabelColor,
-                        onPick = viewModel::setAppLabelColor,
-                    )
-                    FollowHomeColorRow(
-                        label = stringResource(R.string.settings_dock_label_color),
-                        followsHome = s.dockLabelColorFollowsHome,
-                        selected = s.dockLabelColor ?: s.appLabelColor,
-                        onFollowHome = { viewModel.setDockLabelColor(null) },
-                        onCustom = { viewModel.setDockLabelColor(s.dockLabelColor ?: s.appLabelColor) },
-                        onPick = viewModel::setDockLabelColor,
-                    )
-                    DrawerLabelColorModeRow(
-                        mode = s.drawerLabelColorMode,
-                        onPick = { mode ->
-                            viewModel.setDrawerLabelColorMode(mode)
-                            if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.drawerLabelColor == null) {
-                                viewModel.setDrawerLabelColor(s.appLabelColor)
-                            }
-                        },
-                    )
-                    if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
-                        LabelColorRow(
-                            label = stringResource(R.string.settings_drawer_label_color),
-                            selected = s.drawerLabelColor ?: s.appLabelColor,
-                            onPick = viewModel::setDrawerLabelColor,
-                        )
-                    }
-                }
-                }
+    if (selectedCategory == "icons") {
+        Column {
+                                SettingsGroupLabel(stringResource(R.string.settings_app_icons_group))
+                                val iconPackName = iconPacks.firstOrNull { it.packageName == s.iconPackPackage }?.label
+                                    ?: stringResource(R.string.settings_icon_pack_system)
+                                ExpressiveActionRow(
+                                    label = stringResource(R.string.settings_icon_pack),
+                                    description = iconPackName,
+                                ) { showIconPackPicker = true }
+                                IconShapeRow(selected = s.iconShape, onPick = viewModel::setIconShape)
+                                SwitchRow(
+                                    stringResource(R.string.settings_auto_resize_icons),
+                                    stringResource(R.string.settings_auto_resize_icons_desc),
+                                    s.autoResizeIcons,
+                                    viewModel::setAutoResizeIcons,
+                                )
+                                IconReshapeRow(
+                                    selected = s.reshapeLegacyIcons,
+                                    onPick = viewModel::setReshapeLegacyIcons,
+                                )
+                                ScaleSliderRow(
+                                    label = stringResource(R.string.settings_home_icon_size),
+                                    value = s.iconScale,
+                                    onValueChange = viewModel::setIconScale,
+                                    valueRange = 0.8f..1.3f,
+                                    valueText = percentText,
+                                )
+                                FollowHomeScaleRow(
+                                    label = stringResource(R.string.settings_dock_icon_size),
+                                    value = s.dockIconScale,
+                                    followsHome = s.dockIconScaleFollowsHome,
+                                    onFollowHome = { viewModel.setDockIconScale(null) },
+                                    onCustom = { viewModel.setDockIconScale(s.dockIconScale) },
+                                    onValueChange = viewModel::setDockIconScale,
+                                    valueRange = 0.8f..1.3f,
+                                    valueText = percentText,
+                                )
+                                FollowHomeScaleRow(
+                                    label = stringResource(R.string.settings_drawer_icon_size),
+                                    value = s.drawerIconScale,
+                                    followsHome = s.drawerIconScaleFollowsHome,
+                                    onFollowHome = { viewModel.setDrawerIconScale(null) },
+                                    onCustom = { viewModel.setDrawerIconScale(s.drawerIconScale) },
+                                    onValueChange = viewModel::setDrawerIconScale,
+                                    valueRange = 0.8f..1.3f,
+                                    valueText = percentText,
+                                )
+            
+                                ScaleSliderRow(
+                                    label = stringResource(R.string.settings_home_label_size),
+                                    value = s.appLabelTextScale,
+                                    onValueChange = viewModel::setAppLabelTextScale,
+                                    valueRange = 0.8f..1.6f,
+                                    valueText = percentText,
+                                )
+                                FollowHomeScaleRow(
+                                    label = stringResource(R.string.settings_dock_label_size),
+                                    value = s.dockLabelTextScale,
+                                    followsHome = s.dockLabelTextScaleFollowsHome,
+                                    onFollowHome = { viewModel.setDockLabelTextScale(null) },
+                                    onCustom = { viewModel.setDockLabelTextScale(s.dockLabelTextScale) },
+                                    onValueChange = viewModel::setDockLabelTextScale,
+                                    valueRange = 0.8f..1.6f,
+                                    valueText = percentText,
+                                )
+                                FollowHomeScaleRow(
+                                    label = stringResource(R.string.settings_drawer_label_size),
+                                    value = s.drawerLabelTextScale,
+                                    followsHome = s.drawerLabelTextScaleFollowsHome,
+                                    onFollowHome = { viewModel.setDrawerLabelTextScale(null) },
+                                    onCustom = { viewModel.setDrawerLabelTextScale(s.drawerLabelTextScale) },
+                                    onValueChange = viewModel::setDrawerLabelTextScale,
+                                    valueRange = 0.8f..1.6f,
+                                    valueText = percentText,
+                                )
+                                LabelColorRow(
+                                    label = stringResource(R.string.settings_home_label_color),
+                                    selected = s.appLabelColor,
+                                    onPick = viewModel::setAppLabelColor,
+                                )
+                                FollowHomeColorRow(
+                                    label = stringResource(R.string.settings_dock_label_color),
+                                    followsHome = s.dockLabelColorFollowsHome,
+                                    selected = s.dockLabelColor ?: s.appLabelColor,
+                                    onFollowHome = { viewModel.setDockLabelColor(null) },
+                                    onCustom = { viewModel.setDockLabelColor(s.dockLabelColor ?: s.appLabelColor) },
+                                    onPick = viewModel::setDockLabelColor,
+                                )
+                                DrawerLabelColorModeRow(
+                                    mode = s.drawerLabelColorMode,
+                                    onPick = { mode ->
+                                        viewModel.setDrawerLabelColorMode(mode)
+                                        if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.drawerLabelColor == null) {
+                                            viewModel.setDrawerLabelColor(s.appLabelColor)
+                                        }
+                                    },
+                                )
+                                if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
+                                    LabelColorRow(
+                                        label = stringResource(R.string.settings_drawer_label_color),
+                                        selected = s.drawerLabelColor ?: s.appLabelColor,
+                                        onPick = viewModel::setDrawerLabelColor,
+                                    )
+                                }
+        }
+    }
 
-                if (selectedCategory == "drawer") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_wallpaper_background),
-                    icon = LauncherIcons.Widgets,
-                    collapsed = "wallpaper" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("wallpaper", it) },
-                ) {
-                    SettingsGroupLabel(stringResource(R.string.settings_wallpaper_background))
-                    DrawerBackdropRows(
-                        settings = s,
-                        wallpaper = drawerWallpaper,
-                        blurAvailability = rememberBlurAvailability(),
-                        actions = DrawerBackdropActions(
-                            onColor = viewModel::setDrawerBackgroundColor,
-                            onColorOpacity = viewModel::setDrawerBackgroundOpacity,
-                            onPickPicture = viewModel::importDrawerWallpaper,
-                            onClearPicture = viewModel::clearDrawerWallpaper,
-                            onPictureDim = viewModel::setDrawerPictureDim,
-                            onBlur = viewModel::setBlurBehindDrawer,
-                            onBlurStrength = viewModel::setDrawerBlurStrength,
-                        ),
-                    )
-                }
-                }
+    if (selectedCategory == "folders") {
+        Column {
+            SwitchRow(stringResource(R.string.settings_show_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
+            StepperRow(stringResource(R.string.settings_folder_columns), s.folderColumns, SettingsRepository.MIN_FOLDER_COLUMNS, SettingsRepository.MAX_FOLDER_COLUMNS, viewModel::setFolderColumns)
+            SettingsGroupLabel("App drawer folders")
+            SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
+            ExpressiveActionRow(
+                                    label = stringResource(R.string.settings_drawer_folders),
+                                    description = pluralStringResource(
+                                        R.plurals.settings_drawer_folders_count, drawerFolders.orEmpty().size, drawerFolders.orEmpty().size,
+                                    ),
+                                ) { showFolderManager = true }
+                                val newFolderName = stringResource(R.string.drawer_folder_default)
+                                val folderCreatedMsg = stringResource(R.string.settings_drawer_folder_created)
+                                ExpressiveActionRow(
+                                    label = stringResource(R.string.settings_new_drawer_folder),
+                                    description = stringResource(R.string.settings_new_drawer_folder_desc),
+                                    trailingIcon = LauncherIcons.Add,
+                                ) {
+                                    viewModel.createDrawerFolder(newFolderName)
+                                    android.widget.Toast.makeText(context, folderCreatedMsg, android.widget.Toast.LENGTH_SHORT).show()
+                                }
+                                SwitchRow(
+                                    stringResource(R.string.settings_sort_drawer_folders),
+                                    stringResource(R.string.settings_sort_drawer_folders_desc),
+                                    s.sortDrawerFolders,
+                                    viewModel::setSortDrawerFolders,
+                                )
+                                SwitchRow(
+                                    stringResource(R.string.settings_mix_drawer_folders),
+                                    stringResource(R.string.settings_mix_drawer_folders_desc),
+                                    s.mixDrawerFolders,
+                                    viewModel::setMixDrawerFolders,
+                                )
+        }
+    }
 
-                if (selectedCategory == "gestures") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_gestures_interaction),
-                    icon = LauncherIcons.Gestures,
-                    collapsed = "gestures" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("gestures", it) },
-                ) {
-                    SwitchRow(stringResource(R.string.settings_swipe_up_drawer), s.swipeUpForDrawer, viewModel::setSwipeUp)
-                    SwitchRow(stringResource(R.string.settings_swipe_down_notif), s.swipeDownForNotifications, viewModel::setSwipeDown)
-                    SwitchRow(
-                        stringResource(R.string.settings_folder_swipe_first_app),
-                        stringResource(R.string.settings_folder_swipe_first_app_desc),
-                        s.folderSwipeOpensFirstApp,
-                        viewModel::setFolderSwipeOpensFirstApp,
-                    )
-                    DoubleTapLockToggle(enabled = s.doubleTapToLock, onSetEnabled = viewModel::setDoubleTapToLock)
-                    // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
-                    // number is the real wait here and the default chip names it.
-                    val systemLongPress = rememberSystemLongPressTimeout()
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_long_press_delay),
-                        description = stringResource(R.string.settings_long_press_delay_desc),
-                        value = s.longPressScale,
-                        onValueChange = viewModel::setLongPressScale,
-                        valueRange = LongPressScale.MIN..LongPressScale.MAX,
-                        step = 0.1f,
-                        valueText = { resources.getString(R.string.settings_millis, (systemLongPress * it).roundToInt()) },
-                    )
-                }
-                }
+    if (selectedCategory == "gestures") {
+        Column {
+                                SwitchRow(stringResource(R.string.settings_swipe_up_drawer), s.swipeUpForDrawer, viewModel::setSwipeUp)
+                                SwitchRow(stringResource(R.string.settings_swipe_down_notif), s.swipeDownForNotifications, viewModel::setSwipeDown)
+                                SwitchRow(
+                                    stringResource(R.string.settings_folder_swipe_first_app),
+                                    stringResource(R.string.settings_folder_swipe_first_app_desc),
+                                    s.folderSwipeOpensFirstApp,
+                                    viewModel::setFolderSwipeOpensFirstApp,
+                                )
+                                DoubleTapLockToggle(enabled = s.doubleTapToLock, onSetEnabled = viewModel::setDoubleTapToLock)
+                                // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
+                                // number is the real wait here and the default chip names it.
+                                val systemLongPress = rememberSystemLongPressTimeout()
+                                ScaleSliderRow(
+                                    label = stringResource(R.string.settings_long_press_delay),
+                                    description = stringResource(R.string.settings_long_press_delay_desc),
+                                    value = s.longPressScale,
+                                    onValueChange = viewModel::setLongPressScale,
+                                    valueRange = LongPressScale.MIN..LongPressScale.MAX,
+                                    step = 0.1f,
+                                    valueText = { resources.getString(R.string.settings_millis, (systemLongPress * it).roundToInt()) },
+                                )
+        }
+    }
 
-                if (selectedCategory == "notifications") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_notifications),
-                    icon = LauncherIcons.Notifications,
-                    collapsed = "notifications" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("notifications", it) },
-                ) {
-                    SwitchRow(stringResource(R.string.settings_notif_dots), s.showNotificationDots, viewModel::setShowNotificationDots)
-                    SwitchRow(stringResource(R.string.settings_notif_count), s.notificationDotCount, viewModel::setNotificationDotCount)
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_notif_size),
-                        value = s.notificationDotScale,
-                        onValueChange = viewModel::setNotificationDotScale,
-                        valueRange = 0.6f..1.8f,
-                        valueText = percentText,
-                    )
-                    BadgePreview(
-                        icon = previewIcon,
-                        showDots = s.showNotificationDots,
-                        showCount = s.notificationDotCount,
-                        scale = s.notificationDotScale,
-                    )
-                }
-                }
+    if (selectedCategory == "notifications") {
+        Column {
+                                SwitchRow(stringResource(R.string.settings_notif_dots), s.showNotificationDots, viewModel::setShowNotificationDots)
+                                SwitchRow(stringResource(R.string.settings_notif_count), s.notificationDotCount, viewModel::setNotificationDotCount)
+                                ScaleSliderRow(
+                                    label = stringResource(R.string.settings_notif_size),
+                                    value = s.notificationDotScale,
+                                    onValueChange = viewModel::setNotificationDotScale,
+                                    valueRange = 0.6f..1.8f,
+                                    valueText = percentText,
+                                )
+                                BadgePreview(
+                                    icon = previewIcon,
+                                    showDots = s.showNotificationDots,
+                                    showCount = s.notificationDotCount,
+                                    scale = s.notificationDotScale,
+                                )
+            ExpressiveActionRow(
+                label = stringResource(R.string.settings_notif_access),
+                description = stringResource(if (notifAccessGranted) R.string.settings_notif_access_granted else R.string.settings_notif_access_not_granted),
+            ) { openNotificationAccess(context) }
+        }
+    }
 
+    if (selectedCategory == "widgets") {
+        Column {
+            SwitchRow(stringResource(R.string.settings_widget_tonal), s.widgetTonalBackground, viewModel::setWidgetTonalBackground)
+            SwitchRow(stringResource(R.string.settings_widget_inset), stringResource(R.string.settings_widget_inset_desc), s.widgetEdgesAlignWithIcons, viewModel::setWidgetEdgesAlignWithIcons)
+            WeatherToggle(enabled = s.showWeather, onSetEnabled = viewModel::setShowWeather)
+            if (s.showWeather) { WeatherAppRow(appLabel = allApps.firstOrNull { it.key == s.weatherAppKey }?.label) { showWeatherAppPicker = true } }
+            PermissionRow(label = stringResource(R.string.settings_permission_calendar), permission = android.Manifest.permission.READ_CALENDAR)
+            PermissionRow(label = stringResource(R.string.settings_permission_location), permission = android.Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+    }
 
-                if (selectedCategory == "home") {
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_set_default),
-                        description = stringResource(
-                            if (isDefaultLauncher) R.string.settings_default_current else R.string.settings_default_tap,
-                        ),
-                    ) {
-                        runCatching { setDefaultLauncher.launch(DefaultLauncher.requestIntent(context)) }
-                    }
-                }
+    if (selectedCategory == "backup") {
+        Column {
+                                ExpressiveActionRow(
+                                    label = stringResource(R.string.settings_backup),
+                                    description = "",
+                                ) { showBackup = true }
+        }
+    }
 
-                if (selectedCategory == "notifications") {
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_notif_access),
-                        description = stringResource(
-                            if (notifAccessGranted) R.string.settings_notif_access_granted
-                            else R.string.settings_notif_access_not_granted,
-                        ),
-                    ) { openNotificationAccess(context) }
-                }
+    if (selectedCategory == "about") {
+        Column {
+                                // Keep the installed app version with the other information about Nomina.
+                                val installedVersion = remember(context) { installedVersionLabel(context) }
+                                if (installedVersion != null) {
+                                    Text(
+                                        text = installedVersion,
+                                        color = palette.dim,
+                                        style = LauncherTextStyles.settingsDescription,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 28.dp, bottom = 4.dp),
+                                    )
+                                }
+                                ExpressiveActionRow(
+                                    label = stringResource(R.string.settings_updates_check),
+                                    description = stringResource(R.string.settings_updates_check_desc),
+                                ) { openLink(context, RELEASES_URL) }
+                                FeedbackRows(onOpen = { openLink(context, it) })
+        }
+    }
+}
 
-                if (selectedCategory == "folders") {
-                    CollapsibleSection(
-                        title = "Folders",
-                        icon = LauncherIcons.AppsGrid,
-                        collapsed = "folders" in s.collapsedSettingsSections,
-                        onToggle = { viewModel.setSectionCollapsed("folders", it) },
-                    ) {
-                        SettingsGroupLabel("Home screen folders")
-                        SwitchRow(stringResource(R.string.settings_show_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
-                        StepperRow(
-                            stringResource(R.string.settings_folder_columns),
-                            s.folderColumns,
-                            SettingsRepository.MIN_FOLDER_COLUMNS,
-                            SettingsRepository.MAX_FOLDER_COLUMNS,
-                            viewModel::setFolderColumns,
-                        )
-                        SettingsGroupLabel("App drawer folders")
-                        SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
-                        ExpressiveActionRow(
-                            label = stringResource(R.string.settings_drawer_folders),
-                            description = pluralStringResource(
-                                R.plurals.settings_drawer_folders_count,
-                                drawerFolders.orEmpty().size,
-                                drawerFolders.orEmpty().size,
-                            ),
-                        ) { showFolderManager = true }
-                        val newFolderName = stringResource(R.string.drawer_folder_default)
-                        val folderCreatedMsg = stringResource(R.string.settings_drawer_folder_created)
-                        ExpressiveActionRow(
-                            label = stringResource(R.string.settings_new_drawer_folder),
-                            description = stringResource(R.string.settings_new_drawer_folder_desc),
-                            trailingIcon = LauncherIcons.Add,
-                        ) {
-                            viewModel.createDrawerFolder(newFolderName)
-                            android.widget.Toast.makeText(context, folderCreatedMsg, android.widget.Toast.LENGTH_SHORT).show()
-                        }
-                        SwitchRow(
-                            stringResource(R.string.settings_sort_drawer_folders),
-                            stringResource(R.string.settings_sort_drawer_folders_desc),
-                            s.sortDrawerFolders,
-                            viewModel::setSortDrawerFolders,
-                        )
-                        SwitchRow(
-                            stringResource(R.string.settings_mix_drawer_folders),
-                            stringResource(R.string.settings_mix_drawer_folders_desc),
-                            s.mixDrawerFolders,
-                            viewModel::setMixDrawerFolders,
-                        )
-                    }
-                }
-
-                if (selectedCategory == "widgets") {
-                    CollapsibleSection(
-                        title = "Widgets",
-                        icon = LauncherIcons.Widgets,
-                        collapsed = "widgets" in s.collapsedSettingsSections,
-                        onToggle = { viewModel.setSectionCollapsed("widgets", it) },
-                    ) {
-                        SwitchRow(stringResource(R.string.settings_widget_tonal), s.widgetTonalBackground, viewModel::setWidgetTonalBackground)
-                        SwitchRow(
-                            stringResource(R.string.settings_widget_inset),
-                            stringResource(R.string.settings_widget_inset_desc),
-                            s.widgetEdgesAlignWithIcons,
-                            viewModel::setWidgetEdgesAlignWithIcons,
-                        )
-                        WeatherToggle(enabled = s.showWeather, onSetEnabled = viewModel::setShowWeather)
-                        if (s.showWeather) {
-                            WeatherAppRow(appLabel = allApps.firstOrNull { it.key == s.weatherAppKey }?.label) {
-                                showWeatherAppPicker = true
-                            }
-                        }
-                        PermissionRow(
-                            label = stringResource(R.string.settings_permission_calendar),
-                            permission = android.Manifest.permission.READ_CALENDAR,
-                        )
-                        PermissionRow(
-                            label = stringResource(R.string.settings_permission_location),
-                            permission = android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                        )
-                    }
-                }
-                if (selectedCategory == "backup") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_backup_restore),
-                    icon = LauncherIcons.Backup,
-                    collapsed = "backup" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("backup", it) },
-                ) {
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_backup),
-                        description = "",
-                    ) { showBackup = true }
-                }
-                }
-
-                if (selectedCategory == "about") {
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_about),
-                    icon = LauncherIcons.Info,
-                    collapsed = "updates" in s.collapsedSettingsSections,
-                    onToggle = { viewModel.setSectionCollapsed("updates", it) },
-                ) {
-                    // Keep the installed app version with the other information about Nomina.
-                    val installedVersion = remember(context) { installedVersionLabel(context) }
-                    if (installedVersion != null) {
-                        Text(
-                            text = installedVersion,
-                            color = palette.dim,
-                            style = LauncherTextStyles.settingsDescription,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 28.dp, bottom = 4.dp),
-                        )
-                    }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_updates_check),
-                        description = stringResource(R.string.settings_updates_check_desc),
-                    ) { openLink(context, RELEASES_URL) }
-                    FeedbackRows(onOpen = { openLink(context, it) })
-
-                }
-                }
 
 
                 }

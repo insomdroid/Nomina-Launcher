@@ -1,15 +1,12 @@
 package com.insomdroid.nomina.feature.home
 
 import android.Manifest
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.ContentUris
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.os.BatteryManager
 import android.provider.CalendarContract
 import android.text.format.DateUtils
 import android.util.Log
@@ -30,10 +27,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,7 +48,6 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,9 +55,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import com.insomdroid.nomina.data.AppRepository
 import com.insomdroid.nomina.data.SettingsRepository
 import com.insomdroid.nomina.data.smartspace.CalendarEvent
@@ -72,6 +67,8 @@ import com.insomdroid.nomina.data.smartspace.CurrentWeather
 import com.insomdroid.nomina.data.smartspace.NextEventPicker
 import com.insomdroid.nomina.data.smartspace.WeatherRepository
 import com.insomdroid.nomina.model.AppItem
+import com.insomdroid.nomina.model.BatteryStatus
+import com.insomdroid.nomina.launcher.system.BatteryMonitor
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -87,6 +84,7 @@ class SmartspaceViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
     private val settingsRepository: SettingsRepository,
     private val appRepository: AppRepository,
+    batteryMonitor: BatteryMonitor,
 ) : ViewModel() {
 
     val hasCalendarPermission = MutableStateFlow(calendarRepository.hasPermission())
@@ -102,7 +100,16 @@ class SmartspaceViewModel @Inject constructor(
             weather.takeIf { settings.showWeather }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** Re-checks the permissions (resume / after a runtime grant) and re-queries the sources. */
+    fun onHomeResumed() {
+        calendarRepository.startObserving()
+        refresh()
+    }
+
+    fun onHomePaused() {
+        calendarRepository.stopObserving()
+    }
+
+    /** Re-checks the permissions (after a runtime grant) and re-queries the sources. */
     fun refresh() {
         hasCalendarPermission.value = calendarRepository.hasPermission()
         hasLocationPermission.value = weatherRepository.hasPermission()
@@ -115,9 +122,15 @@ class SmartspaceViewModel @Inject constructor(
         }
     }
 
+    /** One shared minute clock drives both the date/time row and next-event selection. */
+    val minuteTimestamp: StateFlow<Long> = minuteTicks()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), System.currentTimeMillis())
+
+    val batteryStatus: StateFlow<BatteryStatus?> = batteryMonitor.status
+
     /** Re-picked every minute so an ended event flips to the next one without a provider change. */
     val nextEvent: StateFlow<CalendarEvent?> =
-        combine(calendarRepository.events, minuteTicks()) { events, now -> NextEventPicker.pick(events, now) }
+        combine(calendarRepository.events, minuteTimestamp) { events, now -> NextEventPicker.pick(events, now) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private fun minuteTicks(): Flow<Long> = flow {
@@ -143,9 +156,6 @@ class SmartspaceViewModel @Inject constructor(
         }
     }
 
-    init {
-        refresh()
-    }
 }
 
 /** The app [key] names when it is among [apps]; a blank or unknown key resolves to nothing. */
@@ -160,6 +170,7 @@ internal data class SmartspaceState(
     val showWeather: Boolean,
     val weather: CurrentWeather?,
     val weatherApp: AppItem?,
+    val batteryStatus: BatteryStatus? = null,
 )
 
 /**
@@ -178,8 +189,18 @@ fun SmartspaceWidget(
         showWeather = viewModel.showWeather.collectAsStateWithLifecycle().value,
         weather = viewModel.weather.collectAsStateWithLifecycle().value,
         weatherApp = viewModel.weatherApp.collectAsStateWithLifecycle().value,
+        batteryStatus = viewModel.batteryStatus.collectAsStateWithLifecycle().value,
     )
-    SmartspaceContent(state, onRefresh = viewModel::refresh, onOpenWeatherApp = viewModel::openWeatherApp, modifier = modifier)
+    val now by viewModel.minuteTimestamp.collectAsStateWithLifecycle()
+    SmartspaceContent(
+        state,
+        onRefresh = viewModel::refresh,
+        onOpenWeatherApp = viewModel::openWeatherApp,
+        modifier = modifier,
+        now = now,
+        onResume = viewModel::onHomeResumed,
+        onPause = viewModel::onHomePaused,
+    )
 }
 
 /**
@@ -194,24 +215,17 @@ internal fun SmartspaceContent(
     onRefresh: () -> Unit,
     onOpenWeatherApp: () -> Unit,
     modifier: Modifier = Modifier,
+    now: Long = System.currentTimeMillis(),
+    onResume: () -> Unit = onRefresh,
+    onPause: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val event = state.nextEvent
-    val deviceStatus = rememberDeviceStatus()
+    val deviceStatus = rememberNetworkStatus()
 
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val tickerScope = rememberCoroutineScope()
-    LifecycleResumeEffect(Unit) {
-        now = System.currentTimeMillis()
-        onRefresh()
-        val ticker = tickerScope.launch {
-            while (true) {
-                val current = System.currentTimeMillis()
-                now = current
-                delay(60_000 - current % 60_000)
-            }
-        }
-        onPauseOrDispose { ticker.cancel() }
+    LifecycleResumeEffect(onResume, onPause) {
+        onResume()
+        onPauseOrDispose { onPause() }
     }
 
     val calendarPermission = rememberLauncherForActivityResult(
@@ -296,17 +310,21 @@ internal fun SmartspaceContent(
     val timeLine = remember(timeText, timeZoneText) {
         "${timeText.uppercase(Locale.getDefault())} ${timeZoneText.uppercase(Locale.getDefault())}"
     }
-    val batteryLine = remember(deviceStatus.batteryText, deviceStatus.networkText) {
+    val batteryLine = remember(state.batteryStatus, deviceStatus.networkText) {
         buildAnnotatedString {
-            val battery = deviceStatus.batteryText.uppercase(Locale.getDefault())
-            val numberStart = battery.lastIndexOf(' ').let { if (it >= 0) it + 1 else 0 }
-            if (numberStart in battery.indices && battery.substring(numberStart).any(Char::isDigit)) {
-                append(battery.substring(0, numberStart))
+            val batteryStatus = state.batteryStatus
+            val battery = batteryStatus?.let {
+                "${if (it.charging) "Charging" else "Battery"} ${it.percent.coerceIn(0, 100)}%"
+            } ?: "Battery —"
+            val upperBattery = battery.uppercase(Locale.getDefault())
+            val numberStart = upperBattery.lastIndexOf(' ').let { if (it >= 0) it + 1 else 0 }
+            if (numberStart in upperBattery.indices && upperBattery.substring(numberStart).any(Char::isDigit)) {
+                append(upperBattery.substring(0, numberStart))
                 withStyle(SpanStyle(fontFamily = launcherDisplayFontFamily())) {
-                    append(battery.substring(numberStart))
+                    append(upperBattery.substring(numberStart))
                 }
             } else {
-                append(battery)
+                append(upperBattery)
             }
             append(" · ${deviceStatus.networkText.uppercase(Locale.getDefault())}")
         }
@@ -422,40 +440,15 @@ private fun weatherCondition(code: Int): String = when (code) {
 }
 
 private data class SmartspaceDeviceStatus(
-    val batteryText: String = "Battery —",
     val networkText: String = "Offline",
 )
 
 @Composable
-private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
+private fun rememberNetworkStatus(): SmartspaceDeviceStatus {
     val context = LocalContext.current
     var status by remember { mutableStateOf(SmartspaceDeviceStatus()) }
 
     LifecycleResumeEffect(context) {
-        fun updateBattery(intent: Intent?) {
-            if (intent == null) return
-            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-            if (level < 0 || scale <= 0) return
-            val percent = (level * 100 / scale).coerceIn(0, 100)
-            val charging = when (intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)) {
-                BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> true
-                else -> false
-            }
-            status = status.copy(batteryText = "${if (charging) "Charging" else "Battery"} $percent%")
-        }
-
-        val batteryReceiver = object : BroadcastReceiver() {
-            override fun onReceive(receiverContext: Context?, intent: Intent?) = updateBattery(intent)
-        }
-        val batteryIntent = ContextCompat.registerReceiver(
-            context,
-            batteryReceiver,
-            IntentFilter(Intent.ACTION_BATTERY_CHANGED),
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
-        updateBattery(batteryIntent)
-
         val connectivity = context.getSystemService(ConnectivityManager::class.java)
         var callbackRegistered = false
         var callback: ConnectivityManager.NetworkCallback? = null
@@ -491,7 +484,6 @@ private fun rememberDeviceStatus(): SmartspaceDeviceStatus {
             updateNetwork()
         }
         onPauseOrDispose {
-            runCatching { context.unregisterReceiver(batteryReceiver) }
             if (callbackRegistered) {
                 callback?.let { networkCallback ->
                     runCatching { connectivity?.unregisterNetworkCallback(networkCallback) }

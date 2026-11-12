@@ -38,11 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import com.insomdroid.nomina.designsystem.theme.LocalLauncherColors
 import com.insomdroid.nomina.launcher.system.BatteryMonitor
 import com.insomdroid.nomina.model.BatteryStatus
@@ -57,7 +54,6 @@ class BatteryWidgetViewModel @Inject constructor(
     /** The same ACTION_BATTERY_CHANGED broadcast Android sends — the system's own rhythm,
      *  updated on every percent/charging change, so this can never lag the official indicator. */
     val status: StateFlow<BatteryStatus?> = batteryMonitor.status
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 }
 
 /**

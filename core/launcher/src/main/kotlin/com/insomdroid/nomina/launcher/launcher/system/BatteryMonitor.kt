@@ -7,10 +7,15 @@ import android.content.IntentFilter
 import android.os.BatteryManager
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import com.insomdroid.nomina.model.BatteryStatus
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +25,9 @@ import javax.inject.Singleton
 class BatteryMonitor @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
-    val status: Flow<BatteryStatus> = callbackFlow {
+    // A single shared receiver serves Smartspace and BatteryWidget instead of registering one per collector.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    val status: StateFlow<BatteryStatus?> = callbackFlow {
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(c: Context?, intent: Intent?) {
                 intent?.let { trySend(parse(it)) }
@@ -38,7 +45,7 @@ class BatteryMonitor @Inject constructor(
         )
         sticky?.let { trySend(parse(it)) }
         awaitClose { context.unregisterReceiver(receiver) }
-    }.distinctUntilChanged()
+    }.distinctUntilChanged().stateIn(scope, SharingStarted.WhileSubscribed(5_000), null)
 
     private fun parse(intent: Intent): BatteryStatus {
         val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)

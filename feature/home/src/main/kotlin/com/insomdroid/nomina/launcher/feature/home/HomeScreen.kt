@@ -100,6 +100,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -316,23 +317,26 @@ fun HomeScreen(
 
     // Empty-area long-press options popup (anchor + whether it flips above the press point).
     var homeOptions by remember { mutableStateOf<Pair<IntOffset, Boolean>?>(null) }
-    // Close the dock after five idle seconds. Any pointer activity or open overlay restarts/pauses it.
-    LaunchedEffect(
+    // Run the idle timer only while Home is RESUMED; backgrounding cancels the pending delay.
+    val dockAutoHideScope = rememberCoroutineScope()
+    LifecycleResumeEffect(
         settings.autoHideDock, settings.dockEnabled, dockExpanded, dockPointerActive, dockInteractionVersion,
         drawerOpen, openFolderId, menuTarget, homeOptions, renameTarget, editingShortcut,
         showWidgetPicker, showOnboarding, dragController.moving,
     ) {
-        if (!settings.autoHideDock) {
-            dockAutoHidden = false
-        } else if (
-            settings.dockEnabled && dockExpanded && !dockPointerActive &&
+        if (!settings.autoHideDock) dockAutoHidden = false
+        val timer = if (
+            settings.autoHideDock && settings.dockEnabled && dockExpanded && !dockPointerActive &&
             !drawerOpen && openFolderId == null && menuTarget == null && homeOptions == null &&
             renameTarget == null && editingShortcut == null && !showWidgetPicker &&
             !showOnboarding && !dragController.moving
         ) {
-            delay(5_000)
-            dockAutoHidden = true
-        }
+            dockAutoHideScope.launch {
+                delay(5_000)
+                dockAutoHidden = true
+            }
+        } else null
+        onPauseOrDispose { timer?.cancel() }
     }
     // Page the workspace should show after a page was added or removed from the empty-area menu.
     val pageRequests = remember { MutableSharedFlow<Int>(extraBufferCapacity = 1) }

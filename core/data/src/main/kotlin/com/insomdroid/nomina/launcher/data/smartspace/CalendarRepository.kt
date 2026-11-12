@@ -62,24 +62,35 @@ class CalendarRepository @Inject constructor(
     fun hasPermission(): Boolean =
         context.checkSelfPermission(Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
 
+    /** Register only while the smartspace is visible; repeated resume calls are idempotent. */
+    @Synchronized
+    fun startObserving() {
+        if (hasPermission() && !observing) {
+            runCatching {
+                context.contentResolver.registerContentObserver(CalendarContract.CONTENT_URI, true, observer)
+            }.onSuccess { observing = true }
+        }
+    }
+
+    /** Stop receiving calendar-provider callbacks while Home is paused or disposed. */
+    @Synchronized
+    fun stopObserving() {
+        if (observing) {
+            runCatching { context.contentResolver.unregisterContentObserver(observer) }
+            observing = false
+        }
+    }
+
     fun refresh() {
         scope.launch(Dispatchers.IO) {
             refreshMutex.withLock {
                 if (!hasPermission()) {
+                    stopObserving()
                     _events.value = emptyList() // a revoked permission really does clear the data
                     return@withLock
                 }
-                // Register lazily on the first permitted refresh — registering without the permission
-                // would be pointless (no data) and the observer lives for the process lifetime anyway.
-                // Flag only after the platform call succeeded, or a transient failure would skip
-                // registration forever.
-                if (!observing) {
-                    runCatching {
-                        context.contentResolver.registerContentObserver(CalendarContract.CONTENT_URI, true, observer)
-                    }.onSuccess { observing = true }
-                }
-                // A failed query keeps the previous good events (a transient provider error must not
-                // blank an event the user was already seeing); the next change/resume retries anyway.
+                // Keep the last good snapshot after transient provider errors; resume or a later
+                // ContentObserver callback will retry the query.
                 runCatching { query() }.onSuccess { _events.value = it }
             }
         }

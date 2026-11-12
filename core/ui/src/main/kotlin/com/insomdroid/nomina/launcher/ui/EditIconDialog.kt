@@ -61,6 +61,7 @@ fun EditIconDialog(
         onDismiss()
     }
     AlertDialog(
+        shape = RoundedCornerShape(8.dp),
         onDismissRequest = { leave(icon) },
         title = { Text(stringResource(R.string.edit_title)) },
         text = {
@@ -69,7 +70,7 @@ fun EditIconDialog(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .clickable { picking = true }
                         .semantics { contentDescription = changeIcon }
                         .padding(8.dp),

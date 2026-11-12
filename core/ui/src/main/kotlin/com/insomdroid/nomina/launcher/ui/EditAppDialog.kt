@@ -64,6 +64,7 @@ fun EditAppDialog(
         onDismiss()
     }
     AlertDialog(
+        shape = RoundedCornerShape(8.dp),
         onDismissRequest = { leave(app.customIcon) },
         title = { Text(stringResource(R.string.edit_title)) },
         text = {
@@ -72,7 +73,7 @@ fun EditAppDialog(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .clickable { picking = true }
                         .semantics { contentDescription = changeIcon }
                         .padding(8.dp),
@@ -133,7 +134,7 @@ fun FolderIconButton(icon: CustomIcon?, preview: @Composable (CustomIcon?, Dp) -
     val changeIcon = stringResource(R.string.icon_change)
     Column(
         Modifier
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(8.dp))
             .clickable { picking = true }
             .semantics { contentDescription = changeIcon }
             .padding(4.dp),

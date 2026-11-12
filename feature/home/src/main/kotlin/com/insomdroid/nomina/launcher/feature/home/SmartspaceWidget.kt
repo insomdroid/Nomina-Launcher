@@ -333,7 +333,7 @@ internal fun SmartspaceContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(widgetSurfaceColor(), RoundedCornerShape(18.dp))
+            .background(widgetSurfaceColor(), RoundedCornerShape(8.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(9.dp),
         horizontalAlignment = Alignment.Start,

@@ -177,7 +177,7 @@ fun NotificationsWidget(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .background(widgetSurfaceColor(), RoundedCornerShape(24.dp))
+                    .background(widgetSurfaceColor(), RoundedCornerShape(8.dp))
                     .clickable(interactionSource = noIndication, indication = null) {
                         openNotificationListenerSettings(context)
                     }

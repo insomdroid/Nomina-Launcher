@@ -122,7 +122,7 @@ internal fun PinRequestSheet(
     // Fully open at once: the sheet is short, and a half state would only hide the buttons.
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
-    ModalBottomSheet(onDismissRequest = onCancel, sheetState = sheetState) {
+    ModalBottomSheet(onDismissRequest = onCancel, sheetState = sheetState, shape = RoundedCornerShape(24.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

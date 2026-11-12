@@ -120,7 +120,7 @@ fun WidgetPickerScreen(
                         Icon(painterResource(LauncherIcons.Close), stringResource(R.string.widget_search_clear))
                     }
                 }),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(6.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
             )
             Text(stringResource(R.string.widget_picker_hint), style = MaterialTheme.typography.bodySmall,
@@ -176,14 +176,14 @@ private fun WidgetCard(
     val sx = defaultX.coerceIn(1, columns.coerceAtLeast(1))
     val sy = defaultY.coerceIn(1, rows.coerceAtLeast(1))
     var snapshot by remember(option.choice) { mutableStateOf<(() -> Bitmap?)?>(null) }
-    Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
+    Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Box(
                 // The ratio alone bounds the height. A heightIn() in front of aspectRatio() does not: a
                 // tall footprint (1×1, 3×4) measured past its slot and drew over the title row below.
                 Modifier.fillMaxWidth()
                     .aspectRatio((sx * controller.cellWidthDp / (sy * controller.cellHeightDp)).coerceIn(1.5f, 3f))
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .widgetDragGesture(option.choice, true, controller) { root, fraction, owner ->
                         controller.start(WidgetDrag(null, option.choice, sx, sy, fraction, snapshot?.invoke()), root, owner)

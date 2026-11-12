@@ -89,7 +89,7 @@ internal fun ScaleSliderRow(
         onValueChange(next)
     }
     Surface(
-        color = p.surfaceHi,
+        color = p.surfaceHi.copy(alpha = 0.94f),
         shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier
             .fillMaxWidth()

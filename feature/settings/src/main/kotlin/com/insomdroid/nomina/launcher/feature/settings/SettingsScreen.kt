@@ -146,7 +146,7 @@ fun SettingsScreen(
     var showHiddenManager by rememberSaveable { mutableStateOf(false) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
-    var settingsSearch by rememberSaveable { mutableStateOf("")
+    var settingsSearch by rememberSaveable { mutableStateOf("") }
     var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }

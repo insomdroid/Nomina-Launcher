@@ -134,7 +134,7 @@ fun WidgetPickerScreen(
                     )
                     if (query.isNotEmpty()) {
                         Box(
-                            Modifier.padding(start = 8.dp).size(40.dp).clip(RoundedCornerShape(6.dp))
+                            Modifier.padding(start = 8.dp).size(40.dp).clip(RoundedCornerShape(ExpressiveRadius.control))
                                 .clickable { query = "" },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -209,7 +209,7 @@ private fun WidgetCard(
                 // tall footprint (1×1, 3×4) measured past its slot and drew over the title row below.
                 Modifier.fillMaxWidth()
                     .aspectRatio((sx * controller.cellWidthDp / (sy * controller.cellHeightDp)).coerceIn(1.5f, 3f))
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(ExpressiveRadius.card))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .widgetDragGesture(option.choice, true, controller) { root, fraction, owner ->
                         controller.start(WidgetDrag(null, option.choice, sx, sy, fraction, snapshot?.invoke()), root, owner)

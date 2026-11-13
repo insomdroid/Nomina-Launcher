@@ -75,7 +75,7 @@ fun EditAppDialog(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(ExpressiveRadius.control))
                         .clickable { picking = true }
                         .semantics { contentDescription = changeIcon }
                         .padding(8.dp),
@@ -145,7 +145,7 @@ fun FolderIconButton(icon: CustomIcon?, preview: @Composable (CustomIcon?, Dp) -
     val changeIcon = stringResource(R.string.icon_change)
     Column(
         Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(ExpressiveRadius.control))
             .clickable { picking = true }
             .semantics { contentDescription = changeIcon }
             .padding(4.dp),

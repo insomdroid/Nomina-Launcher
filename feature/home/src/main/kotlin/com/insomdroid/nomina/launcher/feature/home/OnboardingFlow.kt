@@ -58,10 +58,11 @@ import com.insomdroid.nomina.ui.CoverSystemBars
 import com.insomdroid.nomina.ui.DefaultLauncher
 import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
 
 /** Nomina monochrome setup palette with a restrained Nothing Red accent. */
-private val AURORA_BASE = Color(0xFF080808)
+private val AURORA_BASE = Color(0xFF000000)
 private val ONBOARDING_INVERSE = Color(0xFFEDEDED)
 private val ONBOARDING_SURFACE = Color(0xFF0E0E0E)
 private val ONBOARDING_MUTED = Color(0xFF8C8C8C)
@@ -377,7 +378,7 @@ private fun PermissionRow(title: String, description: String, granted: Boolean, 
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .background(ONBOARDING_SURFACE, RoundedCornerShape(8.dp))
+            .background(ONBOARDING_SURFACE, RoundedCornerShape(ExpressiveRadius.card))
             .clickable(enabled = !granted, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

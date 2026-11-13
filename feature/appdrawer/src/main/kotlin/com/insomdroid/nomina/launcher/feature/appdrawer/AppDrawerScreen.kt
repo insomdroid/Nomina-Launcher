@@ -1001,7 +1001,7 @@ private fun DrawerFolderPreview(folder: DrawerFolderUi, tileSize: Dp, contentDes
         modifier = Modifier
             .size(tileSize)
             .then(if (contentDescription == null) Modifier else Modifier.semantics { this.contentDescription = contentDescription })
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(ExpressiveRadius.panel))
             .padding(7.dp * scale),
         contentAlignment = Alignment.Center,
     ) {

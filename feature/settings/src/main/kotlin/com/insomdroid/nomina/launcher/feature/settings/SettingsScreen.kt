@@ -1871,7 +1871,7 @@ internal fun DrawerWallpaperRow(wallpaper: DrawerWallpaper?, onPick: (Uri) -> Un
                         file = wallpaper.file,
                         blur = 0.dp,
                         contentDescription = stringResource(R.string.settings_drawer_wallpaper),
-                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).testTag(DRAWER_WALLPAPER_PREVIEW_TAG),
+                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(ExpressiveRadius.card)).testTag(DRAWER_WALLPAPER_PREVIEW_TAG),
                     )
                 } else {
                     Text(stringResource(R.string.settings_drawer_wallpaper_none), color = p.dim, fontSize = 14.sp)

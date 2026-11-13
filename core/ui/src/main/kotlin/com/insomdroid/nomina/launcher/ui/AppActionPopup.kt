@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -292,11 +293,11 @@ internal fun PopupCardContent(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             if (showCaret && !preferAbove) Caret(pointingUp = true, color = cardColor, modifier = caretModifier(caretStart))
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(ExpressiveRadius.card),
                 color = cardColor,
                 tonalElevation = 0.dp,
                 shadowElevation = 0.dp,
-                modifier = Modifier.width(width).border(1.dp, palette.trackOff.copy(alpha = 0.8f), RoundedCornerShape(8.dp)),
+                modifier = Modifier.width(width).border(1.dp, palette.trackOff.copy(alpha = 0.8f), RoundedCornerShape(ExpressiveRadius.card)),
             ) {
                 Column(
                     modifier = Modifier

@@ -29,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -129,7 +130,7 @@ fun BackupScreen(
     // --- File import confirm dialog ---
     pendingImport?.let { uri ->
         AlertDialog(
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(ExpressiveRadius.card),
             onDismissRequest = { pendingImport = null },
             title = { Text(stringResource(R.string.backup_restore_confirm_title)) },
             text = { Text(stringResource(R.string.backup_restore_confirm_msg)) },

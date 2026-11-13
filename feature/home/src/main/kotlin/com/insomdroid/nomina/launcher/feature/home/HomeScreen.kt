@@ -1094,7 +1094,7 @@ fun HomeScreen(
         if (removableIncoming || dragController.localDragging) {
             Surface(
                 color = if (overRemove) Accent else Color.Black.copy(alpha = 0.55f),
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(ExpressiveRadius.sheet),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .statusBarsPadding()

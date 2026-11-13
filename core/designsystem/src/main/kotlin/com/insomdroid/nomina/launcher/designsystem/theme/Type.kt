@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 val LauncherTypography = Typography()
 
 /** This typography with every style in [family]: the user's font for everything the launcher draws
- *  itself (Settings > Icons > Font); a text style that names no family inherits it through the theme. */
+ *  itself; a text style that names no family inherits it through the theme. */
 fun Typography.withFontFamily(family: FontFamily): Typography = copy(
     displayLarge = displayLarge.copy(fontFamily = family),
     displayMedium = displayMedium.copy(fontFamily = family),

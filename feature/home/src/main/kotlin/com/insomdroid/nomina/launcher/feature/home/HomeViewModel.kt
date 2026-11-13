@@ -60,22 +60,6 @@ const val SMARTSPACE_DEFAULT_SPAN_Y = 2
 /** Smallest allowed smartspace size — below 3 columns the clock + event row no longer fit. */
 const val SMARTSPACE_MIN_SPAN_X = 3
 
-/** Edit-frame default width of the built-in notifications widget (the picker ADDS it full-width —
- *  a narrower footprint can't center its icon group on an odd column count). */
-const val NOTIFICATIONS_DEFAULT_SPAN_X = 4
-
-/** Smallest allowed notifications-widget width — one icon + the overflow chip still fit. */
-const val NOTIFICATIONS_MIN_SPAN_X = 2
-
-/** Default AND minimum footprint of the built-in battery widget — app-icon sized. */
-const val BATTERY_SPAN = 1
-
-/** The people widget defaults to a few rows of tiles; the user stretches it to the whole grid. */
-const val PEOPLE_DEFAULT_SPAN_Y = 3
-
-/** Narrowest people widget: two quiet tiles, or one tile with content. */
-const val PEOPLE_MIN_SPAN_X = 2
-
 /** A page-menu operation's result when storage refused it (the layout is left as it was). */
 internal const val PAGE_FAILED = -2
 

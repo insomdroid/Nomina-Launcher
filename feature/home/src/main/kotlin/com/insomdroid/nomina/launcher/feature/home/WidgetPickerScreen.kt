@@ -191,11 +191,7 @@ private fun WidgetCard(
             choice.provider, context, controller.cellWidthDp, controller.cellHeightDp,
             controller.widgetInsetXDp, controller.widgetInsetYDp,
         )
-        is WidgetChoice.Builtin -> when (choice.type) {
-            HomeItemEntity.BUILTIN_BATTERY -> 1 to 1
-            HomeItemEntity.BUILTIN_NOTIFICATIONS -> columns to 1
-            else -> columns to 2
-        }
+        is WidgetChoice.Builtin -> columns to 2
     }
     // A default larger than the grid shrinks to it, as the old add path and Launcher3 do
     // (min(span, numColumns)) — refusing it made such widgets impossible to add at all.
@@ -271,7 +267,7 @@ internal fun WidgetPreview(
     var failedRemote by remember(provider, preview.remote) { mutableStateOf(false) }
     when {
         choice is WidgetChoice.Builtin -> {
-            BuiltinWidgetPreview(choice.type, modifier)
+            BuiltinWidgetPreview(modifier)
             SideEffect { onSnapshot { null } }
         }
         preview.remote != null && !failedRemote -> AndroidView(
@@ -313,24 +309,12 @@ internal fun WidgetPreview(
 
 /** Static samples share the real widget surface; previewing never starts data collectors or actions. */
 @Composable
-private fun BuiltinWidgetPreview(type: String, modifier: Modifier) {
+private fun BuiltinWidgetPreview(modifier: Modifier) {
     WidgetSurface(modifier) {
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-            when (type) {
-                HomeItemEntity.BUILTIN_BATTERY -> {
-                    Text("75%", style = MaterialTheme.typography.displaySmall)
-                    Text(stringResource(R.string.battery_widget_name), style = MaterialTheme.typography.labelMedium)
-                }
-                HomeItemEntity.BUILTIN_NOTIFICATIONS -> {
-                    Icon(painterResource(LauncherIcons.Widgets), null, Modifier.size(32.dp))
-                    Text(stringResource(R.string.notifications_widget_name), style = MaterialTheme.typography.labelMedium)
-                }
-                else -> {
-                    Text("9.41", style = MaterialTheme.typography.displayMedium)
-                    Text(stringResource(R.string.smartspace_widget_name), style = MaterialTheme.typography.labelMedium)
-                }
-            }
+            Text("9.41", style = MaterialTheme.typography.displayMedium)
+            Text(stringResource(R.string.smartspace_widget_name), style = MaterialTheme.typography.labelMedium)
         }
     }
 }

@@ -60,6 +60,7 @@ class SettingsRepository @Inject constructor(
             p.remove(stringPreferencesKey("people_aliases"))
             p.remove(booleanPreferencesKey("people_show_apps"))
             p.remove(booleanPreferencesKey("theme_all_icons"))
+            p.remove(stringPreferencesKey("notif_widget_count_style"))
             val stored = p.asMap()
             for (name in FLOAT_KEYS) {
                 val raw = stored[floatPreferencesKey(name)] ?: continue
@@ -166,8 +167,6 @@ class SettingsRepository @Inject constructor(
             showWeather = p[Keys.SHOW_WEATHER] ?: true,
             widgetTonalBackground = p[Keys.WIDGET_TONAL_BACKGROUND] ?: false,
             widgetEdgesAlignWithIcons = p[Keys.WIDGET_INSET_LIKE_ICONS] ?: false,
-            notificationWidgetCountStyle = (p[Keys.NOTIF_WIDGET_COUNT_STYLE] ?: LauncherSettings.COUNT_NUMBER)
-                .let { if (it == LauncherSettings.COUNT_DOT || it == LauncherSettings.COUNT_NONE) it else LauncherSettings.COUNT_NUMBER },
             doubleTapToLock = p[Keys.DOUBLE_TAP_LOCK] ?: false,
             homePage = (p[Keys.HOME_PAGE] ?: 0).coerceIn(0, HomeLayoutRepository.MAX_PAGES),
             homePageCount = (p[Keys.HOME_PAGE_COUNT] ?: 0).coerceIn(0, HomeLayoutRepository.MAX_PAGES),
@@ -364,9 +363,7 @@ class SettingsRepository @Inject constructor(
     /** Sets (or clears, for blank) the selected third-party icon pack package. */
     suspend fun setIconPackPackage(pkg: String) = edit { it[Keys.ICON_PACK] = pkg.trim() }
 
-    /** Count indicator style of the built-in notifications widget (see LauncherSettings.COUNT_*). */
     suspend fun setWidgetTonalBackground(value: Boolean) = edit { it[Keys.WIDGET_TONAL_BACKGROUND] = value }
-    suspend fun setNotificationWidgetCountStyle(style: String) = edit { it[Keys.NOTIF_WIDGET_COUNT_STYLE] = style }
 
     /** Sets (or, for a blank/null [key], clears) the app a tap on the weather line opens. */
     suspend fun setWeatherAppKey(key: String?) = edit { it[Keys.WEATHER_APP_KEY] = key?.trim().orEmpty() }
@@ -678,7 +675,6 @@ class SettingsRepository @Inject constructor(
         val NOTIF_DOT_COUNT = booleanPreferencesKey("notif_dot_count")
         val NOTIF_DOT_SCALE = floatPreferencesKey("notif_dot_scale")
         val WIDGET_TONAL_BACKGROUND = booleanPreferencesKey("widget_tonal_background")
-        val NOTIF_WIDGET_COUNT_STYLE = stringPreferencesKey("notif_widget_count_style")
         val USE_THEMED_ICONS = booleanPreferencesKey("use_themed_icons")
         val ICON_PACK = stringPreferencesKey("icon_pack_package")
         val WEATHER_APP_KEY = stringPreferencesKey("weather_app_key")
@@ -777,7 +773,7 @@ class SettingsRepository @Inject constructor(
         )
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
-            "notif_widget_count_style", "icon_pack_package", "weather_app_key", "home_page_marker",
+            "icon_pack_package", "weather_app_key", "home_page_marker",
             "page_switch_speed", "collapsed_settings_sections", "icon_shape", "reshape_legacy_icons", "drawer_label_color_mode",
             "custom_icons", "folder_icons", "shortcut_icons",
         )
@@ -848,6 +844,7 @@ class SettingsRepository @Inject constructor(
             // Legacy settings from removed features must not reappear in backups or be restored.
             "search_contacts", "lock_sounds_enabled", "show_status_bar", "network_place_names",
             "hide_system_status_bar", "status_bar_scrim", "lock_sound_uri", "unlock_sound_uri",
+            "notif_widget_count_style",
         )
     }
 }

@@ -10,13 +10,8 @@
     <string name="smartspace_allow_calendar">Tap to allow calendar access</string>
     <string name="smartspace_no_title">(No title)</string>
     <string name="smartspace_size_full">Full width</string>
-    <string name="battery_widget_name">Battery</string>
-    <string name="battery_widget_desc">Charge ring and percent</string>
     <string name="smartspace_next_alarm">Next alarm</string>
     <string name="smartspace_allow_location">Tap to allow location – weather</string>
-    <string name="notifications_widget_name">Notifications</string>
-    <string name="notifications_widget_desc">Notifications as app icons</string>
-    <string name="notifications_widget_allow_access">Tap to grant notification access</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_next">Next</string>
@@ -104,8 +99,6 @@
     <string name="widget_size">%1$d × %2$d</string>
     <string name="widget_no_space">No space here</string>
     <string name="widget_add_failed">Could not add the widget at the selected position. Try again.</string>
-    <string name="battery_widget_charging">Charging</string>
-    <string name="battery_widget_on_battery">On battery</string>
     <string name="widget_resize_width">Resize width</string>
     <string name="widget_resize_height">Resize height</string>
     <string name="pin_request_subtitle">Will be added to the first free spot.</string>

@@ -76,6 +76,13 @@ internal val MIGRATION_8_9 = object : Migration(8, 9) {
     }
 }
 
+/** v10 removes retired built-in widgets; Smartspace is the only built-in widget still supported. */
+private val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("DELETE FROM home_items WHERE builtinType IS NOT NULL AND builtinType != 'smartspace'")
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DataModule {
@@ -118,7 +125,7 @@ object DataModule {
             // pre-v5 dev versions (1–4, which never shipped a migration) so an old test install resets
             // instead of crashing; v5 onward is migrated, so the user's home layout survives upgrades.
             .fallbackToDestructiveMigrationFrom(dropAllTables = true, 1, 2, 3, 4)
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
             .build()
 
     @Provides

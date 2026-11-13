@@ -121,13 +121,11 @@ data class LauncherSettings(
     val drawerLabelColorMode: String = LABEL_COLOR_AUTOMATIC,
     /** Show the current weather (Open-Meteo; needs a location permission) in the smartspace widget. */
     val showWeather: Boolean = true,
-    /** Count indicator of the built-in notifications widget: [COUNT_NUMBER], [COUNT_DOT] or [COUNT_NONE]. */
     /** Use theme surfaces for built-in widgets; false keeps the translucent wallpaper style. */
     val widgetTonalBackground: Boolean = false,
     /** Widgets keep the same side margin inside their cells as an app icon has inside its cell, instead of
      *  filling the span edge to edge (a Telegram request after 0.9.7, opt-in; Launcher3's widget padding). */
     val widgetEdgesAlignWithIcons: Boolean = false,
-    val notificationWidgetCountStyle: String = COUNT_NUMBER,
     /** Double-tap on empty home-screen space locks the screen (needs the lock accessibility service). */
     val doubleTapToLock: Boolean = false,
     /** The page the launcher opens on and the HOME button returns to (0 = the leftmost). */
@@ -137,10 +135,6 @@ data class LauncherSettings(
     val homePageCount: Int = 0,
 ) {
     companion object {
-        const val COUNT_NUMBER = "number"
-        const val COUNT_DOT = "dot"
-        const val COUNT_NONE = "none"
-
         const val MARKER_RING = "ring"
         const val MARKER_HOUSE = "house"
 

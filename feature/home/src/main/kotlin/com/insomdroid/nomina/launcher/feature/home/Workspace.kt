@@ -1635,12 +1635,8 @@ internal fun Workspace(
                                         },
                                 ) {
                                     CompositionLocalProvider(LocalWidgetDragController provides widgetDragController) {
-                                        when (space.type) {
-                                            HomeItemEntity.BUILTIN_NOTIFICATIONS ->
-                                                NotificationsWidget(modifier = Modifier.fillMaxSize())
-                                            HomeItemEntity.BUILTIN_BATTERY ->
-                                                BatteryWidget(modifier = Modifier.fillMaxSize())
-                                            else -> SmartspaceWidget(modifier = Modifier.fillMaxSize())
+                                        if (space.type == HomeItemEntity.BUILTIN_SMARTSPACE) {
+                                            SmartspaceWidget(modifier = Modifier.fillMaxSize())
                                         }
                                     }
                                 }
@@ -1656,18 +1652,9 @@ internal fun Workspace(
                         val info = remember(ew.appWidgetId, widgetProviderGeneration) {
                             ew.appWidgetId?.let { AppWidgetManager.getInstance(ctxE).getAppWidgetInfo(it) }
                         }
-                        // A built-in's min/default spans depend on its type (the notifications row is
-                        // usable narrower than the smartspace clock).
-                        val builtinType = remember(ew.rowId) {
-                            if (ew.appWidgetId == null) builtins.firstOrNull { it.rowId == ew.rowId }?.type else null
-                        }
                         val range = remember(ew.rowId, columns, rows, cellW, cellH) {
                             if (ew.appWidgetId == null) {
-                                val minSpanX = when (builtinType) {
-                                    HomeItemEntity.BUILTIN_NOTIFICATIONS -> NOTIFICATIONS_MIN_SPAN_X
-                                    HomeItemEntity.BUILTIN_BATTERY -> BATTERY_SPAN
-                                    else -> SMARTSPACE_MIN_SPAN_X
-                                }
+                                val minSpanX = SMARTSPACE_MIN_SPAN_X
                                 WidgetResizeRange(
                                     minX = minSpanX.coerceAtMost(columns), minY = 1,
                                     maxX = columns, maxY = rows,

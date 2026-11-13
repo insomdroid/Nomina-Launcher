@@ -171,7 +171,6 @@ class SettingsViewModel @Inject constructor(
     fun setTwoLineDrawerLabels(value: Boolean) = update { repository.setTwoLineDrawerLabels(value) }
     fun setShowWeather(value: Boolean) = update { repository.setShowWeather(value) }
     fun setWidgetTonalBackground(value: Boolean) = update { repository.setWidgetTonalBackground(value) }
-    fun setNotificationWidgetCountStyle(value: String) = update { repository.setNotificationWidgetCountStyle(value) }
 
     private fun update(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

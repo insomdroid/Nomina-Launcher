@@ -76,12 +76,6 @@ data class HomeItemEntity(
         /** [builtinType] of the clock + date + next-calendar-event widget. */
         const val BUILTIN_SMARTSPACE = "smartspace"
 
-        /** [builtinType] of the notifications widget (active notifications as app icons). */
-        const val BUILTIN_NOTIFICATIONS = "notifications"
-
-        /** [builtinType] of the battery widget (a ring gauge + percent, app-icon sized). */
-        const val BUILTIN_BATTERY = "battery"
-
         /** Legacy [builtinType] retained only to discard saved rows and backups from the removed widget. */
         const val BUILTIN_PEOPLE = "people"
     }

@@ -5,8 +5,6 @@ plugins {
 
 android {
     namespace = "com.insomdroid.nomina.data"
-    defaultConfig {
-    }
 }
 
 ksp {
@@ -23,5 +21,4 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-
 }

@@ -4,8 +4,6 @@ plugins {
 
 android {
     namespace = "com.insomdroid.nomina.feature.settings"
-    defaultConfig {
-    }
 }
 
 dependencies {

@@ -4,8 +4,6 @@ plugins {
 
 android {
     namespace = "com.insomdroid.nomina.feature.home"
-    defaultConfig {
-    }
 }
 
 dependencies {

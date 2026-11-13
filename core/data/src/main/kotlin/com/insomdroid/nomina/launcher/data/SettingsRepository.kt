@@ -161,8 +161,8 @@ class SettingsRepository @Inject constructor(
             dockLabelColorFollowsHome = p[Keys.DOCK_LABEL_COLOR] == null,
             drawerLabelColor = p[Keys.DRAWER_LABEL_COLOR],
             drawerLabelColorMode = (p[Keys.DRAWER_LABEL_COLOR_MODE]
-                ?: if (p[Keys.DRAWER_LABEL_COLOR] != null) LauncherSettings.LABEL_COLOR_CUSTOM else LauncherSettings.LABEL_COLOR_FOLLOW_HOME)
-                .let { if (it in setOf(LauncherSettings.LABEL_COLOR_FOLLOW_HOME, LauncherSettings.LABEL_COLOR_AUTOMATIC, LauncherSettings.LABEL_COLOR_CUSTOM)) it else LauncherSettings.LABEL_COLOR_FOLLOW_HOME },
+                ?: if (p[Keys.DRAWER_LABEL_COLOR] != null) LauncherSettings.LABEL_COLOR_CUSTOM else LauncherSettings.LABEL_COLOR_AUTOMATIC)
+                .let { if (it in setOf(LauncherSettings.LABEL_COLOR_FOLLOW_HOME, LauncherSettings.LABEL_COLOR_AUTOMATIC, LauncherSettings.LABEL_COLOR_CUSTOM)) it else LauncherSettings.LABEL_COLOR_AUTOMATIC },
             showWeather = p[Keys.SHOW_WEATHER] ?: true,
             widgetTonalBackground = p[Keys.WIDGET_TONAL_BACKGROUND] ?: false,
             widgetEdgesAlignWithIcons = p[Keys.WIDGET_INSET_LIKE_ICONS] ?: false,
@@ -459,7 +459,7 @@ class SettingsRepository @Inject constructor(
             it == LauncherSettings.LABEL_COLOR_FOLLOW_HOME ||
                 it == LauncherSettings.LABEL_COLOR_AUTOMATIC ||
                 it == LauncherSettings.LABEL_COLOR_CUSTOM
-        } ?: LauncherSettings.LABEL_COLOR_FOLLOW_HOME
+        } ?: LauncherSettings.LABEL_COLOR_AUTOMATIC
     }
 
     /** Lets home-screen labels wrap onto a second line (apps, folders, shortcuts; not the dock). */

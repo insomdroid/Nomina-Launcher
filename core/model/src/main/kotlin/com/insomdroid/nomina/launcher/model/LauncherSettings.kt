@@ -118,7 +118,7 @@ data class LauncherSettings(
     val dockLabelColor: Int? = null,
     val dockLabelColorFollowsHome: Boolean = true,
     val drawerLabelColor: Int? = null,
-    val drawerLabelColorMode: String = LABEL_COLOR_FOLLOW_HOME,
+    val drawerLabelColorMode: String = LABEL_COLOR_AUTOMATIC,
     /** Show the current weather (Open-Meteo; needs a location permission) in the smartspace widget. */
     val showWeather: Boolean = true,
     /** Count indicator of the built-in notifications widget: [COUNT_NUMBER], [COUNT_DOT] or [COUNT_NONE]. */

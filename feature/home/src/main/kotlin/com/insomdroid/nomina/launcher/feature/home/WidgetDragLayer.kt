@@ -16,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.insomdroid.nomina.data.ReorderPlanner
-import com.insomdroid.nomina.data.local.HomeItemEntity
 import com.insomdroid.nomina.ui.HomeDragController
 import kotlin.math.roundToInt
 
@@ -37,12 +36,8 @@ internal fun List<HomeEntry>.widgetRects() = mapIndexed { index, e ->
 }
 
 @Composable
-internal fun BuiltinWidget(type: String, modifier: Modifier = Modifier) {
-    when (type) {
-        HomeItemEntity.BUILTIN_NOTIFICATIONS -> NotificationsWidget(modifier)
-        HomeItemEntity.BUILTIN_BATTERY -> BatteryWidget(modifier)
-        else -> SmartspaceWidget(modifier)
-    }
+internal fun BuiltinWidget(modifier: Modifier = Modifier) {
+    SmartspaceWidget(modifier)
 }
 
 /** Only this small overlay reads the per-frame position in composition. */
@@ -70,7 +65,7 @@ internal fun WidgetDragLayer(state: WidgetDragController, home: HomeDragControll
             val builtin = drag.choice as? WidgetChoice.Builtin
             when {
                 drag.preview != null -> Image(drag.preview.asImageBitmap(), null, Modifier.fillMaxSize())
-                builtin != null -> BuiltinWidget(builtin.type, Modifier.fillMaxSize())
+                builtin != null -> BuiltinWidget(Modifier.fillMaxSize())
                 drag.choice != null -> WidgetPreview(drag.choice, Modifier.fillMaxSize(),
                     drag.spanX * state.cellWidthDp, drag.spanY * state.cellHeightDp, onSnapshot = {})
                 else -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(24.dp)))

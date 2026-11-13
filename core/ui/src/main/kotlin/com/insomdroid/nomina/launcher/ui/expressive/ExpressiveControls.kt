@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -228,7 +227,6 @@ fun ExpressiveSlider(
             },
         contentAlignment = Alignment.CenterStart,
     ) {
-        val trackWidth = maxWidth
         Canvas(modifier = Modifier.fillMaxWidth().height(20.dp)) {
             val centerY = size.height / 2f
             val startX = 4.dp.toPx()
@@ -268,7 +266,6 @@ fun ExpressiveTextField(
     textStyle: TextStyle = TextStyle.Default,
 ) {
     val p = LocalExpressivePalette.current
-    var focused by remember { androidx.compose.runtime.mutableStateOf(false) }
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -276,7 +273,6 @@ fun ExpressiveTextField(
             .fillMaxWidth()
             .clip(RoundedCornerShape(ExpressiveRadius.control))
             .background(p.surfaceHi)
-            .onFocusChanged { focused = it.isFocused }
             .padding(PaddingValues(horizontal = 12.dp, vertical = 12.dp)),
         enabled = enabled,
         singleLine = singleLine,

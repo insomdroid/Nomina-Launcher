@@ -391,6 +391,32 @@ fun SettingsScreen(
                         stringResource(R.string.settings_folder_columns), s.folderColumns,
                         SettingsRepository.MIN_FOLDER_COLUMNS, SettingsRepository.MAX_FOLDER_COLUMNS, viewModel::setFolderColumns,
                     )
+                    SwitchRow(stringResource(R.string.settings_folder_show_labels), s.folderShowLabels, viewModel::setFolderShowLabels)
+                    ScaleSliderRow(
+                        label = stringResource(R.string.settings_folder_icon_size),
+                        value = s.folderIconScale,
+                        onValueChange = viewModel::setFolderIconScale,
+                        valueRange = SettingsRepository.MIN_FOLDER_ICON_SCALE..SettingsRepository.MAX_FOLDER_ICON_SCALE,
+                        valueText = percentText,
+                        default = 1f,
+                    )
+                    ScaleSliderRow(
+                        label = stringResource(R.string.settings_folder_spacing),
+                        value = s.folderSpacing,
+                        onValueChange = viewModel::setFolderSpacing,
+                        valueRange = SettingsRepository.MIN_FOLDER_SPACING..SettingsRepository.MAX_FOLDER_SPACING,
+                        valueText = percentText,
+                        default = 1f,
+                    )
+                    FolderBackgroundColorRow(selected = s.folderBackgroundColor, onPick = viewModel::setFolderBackgroundColor)
+                    ScaleSliderRow(
+                        label = stringResource(R.string.settings_folder_opacity),
+                        value = s.folderBackgroundOpacity,
+                        onValueChange = viewModel::setFolderBackgroundOpacity,
+                        valueRange = SettingsRepository.MIN_FOLDER_BACKGROUND_OPACITY..1f,
+                        valueText = percentText,
+                        default = 1f,
+                    )
                     SwitchRow(
                         stringResource(R.string.settings_folder_swipe_first_app),
                         stringResource(R.string.settings_folder_swipe_first_app_desc),

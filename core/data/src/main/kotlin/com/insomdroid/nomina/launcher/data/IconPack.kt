@@ -74,7 +74,7 @@ class IconPack(
                         total += (max - min).toDouble() / max.toDouble()
                         count++
                     }
-                    if (count == 0) 0.0 else total / count
+                    if (count == 0) null else total / count
                 } finally {
                     bitmap.recycle()
                 }

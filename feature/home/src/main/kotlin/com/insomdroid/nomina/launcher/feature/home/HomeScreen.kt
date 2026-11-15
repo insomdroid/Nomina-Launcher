@@ -966,79 +966,44 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (miniDockCameraApp != null) {
-                        AsyncImage(
-                            model = IconRequest(
-                                app = miniDockCameraApp,
-                                iconPack = settings.iconPackPackage,
-                                epoch = LocalIconEpochs.current.of(miniDockCameraApp.packageName),
-                                reshapeLegacyIcons = settings.reshapeLegacyIcons,
-                                iconShape = settings.iconShape,
-                                autoResize = settings.autoResizeIcons,
-                            ),
-                            contentDescription = miniDockCameraApp.label,
-                            modifier = Modifier.size(16.dp).clickable { viewModel.launch(miniDockCameraApp) },
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_mini_camera),
-                            contentDescription = "Camera",
-                            modifier = Modifier.size(16.dp).clickable {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_mini_camera),
+                        contentDescription = miniDockCameraApp?.label ?: "Camera",
+                        modifier = Modifier.size(16.dp).clickable {
+                            if (miniDockCameraApp != null) {
+                                viewModel.launch(miniDockCameraApp)
+                            } else {
                                 val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
                                 runCatching { context.startActivity(intent) }.onFailure {
                                     runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
                                 }
-                            },
-                            tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
-                        )
-                    }
-                    if (miniDockSearchApp != null) {
-                        AsyncImage(
-                            model = IconRequest(
-                                app = miniDockSearchApp,
-                                iconPack = settings.iconPackPackage,
-                                epoch = LocalIconEpochs.current.of(miniDockSearchApp.packageName),
-                                reshapeLegacyIcons = settings.reshapeLegacyIcons,
-                                iconShape = settings.iconShape,
-                                autoResize = settings.autoResizeIcons,
-                            ),
-                            contentDescription = miniDockSearchApp.label,
-                            modifier = Modifier.size(16.dp).clickable { viewModel.launch(miniDockSearchApp) },
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_search),
-                            contentDescription = "Search apps",
-                            modifier = Modifier.size(16.dp).clickable { onOpenDrawer() },
-                            tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
-                        )
-                    }
-                    if (miniDockBrowserApp != null) {
-                        AsyncImage(
-                            model = IconRequest(
-                                app = miniDockBrowserApp,
-                                iconPack = settings.iconPackPackage,
-                                epoch = LocalIconEpochs.current.of(miniDockBrowserApp.packageName),
-                                reshapeLegacyIcons = settings.reshapeLegacyIcons,
-                                iconShape = settings.iconShape,
-                                autoResize = settings.autoResizeIcons,
-                            ),
-                            contentDescription = miniDockBrowserApp.label,
-                            modifier = Modifier.size(16.dp).clickable { viewModel.launch(miniDockBrowserApp) },
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_mini_browser),
-                            contentDescription = "Browser",
-                            modifier = Modifier.size(16.dp).clickable {
+                            }
+                        },
+                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = miniDockSearchApp?.label ?: "Search apps",
+                        modifier = Modifier.size(16.dp).clickable {
+                            if (miniDockSearchApp != null) viewModel.launch(miniDockSearchApp) else onOpenDrawer()
+                        },
+                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_mini_browser),
+                        contentDescription = miniDockBrowserApp?.label ?: "Browser",
+                        modifier = Modifier.size(16.dp).clickable {
+                            if (miniDockBrowserApp != null) {
+                                viewModel.launch(miniDockBrowserApp)
+                            } else {
                                 val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
                                 runCatching { context.startActivity(intent) }.onFailure {
                                     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }
                                 }
-                            },
-                            tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
-                        )
-                    }
+                            }
+                        },
+                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                    )
                 }
             }
         }

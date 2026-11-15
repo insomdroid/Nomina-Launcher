@@ -462,12 +462,6 @@ fun SettingsScreen(
                     collapsed = selectedSection == null,
                     onToggle = { selectedSection = "capsule" },
                 ) {
-                    Text(
-                        text = stringResource(R.string.settings_capsule_desc),
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
-                        style = LauncherTextStyles.settingsSupportingText,
-                        color = palette.dim,
-                    )
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_capsule_camera),
                         description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label

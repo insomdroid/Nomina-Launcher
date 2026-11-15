@@ -269,25 +269,49 @@ class LauncherAppsSource @Inject constructor(
             reload()
         }
 
+        // A profile event may only affect data belonging to profiles that are allowed into the
+        // shared app list. In particular, a private or untyped Android 15+ profile must not invalidate
+        // a personal app with the same package name or remove its pinned home rows.
+        fun routePackageEvent(user: UserHandle, action: () -> Unit) {
+            val serial = runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull()
+            val kinds = profileSystem.snapshot().associate { it.serial to it.kind }
+            if (shouldListProfileApps(
+                    isOwnUser = user == Process.myUserHandle(),
+                    serial = serial,
+                    kinds = kinds,
+                    sdkInt = Build.VERSION.SDK_INT,
+                )
+            ) {
+                action()
+            }
+        }
+
         val callback = object : LauncherApps.Callback() {
-            override fun onPackageAdded(packageName: String, user: UserHandle) = packageEvent(packageName)
-            override fun onPackageRemoved(packageName: String, user: UserHandle) {
+            override fun onPackageAdded(packageName: String, user: UserHandle) =
+                routePackageEvent(user) { packageEvent(packageName) }
+
+            override fun onPackageRemoved(packageName: String, user: UserHandle) = routePackageEvent(user) {
                 val serial = runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull() ?: 0L
                 packageRemovalPool.add(packageName to serial)
                 packageEvent(packageName)
             }
+
             override fun onPackageChanged(packageName: String, user: UserHandle) =
-                packageEvent(packageName, iconsMayHaveChanged = true)
+                routePackageEvent(user) { packageEvent(packageName, iconsMayHaveChanged = true) }
+
             override fun onPackagesAvailable(names: Array<out String>, user: UserHandle, replacing: Boolean) =
-                packageEvent(*names, iconsMayHaveChanged = replacing)
+                routePackageEvent(user) { packageEvent(*names, iconsMayHaveChanged = replacing) }
+
             override fun onPackagesUnavailable(names: Array<out String>, user: UserHandle, replacing: Boolean) =
-                packageEvent(*names)
+                routePackageEvent(user) { packageEvent(*names) }
 
             // Only the default home app receives it. Not a package event: chat apps re-publish their
             // shortcuts on every message, and those must not rescan the app list.
             override fun onShortcutsChanged(packageName: String, shortcuts: MutableList<ShortcutInfo>, user: UserHandle) {
-                val serial = runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull() ?: 0L
-                shortcutChangePool.add(packageName to serial)
+                routePackageEvent(user) {
+                    val serial = runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull() ?: 0L
+                    shortcutChangePool.add(packageName to serial)
+                }
             }
         }
 

@@ -47,12 +47,6 @@ interface ProfileSystem {
 }
 
 /**
- * The one profile the Work tab shows, or null: a [ProfileKind.Managed] profile, or an
- * [ProfileKind.Unknown] one that is badged (API 30–34 cannot tell a clone profile apart, and
- * Launcher3 lumps them together there too). The own user, private and clone profiles never
- * qualify. Exactly one work profile is supported: the lowest serial wins.
- */
-/**
  * Whether a profile's launchable apps may enter Nomina's shared app list.
  *
  * Android 15+ identifies managed, private and clone profiles. Only positively identified
@@ -75,6 +69,12 @@ internal fun shouldListProfileApps(
     }
 }
 
+/**
+ * The one profile the Work tab shows, or null: a [ProfileKind.Managed] profile, or an
+ * [ProfileKind.Unknown] one that is badged (API 30–34 cannot tell a clone profile apart, and
+ * Launcher3 lumps them together there too). The own user, private and clone profiles never
+ * qualify. Exactly one work profile is supported: the lowest serial wins.
+ */
 fun workProfileOf(profiles: List<ProfileSnapshot>): ProfileSnapshot? = profiles
     .filter { it.kind == ProfileKind.Managed || (it.kind == ProfileKind.Unknown && it.badged) }
     .minByOrNull { it.serial }

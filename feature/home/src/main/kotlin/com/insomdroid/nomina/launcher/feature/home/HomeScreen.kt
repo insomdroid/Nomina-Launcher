@@ -139,6 +139,7 @@ import com.insomdroid.nomina.ui.R as UiR
 import com.insomdroid.nomina.ui.rememberHomeDragController
 import com.insomdroid.nomina.ui.component.LocalAppLabelLines
 import com.insomdroid.nomina.ui.component.LocalAppLabelScale
+import com.insomdroid.nomina.ui.component.systemLabelColor
 import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.LocalIconEpochs
 import com.insomdroid.nomina.ui.component.LocalIconPack
@@ -751,7 +752,7 @@ fun HomeScreen(
                 badgeScale = badgeScale,
                 showLabels = settings.showHomeLabels,
                 showFolderNames = settings.showHomeFolderNames,
-                labelColor = Color(settings.appLabelColor),
+                labelColor = if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) Color(settings.appLabelColor) else systemLabelColor(),
                 showPageIndicator = settings.showPageIndicator,
                 widgetEdgesAlignWithIcons = settings.widgetEdgesAlignWithIcons,
                 homePageMarker = settings.homePageMarker,
@@ -909,7 +910,12 @@ fun HomeScreen(
                         badgeScale = badgeScale,
                         showLabels = settings.showDockLabels,
                         showFolderNames = settings.showHomeFolderNames,
-                        labelColor = Color(settings.dockLabelColor ?: settings.appLabelColor),
+                        labelColor = when (settings.dockLabelColorMode) {
+                            LauncherSettings.LABEL_COLOR_FOLLOW_HOME ->
+                                if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) Color(settings.appLabelColor) else systemLabelColor()
+                            LauncherSettings.LABEL_COLOR_CUSTOM -> Color(settings.dockLabelColor ?: settings.appLabelColor)
+                            else -> systemLabelColor()
+                        },
                         backgroundAlpha = settings.dockBackgroundOpacity,
                         locked = settings.desktopLocked,
                         dragController = dragController,
@@ -1034,8 +1040,15 @@ fun HomeScreen(
                     showLabel = liftedFolderSource == DragSource.Home && settings.showHomeLabels,
                     showName = settings.showHomeFolderNames,
                     labelColor = Color(
-                        if (liftedFolderSource == DragSource.Dock) settings.dockLabelColor ?: settings.appLabelColor
-                        else settings.appLabelColor,
+                        if (liftedFolderSource == DragSource.Dock) {
+                            when (settings.dockLabelColorMode) {
+                                LauncherSettings.LABEL_COLOR_FOLLOW_HOME ->
+                                    if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) settings.appLabelColor else systemLabelColor().value.toInt()
+                                LauncherSettings.LABEL_COLOR_CUSTOM -> settings.dockLabelColor ?: settings.appLabelColor
+                                else -> systemLabelColor().value.toInt()
+                            }
+                        } else if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) settings.appLabelColor
+                        else systemLabelColor().value.toInt(),
                     ),
                 )
             }

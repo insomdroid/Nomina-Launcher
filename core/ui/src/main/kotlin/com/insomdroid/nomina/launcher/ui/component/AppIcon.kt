@@ -38,7 +38,7 @@ val LocalIconReshapeMode = compositionLocalOf { LauncherSettings.RESHAPE_UNTHEME
 /**
  * Package name of the selected third-party icon pack under this subtree ("" = none). Provided per
  * surface from the user's setting and fed into the Coil request (part of the cache key). A mapped pack
- * drawable wins; an unmapped app keeps its original full-colour icon.
+ * drawable wins; an unmapped app follows the Unthemed Icons settings.
  */
 val LocalIconPack = compositionLocalOf { "" }
 

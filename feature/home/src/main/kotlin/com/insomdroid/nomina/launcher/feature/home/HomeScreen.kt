@@ -90,6 +90,8 @@ import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveMotion
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
+import coil3.compose.AsyncImage
+import com.insomdroid.nomina.model.IconRequest
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -138,6 +140,7 @@ import com.insomdroid.nomina.ui.rememberHomeDragController
 import com.insomdroid.nomina.ui.component.LocalAppLabelLines
 import com.insomdroid.nomina.ui.component.LocalAppLabelScale
 import com.insomdroid.nomina.ui.component.LocalIconScale
+import com.insomdroid.nomina.ui.component.LocalIconEpochs
 import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import kotlin.math.abs
@@ -191,6 +194,9 @@ fun HomeScreen(
     // The system (and the startup benchmarks) learn when home is really up: its rows loaded.
     HomeDrawnReporter(loaded = uiState.loaded)
     val settings = uiState.settings
+    val miniDockCameraApp = uiState.apps.firstOrNull { it.key == settings.miniDockCameraAppKey }
+    val miniDockSearchApp = uiState.apps.firstOrNull { it.key == settings.miniDockSearchAppKey }
+    val miniDockBrowserApp = uiState.apps.firstOrNull { it.key == settings.miniDockBrowserAppKey }
     // First-run intro (fresh installs only) — covers the whole home surface until finished/skipped.
     val showOnboarding by viewModel.showOnboarding.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -960,34 +966,79 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_mini_camera),
-                        contentDescription = "Camera",
-                        modifier = Modifier.size(16.dp).clickable {
-                            val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
-                            runCatching { context.startActivity(intent) }.onFailure {
-                                runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
-                            }
-                        },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
-                    )
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search),
-                        contentDescription = "Search apps",
-                        modifier = Modifier.size(16.dp).clickable { onOpenDrawer() },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
-                    )
-                    Icon(
-                        painter = painterResource(R.drawable.ic_mini_browser),
-                        contentDescription = "Browser",
-                        modifier = Modifier.size(16.dp).clickable {
-                            val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
-                            runCatching { context.startActivity(intent) }.onFailure {
-                                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }
-                            }
-                        },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
-                    )
+                    if (miniDockCameraApp != null) {
+                        AsyncImage(
+                            model = IconRequest(
+                                app = miniDockCameraApp,
+                                iconPack = settings.iconPackPackage,
+                                epoch = LocalIconEpochs.current.of(miniDockCameraApp.packageName),
+                                reshapeLegacyIcons = settings.reshapeLegacyIcons,
+                                iconShape = settings.iconShape,
+                                autoResize = settings.autoResizeIcons,
+                            ),
+                            contentDescription = miniDockCameraApp.label,
+                            modifier = Modifier.size(16.dp).clickable { viewModel.launch(miniDockCameraApp) },
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_mini_camera),
+                            contentDescription = "Camera",
+                            modifier = Modifier.size(16.dp).clickable {
+                                val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
+                                runCatching { context.startActivity(intent) }.onFailure {
+                                    runCatching { context.startActivity(Intent(MediaStore.ACTION_IMAGE_CAPTURE)) }
+                                }
+                            },
+                            tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        )
+                    }
+                    if (miniDockSearchApp != null) {
+                        AsyncImage(
+                            model = IconRequest(
+                                app = miniDockSearchApp,
+                                iconPack = settings.iconPackPackage,
+                                epoch = LocalIconEpochs.current.of(miniDockSearchApp.packageName),
+                                reshapeLegacyIcons = settings.reshapeLegacyIcons,
+                                iconShape = settings.iconShape,
+                                autoResize = settings.autoResizeIcons,
+                            ),
+                            contentDescription = miniDockSearchApp.label,
+                            modifier = Modifier.size(16.dp).clickable { viewModel.launch(miniDockSearchApp) },
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = "Search apps",
+                            modifier = Modifier.size(16.dp).clickable { onOpenDrawer() },
+                            tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        )
+                    }
+                    if (miniDockBrowserApp != null) {
+                        AsyncImage(
+                            model = IconRequest(
+                                app = miniDockBrowserApp,
+                                iconPack = settings.iconPackPackage,
+                                epoch = LocalIconEpochs.current.of(miniDockBrowserApp.packageName),
+                                reshapeLegacyIcons = settings.reshapeLegacyIcons,
+                                iconShape = settings.iconShape,
+                                autoResize = settings.autoResizeIcons,
+                            ),
+                            contentDescription = miniDockBrowserApp.label,
+                            modifier = Modifier.size(16.dp).clickable { viewModel.launch(miniDockBrowserApp) },
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_mini_browser),
+                            contentDescription = "Browser",
+                            modifier = Modifier.size(16.dp).clickable {
+                                val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
+                                runCatching { context.startActivity(intent) }.onFailure {
+                                    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))) }
+                                }
+                            },
+                            tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        )
+                    }
                 }
             }
         }

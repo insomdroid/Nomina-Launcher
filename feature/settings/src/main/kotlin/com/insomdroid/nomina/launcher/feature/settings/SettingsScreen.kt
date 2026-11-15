@@ -1257,15 +1257,17 @@ private fun AlertDialog(
             color = containerColor,
             shape = RoundedCornerShape(ExpressiveRadius.card),
         ) {
-            Column(modifier = Modifier.padding(ExpressiveSpacing.xl)) {
-                CompositionLocalProvider(LocalContentColor provides LocalExpressivePalette.current.text) { title() }
-                Spacer(Modifier.height(16.dp))
-                text()
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) { confirmButton() }
+            CompositionLocalProvider(LocalContentColor provides LocalExpressivePalette.current.text) {
+                Column(modifier = Modifier.padding(ExpressiveSpacing.xl)) {
+                    title()
+                    Spacer(Modifier.height(16.dp))
+                    text()
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) { confirmButton() }
+                }
             }
         }
     }

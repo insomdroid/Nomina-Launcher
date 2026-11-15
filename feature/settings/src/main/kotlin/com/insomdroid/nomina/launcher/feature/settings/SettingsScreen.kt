@@ -2024,6 +2024,40 @@ private fun FollowHomeScaleRow(
 }
 
 @Composable
+private fun FollowHomeChoiceCard(
+    label: String,
+    followsHome: Boolean,
+    onFollowHome: () -> Unit,
+    onCustom: () -> Unit,
+) {
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi.copy(alpha = 0.94f),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs),
+    ) {
+        Column(Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = 14.dp)) {
+            RowLabel(label)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = 10.dp).horizontalScroll(rememberScrollState()),
+            ) {
+                SettingsFilterChip(
+                    selected = followsHome,
+                    onClick = onFollowHome,
+                    label = { Text(stringResource(R.string.settings_follow_home)) },
+                )
+                SettingsFilterChip(
+                    selected = !followsHome,
+                    onClick = onCustom,
+                    label = { Text(stringResource(R.string.settings_custom)) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun LabelColorModeRow(
     mode: String,
     includeFollowHome: Boolean,

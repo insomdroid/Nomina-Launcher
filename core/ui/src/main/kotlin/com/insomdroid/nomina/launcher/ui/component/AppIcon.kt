@@ -217,6 +217,6 @@ fun AppLabel(
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
-        modifier = if (spoken == null) Modifier else Modifier.clearAndSetSemantics { text = AnnotatedString(spoken) },
+        modifier = if (spoken == null) Modifier else Modifier.clearAndSetSemantics { this.text = AnnotatedString(spoken) },
     )
 }

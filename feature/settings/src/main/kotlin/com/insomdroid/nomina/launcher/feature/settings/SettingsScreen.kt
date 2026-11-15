@@ -117,6 +117,10 @@ import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconShape
 import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
+import com.insomdroid.nomina.ui.component.LocalUnthemedIconMode
+import com.insomdroid.nomina.ui.component.LocalUnthemedContainerMode
+import com.insomdroid.nomina.ui.component.LocalUnthemedContainerColor
+import com.insomdroid.nomina.ui.component.LocalUnthemedContainerOpacity
 import com.insomdroid.nomina.ui.component.NotificationBadge
 import com.insomdroid.nomina.ui.component.CapsuleGlyph
 import com.insomdroid.nomina.model.CapsuleGlyphs
@@ -158,6 +162,9 @@ fun SettingsScreen(
     var miniDockGlyphPickerSlot by rememberSaveable { mutableStateOf<String?>(null) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
+    var showUnthemedAppearancePicker by rememberSaveable { mutableStateOf(false) }
+    var showUnthemedContainerPicker by rememberSaveable { mutableStateOf(false) }
+    var showUnthemedColorPicker by rememberSaveable { mutableStateOf(false) }
     var showHomeMarkerPicker by rememberSaveable { mutableStateOf(false) }
     var showBackup by rememberSaveable { mutableStateOf(false) }
     var selectedSection by rememberSaveable { mutableStateOf<String?>(null) }
@@ -199,6 +206,10 @@ fun SettingsScreen(
         LocalIconShape provides s.iconShape,
         LocalAutoResizeIcons provides s.autoResizeIcons,
         LocalIconReshapeMode provides s.reshapeLegacyIcons,
+        LocalUnthemedIconMode provides s.unthemedIconMode,
+        LocalUnthemedContainerMode provides s.unthemedContainerMode,
+        LocalUnthemedContainerColor provides s.unthemedContainerColor,
+        LocalUnthemedContainerOpacity provides s.unthemedContainerOpacity,
     ) {
         if (showBackup) {
             BackupScreen(onBack = { showBackup = false }, modifier = modifier.fillMaxSize())
@@ -522,6 +533,41 @@ fun SettingsScreen(
                         selected = s.reshapeLegacyIcons,
                         onPick = viewModel::setReshapeLegacyIcons,
                     )
+                    SettingsGroupLabel(stringResource(R.string.settings_unthemed_icons))
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_unthemed_appearance),
+                        description = stringResource(
+                            when (s.unthemedIconMode) {
+                                LauncherSettings.UNTHEMED_ICON_ORIGINAL -> R.string.settings_unthemed_original
+                                LauncherSettings.UNTHEMED_ICON_MONOCHROME -> R.string.settings_unthemed_monochrome
+                                else -> R.string.settings_color_automatic
+                            },
+                        ),
+                    ) { showUnthemedAppearancePicker = true }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_unthemed_container),
+                        description = stringResource(
+                            when (s.unthemedContainerMode) {
+                                LauncherSettings.UNTHEMED_CONTAINER_CUSTOM -> R.string.settings_custom
+                                LauncherSettings.UNTHEMED_CONTAINER_NONE -> R.string.settings_color_transparent
+                                else -> R.string.settings_color_automatic
+                            },
+                        ),
+                    ) { showUnthemedContainerPicker = true }
+                    if (s.unthemedContainerMode == LauncherSettings.UNTHEMED_CONTAINER_CUSTOM) {
+                        ExpressiveActionRow(
+                            label = stringResource(R.string.settings_unthemed_custom_color),
+                            description = "#%06X".format(s.unthemedContainerColor and 0xFFFFFF),
+                        ) { showUnthemedColorPicker = true }
+                    }
+                    if (s.unthemedContainerMode != LauncherSettings.UNTHEMED_CONTAINER_NONE) {
+                        SliderRow(
+                            label = stringResource(R.string.settings_unthemed_opacity),
+                            value = s.unthemedContainerOpacity,
+                            onValueChange = viewModel::setUnthemedContainerOpacity,
+                            valueRange = 0.2f..1f,
+                        )
+                    }
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_home_icon_size),
                         value = s.iconScale,
@@ -838,6 +884,40 @@ fun SettingsScreen(
                 onDismiss = { miniDockGlyphPickerSlot = null },
             )
         }
+
+        if (showUnthemedAppearancePicker) {
+            ChoicePicker(
+                title = R.string.settings_unthemed_appearance,
+                options = listOf(
+                    LauncherSettings.UNTHEMED_ICON_AUTOMATIC to R.string.settings_color_automatic,
+                    LauncherSettings.UNTHEMED_ICON_ORIGINAL to R.string.settings_unthemed_original,
+                    LauncherSettings.UNTHEMED_ICON_MONOCHROME to R.string.settings_unthemed_monochrome,
+                ),
+                selected = s.unthemedIconMode,
+                onPick = { viewModel.setUnthemedIconMode(it); showUnthemedAppearancePicker = false },
+                onDismiss = { showUnthemedAppearancePicker = false },
+            )
+        }
+        if (showUnthemedContainerPicker) {
+            ChoicePicker(
+                title = R.string.settings_unthemed_container,
+                options = listOf(
+                    LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC to R.string.settings_color_automatic,
+                    LauncherSettings.UNTHEMED_CONTAINER_CUSTOM to R.string.settings_custom,
+                    LauncherSettings.UNTHEMED_CONTAINER_NONE to R.string.settings_color_transparent,
+                ),
+                selected = s.unthemedContainerMode,
+                onPick = { viewModel.setUnthemedContainerMode(it); showUnthemedContainerPicker = false },
+                onDismiss = { showUnthemedContainerPicker = false },
+            )
+        }
+        if (showUnthemedColorPicker) {
+            UnthemedColorPicker(
+                selected = s.unthemedContainerColor,
+                onPick = { viewModel.setUnthemedContainerColor(it); showUnthemedColorPicker = false },
+                onDismiss = { showUnthemedColorPicker = false },
+            )
+        }
         if (showIconPackPicker) {
             IconPackPicker(
                 packs = iconPacks,
@@ -865,6 +945,54 @@ fun SettingsScreen(
             )
         }
     }
+}
+
+
+/** HEX colour picker for the unthemed-icon backplate. */
+@Composable
+private fun UnthemedColorPicker(
+    selected: Int,
+    onPick: (Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val p = LocalExpressivePalette.current
+    var hex by rememberSaveable { mutableStateOf("%06X".format(selected and 0xFFFFFF)) }
+    val parsed = remember(hex) {
+        val value = hex.trim().removePrefix("#")
+        if (value.length == 6 && value.all { it.digitToIntOrNull(16) != null }) {
+            runCatching { (0xFF000000L or value.toLong(16)).toInt() }.getOrNull()
+        } else null
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = p.surfaceHi,
+        title = { Text(stringResource(R.string.settings_unthemed_custom_color), color = p.text) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(
+                        Modifier.size(36.dp).clip(CircleShape).background(Color(parsed ?: selected))
+                            .border(1.dp, p.faint, CircleShape),
+                    )
+                    Text("#${hex.trim().removePrefix("#")}", color = p.text)
+                }
+                androidx.compose.material3.OutlinedTextField(
+                    value = hex,
+                    onValueChange = { next -> hex = next.filter { it.isDigit() || it.lowercaseChar() in 'a'..'f' || it == '#' }.take(7) },
+                    singleLine = true,
+                    label = { Text(stringResource(R.string.settings_color_hex)) },
+                )
+            }
+        },
+        confirmButton = {
+            if (parsed != null) SettingsTextButton(onClick = { onPick(parsed) }) {
+                Text(stringResource(R.string.settings_apply))
+            }
+        },
+        dismissButton = {
+            SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_folder_cancel)) }
+        },
+    )
 }
 
 /** Single-select picker for the home page marker. */

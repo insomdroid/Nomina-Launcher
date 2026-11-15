@@ -25,6 +25,18 @@ import javax.inject.Singleton
  * that, and one `BroadcastReceiver` per collector of [changes] for the profile broadcasts —
  * `LauncherApps.Callback` never reports a profile coming, going or pausing.
  */
+
+/**
+ * Whether a profile badge may be used to identify a Work profile.
+ *
+ * Android 15 and later expose profile types through LauncherApps. An untyped profile on those
+ * versions must not be classified as Work merely because its icon is badged: it may be a profile
+ * the launcher cannot currently identify. On Android 11–14, the badge remains the available
+ * fallback for distinguishing a managed profile from the owner profile.
+ */
+internal fun badgeCounts(kind: ProfileKind, sdkInt: Int): Boolean =
+    kind == ProfileKind.Unknown && sdkInt < Build.VERSION_CODES.VANILLA_ICE_CREAM
+
 @Singleton
 class AndroidProfileSystem @Inject constructor(@ApplicationContext private val context: Context) : ProfileSystem {
     private val userManager = context.getSystemService(UserManager::class.java)
@@ -44,7 +56,7 @@ class AndroidProfileSystem @Inject constructor(@ApplicationContext private val c
             ProfileSnapshot(
                 serial = serial,
                 kind = kind,
-                badged = kind == ProfileKind.Unknown && isBadged(user),
+                badged = badgeCounts(kind, Build.VERSION.SDK_INT) && isBadged(user),
                 paused = runCatching { userManager.isQuietModeEnabled(user) }.getOrDefault(false),
             )
         }

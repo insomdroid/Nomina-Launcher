@@ -33,7 +33,17 @@ data class StatusBarSettings(
 
 /** The app-icon style (icon pack, legacy reshape and icon-size multiplier), so the shell floating drag icon
  *  matches the surfaces. */
-data class IconStyle(val iconPack: String = "", val iconScale: Float = 1f, val iconShape: String = com.insomdroid.nomina.model.LauncherSettings.ICON_SHAPE_SYSTEM, val reshapeLegacyIcons: String = com.insomdroid.nomina.model.LauncherSettings.RESHAPE_UNTHEMED, val autoResizeIcons: Boolean = true)
+data class IconStyle(
+    val iconPack: String = "",
+    val iconScale: Float = 1f,
+    val iconShape: String = com.insomdroid.nomina.model.LauncherSettings.ICON_SHAPE_SYSTEM,
+    val reshapeLegacyIcons: String = com.insomdroid.nomina.model.LauncherSettings.RESHAPE_UNTHEMED,
+    val autoResizeIcons: Boolean = true,
+    val unthemedIconMode: String = com.insomdroid.nomina.model.LauncherSettings.UNTHEMED_ICON_AUTOMATIC,
+    val unthemedContainerMode: String = com.insomdroid.nomina.model.LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC,
+    val unthemedContainerColor: Int = 0xFF808080.toInt(),
+    val unthemedContainerOpacity: Float = com.insomdroid.nomina.model.LauncherSettings.DEFAULT_UNTHEMED_CONTAINER_OPACITY,
+)
 
 /**
  * Exposes just the icon-style settings to [LauncherShell] so the single floating drag icon — drawn
@@ -54,7 +64,12 @@ class LauncherShellViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     val iconStyle: StateFlow<IconStyle> = settingsRepository.settings
-        .map { IconStyle(it.iconPackPackage, it.iconScale, it.iconShape, it.reshapeLegacyIcons, it.autoResizeIcons) }
+        .map {
+            IconStyle(
+                it.iconPackPackage, it.iconScale, it.iconShape, it.reshapeLegacyIcons, it.autoResizeIcons,
+                it.unthemedIconMode, it.unthemedContainerMode, it.unthemedContainerColor, it.unthemedContainerOpacity,
+            )
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), IconStyle())
 
     val iconEpochs: StateFlow<IconEpochs> = launcherAppsSource.iconEpochs

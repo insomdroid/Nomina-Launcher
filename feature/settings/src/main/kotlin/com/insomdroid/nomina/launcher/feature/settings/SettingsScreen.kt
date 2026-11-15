@@ -282,8 +282,6 @@ fun SettingsScreen(
                     "home" -> stringResource(R.string.settings_home)
                     "dock" -> stringResource(R.string.settings_dock)
                     "drawer" -> stringResource(R.string.settings_drawer)
-                    "folders" -> stringResource(R.string.settings_folders)
-                    "capsule" -> stringResource(R.string.settings_capsule)
                     "icons" -> stringResource(R.string.settings_icons_typography)
                     "wallpaper" -> stringResource(R.string.settings_wallpaper_background)
                     "gestures" -> stringResource(R.string.settings_gestures_interaction)
@@ -344,6 +342,8 @@ fun SettingsScreen(
                             ),
                         ) { showHomeMarkerPicker = true }
                     }
+                    SettingsGroupLabel("ADVANCED")
+                    SwitchRow(stringResource(R.string.settings_home_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
                     PageSwitchSpeedRow(selected = s.pageSwitchSpeed) { showPageSpeedPicker = true }
                     SwitchRow(
                         stringResource(R.string.settings_infinite_scroll),
@@ -415,8 +415,40 @@ fun SettingsScreen(
                         }
                     }
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
-                    DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
                     DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
+                    SettingsGroupLabel("ADVANCED")
+                    DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
+                    SettingsGroupLabel("MINI DOCK")
+                    SettingsGroupLabel(stringResource(R.string.settings_capsule_apps))
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_right),
+                        description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "browser" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_centre),
+                        description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "search" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_left),
+                        description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "camera" }
+
+                    SettingsGroupLabel(stringResource(R.string.settings_capsule_icons))
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_right),
+                        description = CapsuleGlyphs.label(s.miniDockBrowserGlyph),
+                    ) { miniDockGlyphPickerSlot = "browser" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_centre),
+                        description = CapsuleGlyphs.label(s.miniDockSearchGlyph),
+                    ) { miniDockGlyphPickerSlot = "search" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_left),
+                        description = CapsuleGlyphs.label(s.miniDockCameraGlyph),
+                    ) { miniDockGlyphPickerSlot = "camera" }
                 }
 
                 CollapsibleSection(
@@ -459,6 +491,7 @@ fun SettingsScreen(
                     }
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
                     SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
+                    SettingsGroupLabel("ADVANCED")
                     SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
                     SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
                     SwitchRow(
@@ -472,16 +505,7 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_hidden_apps),
                         description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
                     ) { showHiddenManager = true }
-                }
-
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_folders),
-                    icon = LauncherIcons.AppsGrid,
-                    visible = selectedSection == null || selectedSection == "folders",
-                    collapsed = selectedSection == null,
-                    onToggle = { selectedSection = "folders" },
-                ) {
-                    SwitchRow(stringResource(R.string.settings_home_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
+                    SettingsGroupLabel("FOLDERS")
                     SwitchRow(stringResource(R.string.settings_drawer_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
                     StepperRow(
                         stringResource(R.string.settings_folder_columns), s.folderColumns,
@@ -549,44 +573,7 @@ fun SettingsScreen(
                     )
                 }
 
-                CollapsibleSection(
-                    title = stringResource(R.string.settings_capsule),
-                    icon = LauncherIcons.Dock,
-                    visible = selectedSection == null || selectedSection == "capsule",
-                    collapsed = selectedSection == null,
-                    onToggle = { selectedSection = "capsule" },
-                ) {
-                    SettingsGroupLabel(stringResource(R.string.settings_capsule_apps))
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_right),
-                        description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "browser" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_centre),
-                        description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "search" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_left),
-                        description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "camera" }
 
-                    SettingsGroupLabel(stringResource(R.string.settings_capsule_icons))
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_right),
-                        description = CapsuleGlyphs.label(s.miniDockBrowserGlyph),
-                    ) { miniDockGlyphPickerSlot = "browser" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_centre),
-                        description = CapsuleGlyphs.label(s.miniDockSearchGlyph),
-                    ) { miniDockGlyphPickerSlot = "search" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_left),
-                        description = CapsuleGlyphs.label(s.miniDockCameraGlyph),
-                    ) { miniDockGlyphPickerSlot = "camera" }
-                }
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_icons),
@@ -604,6 +591,7 @@ fun SettingsScreen(
                     ) { showIconPackPicker = true }
                     IconShapeRow(selected = s.iconShape, onPick = viewModel::setIconShape)
                     SwitchRow(
+                    SettingsGroupLabel("ADVANCED")
                         stringResource(R.string.settings_auto_resize_icons),
                         stringResource(R.string.settings_auto_resize_icons_desc),
                         s.autoResizeIcons,
@@ -694,6 +682,7 @@ fun SettingsScreen(
                         s.wallpaperScrolling,
                         viewModel::setWallpaperScrolling,
                     )
+                    SettingsGroupLabel("ADVANCED")
                     DrawerBackdropRows(
                         settings = s,
                         wallpaper = drawerWallpaper,
@@ -723,6 +712,7 @@ fun SettingsScreen(
                     // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
                     // number is the real wait here and the default chip names it.
                     val systemLongPress = rememberSystemLongPressTimeout()
+                    SettingsGroupLabel("ADVANCED")
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_long_press_delay),
                         description = stringResource(R.string.settings_long_press_delay_desc),
@@ -743,6 +733,7 @@ fun SettingsScreen(
                 ) {
                     SwitchRow(stringResource(R.string.settings_notif_dots), s.showNotificationDots, viewModel::setShowNotificationDots)
                     SwitchRow(stringResource(R.string.settings_notif_count), s.notificationDotCount, viewModel::setNotificationDotCount)
+                    SettingsGroupLabel("ADVANCED")
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_notif_size),
                         value = s.notificationDotScale,

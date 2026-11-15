@@ -1,6 +1,9 @@
 package com.insomdroid.nomina.data
 
+import android.content.BroadcastReceiver
 import android.content.ComponentCallbacks
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.LauncherActivityInfo
@@ -321,6 +324,7 @@ class LauncherAppsSource @Inject constructor(
         // old language until the next package event. The application-level callback fires after
         // the process Resources carry the new locales, so the rescan reads the new labels.
         var locales = context.resources.configuration.locales.toLanguageTags()
+        var uiMode = context.resources.configuration.uiMode
         val localeCallback = object : ComponentCallbacks {
             override fun onConfigurationChanged(newConfig: Configuration) {
                 val now = newConfig.locales.toLanguageTags()
@@ -328,16 +332,39 @@ class LauncherAppsSource @Inject constructor(
                     locales = now
                     reload()
                 }
+                val newUiMode = newConfig.uiMode
+                if ((newUiMode and Configuration.UI_MODE_NIGHT_MASK) !=
+                    (uiMode and Configuration.UI_MODE_NIGHT_MASK)
+                ) {
+                    uiMode = newUiMode
+                    invalidateThemedIconColors()
+                }
             }
             override fun onLowMemory() = Unit
         }
         context.registerComponentCallbacks(localeCallback)
+
+        val wallpaperReceiver = object : BroadcastReceiver() {
+            override fun onReceive(receiverContext: Context?, intent: Intent?) {
+                if (intent?.action == Intent.ACTION_WALLPAPER_CHANGED) {
+                    invalidateThemedIconColors()
+                }
+            }
+        }
+        val wallpaperFilter = IntentFilter(Intent.ACTION_WALLPAPER_CHANGED)
+        if (Build.VERSION.SDK_INT >= 33) {
+            context.registerReceiver(wallpaperReceiver, wallpaperFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("DEPRECATION")
+            context.registerReceiver(wallpaperReceiver, wallpaperFilter)
+        }
 
         launcherApps.registerCallback(callback, handler)
         reload()
         awaitClose {
             launcherApps.unregisterCallback(callback)
             context.unregisterComponentCallbacks(localeCallback)
+            runCatching { context.unregisterReceiver(wallpaperReceiver) }
         }
     }
 
@@ -445,6 +472,29 @@ class LauncherAppsSource @Inject constructor(
      */
     internal fun iconBackColor(iconPack: String): Int? =
         if (iconPack.isBlank()) null else iconPacks.get(iconPack)?.iconBackColor
+
+    /**
+     * Matches Lawnicons' Android Monet backplate: light uses system_accent1_100 and dark uses
+     * system_accent2_800. Older Android versions or devices without those resources retain the
+     * launcher's established fallback colour.
+     */
+    internal fun unthemedSystemContainerColor(): Int {
+        if (Build.VERSION.SDK_INT < 31) return FALLBACK_ICON_BACKGROUND
+        val night = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+        val resourceName = if (night) "system_accent2_800" else "system_accent1_100"
+        val resourceId = context.resources.getIdentifier(resourceName, "color", "android")
+        return if (resourceId != 0) {
+            runCatching { context.getColor(resourceId) }.getOrDefault(FALLBACK_ICON_BACKGROUND)
+        } else {
+            FALLBACK_ICON_BACKGROUND
+        }
+    }
+
+    private fun invalidateThemedIconColors() {
+        _iconEpochs.update { it.bumpGlobal() }
+        runCatching { imageLoader.get().memoryCache?.clear() }
+    }
 
     internal fun isMonochromeIconPack(iconPack: String): Boolean =
         if (iconPack.isBlank()) false else iconPacks.get(iconPack)?.isMonochrome ?: false

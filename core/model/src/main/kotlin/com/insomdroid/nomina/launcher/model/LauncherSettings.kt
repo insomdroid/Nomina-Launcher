@@ -84,6 +84,16 @@ data class LauncherSettings(
     val mixDrawerFolders: Boolean = false,
     /** Icons per row in an open folder, on the home screen and in the app drawer (a Telegram request). */
     val folderColumns: Int = 4,
+    /** Show app names below icons inside open home and drawer folders. */
+    val folderShowLabels: Boolean = true,
+    /** Additional icon-size multiplier inside open folders (0.7–1.3). */
+    val folderIconScale: Float = 1.0f,
+    /** Vertical spacing multiplier between folder icon rows (0.5–1.5). */
+    val folderSpacing: Float = 1.0f,
+    /** ARGB background colour for open folders; null uses the current theme surface. */
+    val folderBackgroundColor: Int? = null,
+    /** Opacity of the open folder background (20–100%). */
+    val folderBackgroundOpacity: Float = 1.0f,
     /** The settings sections folded under their titles, by id (a Telegram request); empty = all open. */
     val collapsedSettingsSections: Set<String> = emptySet(),
     /** Blur the wallpaper behind the window as the app drawer rises (a Telegram request, Android 12+). */

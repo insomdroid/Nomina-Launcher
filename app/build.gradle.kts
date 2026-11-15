@@ -5,11 +5,19 @@ plugins {
     id("arkikeskus.android.application")
     id("arkikeskus.android.compose")
     id("arkikeskus.android.hilt")
+    alias(libs.plugins.baselineprofile)
 }
 
 val keystorePropsFile = rootProject.file("keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) FileInputStream(keystorePropsFile).use { load(it) }
+}
+
+baselineProfile {
+    automaticGenerationDuringBuild = false
+    saveInSrc = true
+    mergeIntoMain = true
+    dexLayoutOptimization = true
 }
 
 android {
@@ -93,4 +101,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
 }

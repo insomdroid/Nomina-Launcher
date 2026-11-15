@@ -310,7 +310,18 @@ fun SettingsScreen(
                     StepperRow(stringResource(R.string.settings_columns), s.homeColumns, SettingsRepository.MIN_COLUMNS, SettingsRepository.MAX_COLUMNS, viewModel::setHomeColumns)
                     StepperRow(stringResource(R.string.settings_rows), s.homeRows, SettingsRepository.MIN_ROWS, SettingsRepository.MAX_ROWS, viewModel::setHomeRows)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showHomeLabels, viewModel::setShowHomeLabels)
-                    SwitchRow("Hide status bar", s.hideStatusBar, viewModel::setHideStatusBar)
+                    ScaleSliderRow(
+                        label = stringResource(R.string.settings_home_label_size),
+                        value = s.appLabelTextScale,
+                        onValueChange = viewModel::setAppLabelTextScale,
+                        valueRange = 0.8f..1.6f,
+                        valueText = percentText,
+                    )
+                    LabelColorRow(
+                        label = stringResource(R.string.settings_home_label_color),
+                        selected = s.appLabelColor,
+                        onPick = viewModel::setAppLabelColor,
+                    )
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineHomeLabels, viewModel::setTwoLineHomeLabels)
                     SwitchRow(stringResource(R.string.settings_page_indicator), s.showPageIndicator, viewModel::setShowPageIndicator)
                     if (s.showPageIndicator) {
@@ -331,6 +342,7 @@ fun SettingsScreen(
                         s.infiniteScroll,
                         viewModel::setInfiniteScroll,
                     )
+                    SwitchRow("Hide status bar", s.hideStatusBar, viewModel::setHideStatusBar)
                     SwitchRow(stringResource(R.string.settings_lock_desktop), s.desktopLocked, viewModel::setDesktopLocked)
                     SwitchRow(stringResource(R.string.settings_widget_tonal), s.widgetTonalBackground, viewModel::setWidgetTonalBackground)
                     SwitchRow(
@@ -364,6 +376,24 @@ fun SettingsScreen(
                         color = palette.dim,
                     )
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
+                    FollowHomeScaleRow(
+                        label = stringResource(R.string.settings_dock_label_size),
+                        value = s.dockLabelTextScale,
+                        followsHome = s.dockLabelTextScaleFollowsHome,
+                        onFollowHome = { viewModel.setDockLabelTextScale(null) },
+                        onCustom = { viewModel.setDockLabelTextScale(s.dockLabelTextScale) },
+                        onValueChange = viewModel::setDockLabelTextScale,
+                        valueRange = 0.8f..1.6f,
+                        valueText = percentText,
+                    )
+                    FollowHomeColorRow(
+                        label = stringResource(R.string.settings_dock_label_color),
+                        followsHome = s.dockLabelColorFollowsHome,
+                        selected = s.dockLabelColor ?: s.appLabelColor,
+                        onFollowHome = { viewModel.setDockLabelColor(null) },
+                        onCustom = { viewModel.setDockLabelColor(s.dockLabelColor ?: s.appLabelColor) },
+                        onPick = viewModel::setDockLabelColor,
+                    )
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
                     DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
@@ -378,6 +408,32 @@ fun SettingsScreen(
                 ) {
                     StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
+                    FollowHomeScaleRow(
+                        label = stringResource(R.string.settings_drawer_label_size),
+                        value = s.drawerLabelTextScale,
+                        followsHome = s.drawerLabelTextScaleFollowsHome,
+                        onFollowHome = { viewModel.setDrawerLabelTextScale(null) },
+                        onCustom = { viewModel.setDrawerLabelTextScale(s.drawerLabelTextScale) },
+                        onValueChange = viewModel::setDrawerLabelTextScale,
+                        valueRange = 0.8f..1.6f,
+                        valueText = percentText,
+                    )
+                    DrawerLabelColorModeRow(
+                        mode = s.drawerLabelColorMode,
+                        onPick = { mode ->
+                            viewModel.setDrawerLabelColorMode(mode)
+                            if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.drawerLabelColor == null) {
+                                viewModel.setDrawerLabelColor(s.appLabelColor)
+                            }
+                        },
+                    )
+                    if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
+                        LabelColorRow(
+                            label = stringResource(R.string.settings_drawer_label_color),
+                            selected = s.drawerLabelColor ?: s.appLabelColor,
+                            onPick = viewModel::setDrawerLabelColor,
+                        )
+                    }
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
                     SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
                     SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
@@ -510,7 +566,7 @@ fun SettingsScreen(
                 }
 
                 CollapsibleSection(
-                    title = stringResource(R.string.settings_icons_typography),
+                    title = stringResource(R.string.settings_icons),
                     icon = LauncherIcons.Appearance,
                     visible = selectedSection == null || selectedSection == "icons",
                     collapsed = selectedSection == null,
@@ -562,11 +618,13 @@ fun SettingsScreen(
                         ) { showUnthemedColorPicker = true }
                     }
                     if (s.unthemedContainerMode != LauncherSettings.UNTHEMED_CONTAINER_NONE) {
-                        SliderRow(
+                        ScaleSliderRow(
                             label = stringResource(R.string.settings_unthemed_opacity),
                             value = s.unthemedContainerOpacity,
                             onValueChange = viewModel::setUnthemedContainerOpacity,
                             valueRange = 0.2f..1f,
+                            valueText = percentText,
+                            default = 1f,
                         )
                     }
                     ScaleSliderRow(
@@ -597,62 +655,7 @@ fun SettingsScreen(
                         valueText = percentText,
                     )
 
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_home_label_size),
-                        value = s.appLabelTextScale,
-                        onValueChange = viewModel::setAppLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_dock_label_size),
-                        value = s.dockLabelTextScale,
-                        followsHome = s.dockLabelTextScaleFollowsHome,
-                        onFollowHome = { viewModel.setDockLabelTextScale(null) },
-                        onCustom = { viewModel.setDockLabelTextScale(s.dockLabelTextScale) },
-                        onValueChange = viewModel::setDockLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_drawer_label_size),
-                        value = s.drawerLabelTextScale,
-                        followsHome = s.drawerLabelTextScaleFollowsHome,
-                        onFollowHome = { viewModel.setDrawerLabelTextScale(null) },
-                        onCustom = { viewModel.setDrawerLabelTextScale(s.drawerLabelTextScale) },
-                        onValueChange = viewModel::setDrawerLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    LabelColorRow(
-                        label = stringResource(R.string.settings_home_label_color),
-                        selected = s.appLabelColor,
-                        onPick = viewModel::setAppLabelColor,
-                    )
-                    FollowHomeColorRow(
-                        label = stringResource(R.string.settings_dock_label_color),
-                        followsHome = s.dockLabelColorFollowsHome,
-                        selected = s.dockLabelColor ?: s.appLabelColor,
-                        onFollowHome = { viewModel.setDockLabelColor(null) },
-                        onCustom = { viewModel.setDockLabelColor(s.dockLabelColor ?: s.appLabelColor) },
-                        onPick = viewModel::setDockLabelColor,
-                    )
-                    DrawerLabelColorModeRow(
-                        mode = s.drawerLabelColorMode,
-                        onPick = { mode ->
-                            viewModel.setDrawerLabelColorMode(mode)
-                            if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.drawerLabelColor == null) {
-                                viewModel.setDrawerLabelColor(s.appLabelColor)
-                            }
-                        },
-                    )
-                    if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
-                        LabelColorRow(
-                            label = stringResource(R.string.settings_drawer_label_color),
-                            selected = s.drawerLabelColor ?: s.appLabelColor,
-                            onPick = viewModel::setDrawerLabelColor,
-                        )
-                    }
+                    // Label size and colour controls now live with the Home, Dock and Drawer sections.
                 }
 
                 CollapsibleSection(

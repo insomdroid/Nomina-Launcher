@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/insomdroid/Nomina-Launcher/actions"><img src="https://img.shields.io/github/actions/workflow/status/insomdroid/Nomina-Launcher/release.yml?branch=main&style=for-the-badge&label=Build" alt="Build status"></a>
+  <a href="https://github.com/insomdroid/Nomina-Launcher/actions"><img src="https://img.shields.io/github/actions/workflow/status/insomdroid/Nomina-Launcher/android-ci.yml?branch=main&style=for-the-badge&label=Build" alt="Build status"></a>
   <a href="https://github.com/insomdroid/Nomina-Launcher/releases"><img src="https://img.shields.io/github/v/release/insomdroid/Nomina-Launcher?style=for-the-badge&label=Latest%20release" alt="Latest release"></a>
   <a href="https://github.com/insomdroid/Nomina-Launcher/blob/main/LICENSE"><img src="https://img.shields.io/github/license/insomdroid/Nomina-Launcher?style=for-the-badge" alt="License"></a>
 </p>

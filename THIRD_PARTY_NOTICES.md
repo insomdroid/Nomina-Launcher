@@ -2,11 +2,11 @@
 
 ## Vibe-Nothing-UI-Design
 
-The 9×9 dot-matrix camera and search glyph bitmaps in Nomina are adapted from
-[Vibe-Nothing-UI-Design](https://github.com/wangbh030722/vibe-nothing-ui-design)
-by nothing-ui contributors. The bitmap patterns were converted to Android
-VectorDrawable paths for use in Nomina. The browser glyph is an original
-Nomina adaptation using the same visual grid; it is not copied from the source.
+The rounded-dot icon bitmaps used by Nomina's Capsule icon picker are adapted
+directly from the 9×9 icon library in
+[Vibe-Nothing-UI-Design](https://github.com/wangbh030722/vibe-nothing-ui-design),
+by nothing-ui contributors. The original bitmap rows are retained and rendered
+as round dots in Jetpack Compose.
 
 Copyright (c) 2026 nothing-ui contributors
 

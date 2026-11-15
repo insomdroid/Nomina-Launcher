@@ -466,32 +466,33 @@ fun SettingsScreen(
                     onToggle = { selectedSection = "capsule" },
                 ) {
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_camera),
-                        description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "camera" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_camera_symbol),
-                        description = CapsuleGlyphs.label(s.miniDockCameraGlyph),
-                    ) { miniDockGlyphPickerSlot = "camera" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_search),
-                        description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "search" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_search_symbol),
-                        description = CapsuleGlyphs.label(s.miniDockSearchGlyph),
-                    ) { miniDockGlyphPickerSlot = "search" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_browser),
+                        label = stringResource(R.string.settings_capsule_app_1),
                         description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
                             ?: stringResource(R.string.settings_capsule_default),
                     ) { miniDockPickerSlot = "browser" }
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_browser_symbol),
+                        label = stringResource(R.string.settings_capsule_app_2),
+                        description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "search" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_app_3),
+                        description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "camera" }
+
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_icon_1),
                         description = CapsuleGlyphs.label(s.miniDockBrowserGlyph),
                     ) { miniDockGlyphPickerSlot = "browser" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_icon_2),
+                        description = CapsuleGlyphs.label(s.miniDockSearchGlyph),
+                    ) { miniDockGlyphPickerSlot = "search" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_icon_3),
+                        description = CapsuleGlyphs.label(s.miniDockCameraGlyph),
+                    ) { miniDockGlyphPickerSlot = "camera" }
                 }
 
                 CollapsibleSection(
@@ -791,9 +792,9 @@ fun SettingsScreen(
         if (miniDockPickerSlot != null) {
             val slot = miniDockPickerSlot
             val title = when (slot) {
-                "camera" -> stringResource(R.string.settings_capsule_camera)
-                "search" -> stringResource(R.string.settings_capsule_search)
-                else -> stringResource(R.string.settings_capsule_browser)
+                "browser" -> stringResource(R.string.settings_capsule_app_1)
+                "search" -> stringResource(R.string.settings_capsule_app_2)
+                else -> stringResource(R.string.settings_capsule_app_3)
             }
             SingleAppPicker(
                 apps = allApps,
@@ -813,9 +814,9 @@ fun SettingsScreen(
         if (miniDockGlyphPickerSlot != null) {
             val slot = miniDockGlyphPickerSlot
             val title = when (slot) {
-                "camera" -> stringResource(R.string.settings_capsule_camera_symbol)
-                "search" -> stringResource(R.string.settings_capsule_search_symbol)
-                else -> stringResource(R.string.settings_capsule_browser_symbol)
+                "browser" -> stringResource(R.string.settings_capsule_icon_1)
+                "search" -> stringResource(R.string.settings_capsule_icon_2)
+                else -> stringResource(R.string.settings_capsule_icon_3)
             }
             CapsuleGlyphPicker(
                 title = title,

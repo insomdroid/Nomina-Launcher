@@ -3,15 +3,13 @@ package com.insomdroid.nomina.ui.component
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.insomdroid.nomina.model.CapsuleGlyphs
 
-/** A small, monochrome rounded-dot pixel glyph used by the Nomina mini-dock capsule. */
+/** Displays the original rounded-dot bitmap from the Vibe-Nothing icon library. */
 @Composable
 fun CapsuleGlyph(
     glyph: String,
@@ -27,17 +25,18 @@ fun CapsuleGlyph(
     ) {
         val side = size.minDimension
         if (side <= 0f) return@Canvas
-        val cell = side / 7f
-        val dot = cell * 0.78f
-        val inset = (cell - dot) / 2f
+        val columns = definition.rows.maxOfOrNull { it.length } ?: 9
+        val cell = side / maxOf(columns, definition.rows.size).toFloat()
+        val left = (size.width - columns * cell) / 2f
+        val top = (size.height - definition.rows.size * cell) / 2f
+        val radius = cell * 0.36f
         definition.rows.forEachIndexed { row, pattern ->
             pattern.forEachIndexed { column, value ->
-                if (value == '1') {
-                    drawRoundRect(
+                if (value == '#') {
+                    drawCircle(
                         color = color,
-                        topLeft = Offset(column * cell + inset, row * cell + inset),
-                        size = androidx.compose.ui.geometry.Size(dot, dot),
-                        cornerRadius = CornerRadius(dot * 0.38f),
+                        radius = radius,
+                        center = Offset(left + (column + 0.5f) * cell, top + (row + 0.5f) * cell),
                     )
                 }
             }

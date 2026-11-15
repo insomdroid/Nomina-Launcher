@@ -47,6 +47,10 @@ val LocalIconShape = compositionLocalOf { LauncherSettings.ICON_SHAPE_SYSTEM }
 
 /** Whether app icons with transparent padding should be normalized to a common visual size. */
 val LocalAutoResizeIcons = compositionLocalOf { true }
+val LocalUnthemedIconMode = compositionLocalOf { LauncherSettings.UNTHEMED_ICON_AUTOMATIC }
+val LocalUnthemedContainerMode = compositionLocalOf { LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC }
+val LocalUnthemedContainerColor = compositionLocalOf { 0xFF808080.toInt() }
+val LocalUnthemedContainerOpacity = compositionLocalOf { LauncherSettings.DEFAULT_UNTHEMED_CONTAINER_OPACITY }
 
 /**
  * Icon re-fetch tokens (see [IconEpochs]), provided once at the shell root. [AppIcon] folds the
@@ -124,6 +128,10 @@ fun AppIcon(
                     reshapeLegacyIcons = LocalIconReshapeMode.current,
                     iconShape = LocalIconShape.current,
                     autoResize = LocalAutoResizeIcons.current,
+                    unthemedIconMode = LocalUnthemedIconMode.current,
+                    unthemedContainerMode = LocalUnthemedContainerMode.current,
+                    unthemedContainerColor = LocalUnthemedContainerColor.current,
+                    unthemedContainerOpacity = LocalUnthemedContainerOpacity.current,
                 ),
                 contentDescription = spoken,
                 modifier = Modifier.size(iconSize).onGloballyPositioned { origin?.icon = it },

@@ -14,6 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,6 +54,9 @@ val LocalAutoResizeIcons = compositionLocalOf { true }
  * when it is already composed (dock, open home page), where only a model change re-launches the load.
  */
 val LocalIconEpochs = compositionLocalOf { IconEpochs() }
+
+/** Work-profile names appended to app labels for screen readers, keyed by Android user serial. */
+val LocalProfileMarks = compositionLocalOf<Map<Long, String>> { emptyMap() }
 
 /**
  * Size multiplier for [AppIcon] labels under this subtree (1.0 = the default 11sp). Provided per
@@ -102,6 +108,8 @@ fun AppIcon(
 ) {
     val ownOrigin = rememberAppLaunchOrigin()
     val origin = launchOrigin ?: ownOrigin
+    val profile = LocalProfileMarks.current[appItem.userSerial]
+    val spoken = if (profile == null) appItem.label else "${appItem.label}, $profile"
     Column(
         // Outermost, so the icon's whole area — padding a caller adds included — counts as its tap.
         modifier = (if (launchOrigin == null) Modifier.appLaunchTouch(appItem, ownOrigin) else Modifier).then(modifier),
@@ -117,12 +125,13 @@ fun AppIcon(
                     iconShape = LocalIconShape.current,
                     autoResize = LocalAutoResizeIcons.current,
                 ),
-                contentDescription = appItem.label,
+                contentDescription = spoken,
                 modifier = Modifier.size(iconSize).onGloballyPositioned { origin?.icon = it },
             )
             NotificationBadge(count = badgeCount, showCount = badgeShowCount, scale = badgeScale)
         }
-        if (showLabel) AppLabel(appItem.label, labelColor, maxLabelLines, reserveLabelLines)
+        if (showLabel) AppLabel(appItem.label, labelColor, maxLabelLines, reserveLabelLines,
+            spoken = spoken.takeIf { profile != null })
     }
 }
 
@@ -192,6 +201,7 @@ fun AppLabel(
     color: Color,
     maxLines: Int = LocalAppLabelLines.current,
     reserveLines: Boolean = false,
+    spoken: String? = null,
 ) {
     val scale = LocalAppLabelScale.current
     val density = LocalDensity.current
@@ -207,5 +217,6 @@ fun AppLabel(
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
+        modifier = if (spoken == null) Modifier else Modifier.clearAndSetSemantics { text = AnnotatedString(spoken) },
     )
 }

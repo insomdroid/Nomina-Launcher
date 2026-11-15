@@ -399,7 +399,12 @@ fun SettingsScreen(
                         LabelColorModeRow(
                             mode = s.dockLabelColorMode,
                             includeFollowHome = true,
-                            onPick = viewModel::setDockLabelColorMode,
+                            onPick = { mode ->
+                                viewModel.setDockLabelColorMode(mode)
+                                if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.dockLabelColor == null) {
+                                    viewModel.setDockLabelColor(s.appLabelColor)
+                                }
+                            },
                         )
                         if (s.dockLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
                             LabelColorRow(
@@ -437,7 +442,12 @@ fun SettingsScreen(
                         LabelColorModeRow(
                             mode = s.drawerLabelColorMode,
                             includeFollowHome = true,
-                            onPick = viewModel::setDrawerLabelColorMode,
+                            onPick = { mode ->
+                                viewModel.setDrawerLabelColorMode(mode)
+                                if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.drawerLabelColor == null) {
+                                    viewModel.setDrawerLabelColor(s.appLabelColor)
+                                }
+                            },
                         )
                         if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
                             LabelColorRow(

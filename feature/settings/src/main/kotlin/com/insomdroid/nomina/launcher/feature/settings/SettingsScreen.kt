@@ -590,8 +590,8 @@ fun SettingsScreen(
                         description = iconPackName,
                     ) { showIconPackPicker = true }
                     IconShapeRow(selected = s.iconShape, onPick = viewModel::setIconShape)
-                    SwitchRow(
                     SettingsGroupLabel("ADVANCED")
+                    SwitchRow(
                         stringResource(R.string.settings_auto_resize_icons),
                         stringResource(R.string.settings_auto_resize_icons_desc),
                         s.autoResizeIcons,

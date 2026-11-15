@@ -114,6 +114,10 @@ class SettingsViewModel @Inject constructor(
     fun setIconShape(shape: String) = update { repository.setIconShape(shape) }
     fun setReshapeLegacyIcons(mode: String) = update { repository.setReshapeLegacyIcons(mode) }
     fun setAutoResizeIcons(value: Boolean) = update { repository.setAutoResizeIcons(value) }
+    fun setUnthemedIconMode(value: String) = update { repository.setUnthemedIconMode(value) }
+    fun setUnthemedContainerMode(value: String) = update { repository.setUnthemedContainerMode(value) }
+    fun setUnthemedContainerColor(value: Int) = update { repository.setUnthemedContainerColor(value) }
+    fun setUnthemedContainerOpacity(value: Float) = update { repository.setUnthemedContainerOpacity(value) }
 
     fun setFolderColumns(value: Int) = update { repository.setFolderColumns(value) }
     fun setFolderShowLabels(value: Boolean) = update { repository.setFolderShowLabels(value) }

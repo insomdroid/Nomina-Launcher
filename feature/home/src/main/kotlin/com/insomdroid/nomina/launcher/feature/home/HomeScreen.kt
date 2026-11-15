@@ -119,6 +119,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 import com.insomdroid.nomina.model.AppItem
+import com.insomdroid.nomina.model.LauncherSettings
 import com.insomdroid.nomina.ui.AppActionPopup
 import com.insomdroid.nomina.ui.expressive.Accent
 import com.insomdroid.nomina.ui.AppActions

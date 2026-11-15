@@ -140,10 +140,14 @@ data class LauncherSettings(
     /** Let app-drawer labels (apps, folders, the "most used" row) wrap onto a second line — the
      *  drawer's long-standing look, so this defaults on. */
     val twoLineDrawerLabels: Boolean = true,
-    /** Home label colour is the base; Dock and Drawer can follow it or use their own colour. */
+    /** Custom Home label colour; Automatic uses the system/Monet on-surface colour. */
     val appLabelColor: Int = 0xFFFFFFFF.toInt(),
+    val homeLabelColorMode: String = LABEL_COLOR_AUTOMATIC,
+    /** Custom Dock label colour and its selected mode. */
     val dockLabelColor: Int? = null,
+    val dockLabelColorMode: String = LABEL_COLOR_FOLLOW_HOME,
     val dockLabelColorFollowsHome: Boolean = true,
+    /** Custom App Drawer label colour and its selected mode. */
     val drawerLabelColor: Int? = null,
     val drawerLabelColorMode: String = LABEL_COLOR_AUTOMATIC,
     /** Show the current weather (Open-Meteo; needs a location permission) in the smartspace widget. */

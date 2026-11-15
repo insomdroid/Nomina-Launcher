@@ -119,6 +119,11 @@ data class AppDrawerUiState(
     val mixDrawerFolders: Boolean = false,
     /** Icons per row in an open folder's card and editor (Settings > Home > Folder columns). */
     val folderColumns: Int = 4,
+    val folderShowLabels: Boolean = true,
+    val folderIconScale: Float = 1f,
+    val folderSpacing: Float = 1f,
+    val folderBackgroundColor: Int? = null,
+    val folderBackgroundOpacity: Float = 1f,
 )
 
 @HiltViewModel
@@ -210,6 +215,11 @@ class AppDrawerViewModel @Inject constructor(
             sortDrawerFolders = settings.sortDrawerFolders,
             mixDrawerFolders = settings.mixDrawerFolders,
             folderColumns = settings.folderColumns,
+            folderShowLabels = settings.folderShowLabels,
+            folderIconScale = settings.folderIconScale,
+            folderSpacing = settings.folderSpacing,
+            folderBackgroundColor = settings.folderBackgroundColor,
+            folderBackgroundOpacity = settings.folderBackgroundOpacity,
         )
     }.let { base ->
         combine(

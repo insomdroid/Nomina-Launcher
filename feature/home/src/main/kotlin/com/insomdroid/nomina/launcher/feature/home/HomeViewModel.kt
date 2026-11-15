@@ -172,6 +172,8 @@ const val DOCK_PAGE = -1
 
 data class HomeUiState(
     val settings: LauncherSettings = LauncherSettings(),
+    /** All installed launchable apps, used to resolve capsule app selections without PackageManager in UI. */
+    val apps: List<AppItem> = emptyList(),
     /** The dock's slots in order, cut to the dock's columns (rows past them are a hidden tail). */
     val dockEntries: List<DockEntry> = emptyList(),
     val entries: List<HomeEntry> = emptyList(),
@@ -443,6 +445,7 @@ class HomeViewModel @Inject constructor(
         val pageCount = permanentPageCount(occupied, settings.homePageCount)
         HomeUiState(
             settings = settings,
+            apps = apps,
             dockEntries = dockEntries,
             entries = entries,
             pageCount = pageCount,

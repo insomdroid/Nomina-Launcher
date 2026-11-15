@@ -60,7 +60,7 @@ data class LauncherSettings(
     /** Custom ARGB backplate colour for unthemed app icons. */
     val unthemedContainerColor: Int = 0xFF808080.toInt(),
     /** Backplate opacity for unthemed app icons. */
-    val unthemedContainerOpacity: Float = 0.5f,
+    val unthemedContainerOpacity: Float = 1f,
     /** Swiping past the last home page continues to the first one, and back from the first to the
      *  last. Off keeps the bounce back from the end. */
     val infiniteScroll: Boolean = true,
@@ -183,7 +183,7 @@ data class LauncherSettings(
         const val UNTHEMED_CONTAINER_NONE = "none"
         val UNTHEMED_CONTAINER_MODES = listOf(UNTHEMED_CONTAINER_AUTOMATIC, UNTHEMED_CONTAINER_CUSTOM, UNTHEMED_CONTAINER_NONE)
 
-        const val DEFAULT_UNTHEMED_CONTAINER_OPACITY = 0.5f
+        const val DEFAULT_UNTHEMED_CONTAINER_OPACITY = 1f
 
         const val RESHAPE_ALWAYS = "always"
         const val RESHAPE_UNTHEMED = "unthemed"

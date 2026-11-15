@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import com.insomdroid.nomina.model.CapsuleGlyphs
 import com.insomdroid.nomina.model.CustomIcon
 import com.insomdroid.nomina.model.LauncherSettings
 import javax.inject.Inject
@@ -137,9 +138,9 @@ class SettingsRepository @Inject constructor(
             miniDockCameraAppKey = p[Keys.MINI_DOCK_CAMERA_APP] ?: "",
             miniDockSearchAppKey = p[Keys.MINI_DOCK_SEARCH_APP] ?: "",
             miniDockBrowserAppKey = p[Keys.MINI_DOCK_BROWSER_APP] ?: "",
-            miniDockCameraGlyph = p[Keys.MINI_DOCK_CAMERA_GLYPH] ?: LauncherSettings.CapsuleGlyphs.CAMERA,
-            miniDockSearchGlyph = p[Keys.MINI_DOCK_SEARCH_GLYPH] ?: LauncherSettings.CapsuleGlyphs.SEARCH,
-            miniDockBrowserGlyph = p[Keys.MINI_DOCK_BROWSER_GLYPH] ?: LauncherSettings.CapsuleGlyphs.BROWSER,
+            miniDockCameraGlyph = p[Keys.MINI_DOCK_CAMERA_GLYPH] ?: CapsuleGlyphs.CAMERA,
+            miniDockSearchGlyph = p[Keys.MINI_DOCK_SEARCH_GLYPH] ?: CapsuleGlyphs.SEARCH,
+            miniDockBrowserGlyph = p[Keys.MINI_DOCK_BROWSER_GLYPH] ?: CapsuleGlyphs.BROWSER,
             desktopLocked = p[Keys.DESKTOP_LOCKED] ?: false,
             showFrequentApps = p[Keys.SHOW_FREQUENT_APPS] ?: false,
             drawerOpensAtTop = p[Keys.DRAWER_OPENS_AT_TOP] ?: true,

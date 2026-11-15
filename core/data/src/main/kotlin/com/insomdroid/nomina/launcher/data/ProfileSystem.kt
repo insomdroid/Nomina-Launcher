@@ -1,5 +1,6 @@
 package com.insomdroid.nomina.data
 
+import android.os.Build
 import kotlinx.coroutines.flow.Flow
 
 /** How the platform types a user profile, as far as the public API tells a launcher. */
@@ -51,6 +52,29 @@ interface ProfileSystem {
  * Launcher3 lumps them together there too). The own user, private and clone profiles never
  * qualify. Exactly one work profile is supported: the lowest serial wins.
  */
+/**
+ * Whether a profile's launchable apps may enter Nomina's shared app list.
+ *
+ * Android 15+ identifies managed, private and clone profiles. Only positively identified
+ * non-private profiles are listed; an unknown or unavailable profile is excluded because it
+ * may be a Private Space that this launcher does not implement. Before Android 15, profile
+ * types are not exposed through LauncherApps, so retain the previous all-profiles behavior.
+ */
+internal fun shouldListProfileApps(
+    isOwnUser: Boolean,
+    serial: Long?,
+    kinds: Map<Long, ProfileKind>,
+    sdkInt: Int,
+): Boolean = when {
+    isOwnUser -> true
+    sdkInt < Build.VERSION_CODES.VANILLA_ICE_CREAM -> true
+    serial == null -> false
+    else -> when (kinds[serial]) {
+        ProfileKind.Own, ProfileKind.Managed, ProfileKind.Clone -> true
+        ProfileKind.Private, ProfileKind.Unknown, null -> false
+    }
+}
+
 fun workProfileOf(profiles: List<ProfileSnapshot>): ProfileSnapshot? = profiles
     .filter { it.kind == ProfileKind.Managed || (it.kind == ProfileKind.Unknown && it.badged) }
     .minByOrNull { it.serial }

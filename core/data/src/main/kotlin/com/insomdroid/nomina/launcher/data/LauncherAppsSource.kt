@@ -20,6 +20,7 @@ import android.os.UserHandle
 import android.os.UserManager
 import coil3.ImageLoader
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
@@ -72,6 +73,7 @@ class LauncherAppsSource @Inject constructor(
     // Provider breaks the instantiation cycle: the ImageLoader itself is built with this source.
     private val imageLoader: Provider<ImageLoader>,
     private val labelCache: AppLabelCache,
+    private val profileSystem: ProfileSystem,
 ) : AppRowResolver {
     private val launcherApps = context.getSystemService(LauncherApps::class.java)
     private val userManager = context.getSystemService(UserManager::class.java)
@@ -237,7 +239,13 @@ class LauncherAppsSource @Inject constructor(
         fun reload() { reloads.trySend(Unit) }
         launch(Dispatchers.IO) {
             for (unused in reloads) {
-                runCatching { scanApps { apps -> trySend(apps) } }
+                try {
+                    scanApps { apps -> trySend(apps) }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // A transient platform or storage failure must not crash the HOME process.
+                }
             }
         }
         launch { reloadSignals.collect { reload() } }
@@ -326,13 +334,28 @@ class LauncherAppsSource @Inject constructor(
     private suspend fun scanApps(send: (List<AppItem>) -> Unit) {
         labelCache.prepare(context.resources.configuration.locales.toLanguageTags())
         val generations = labelCache.generations()
+        val own = Process.myUserHandle()
+        val profileKinds = profileSystem.snapshot().associate { it.serial to it.kind }
         val profiles = runCatching { userManager?.userProfiles }.getOrNull()
-            ?: listOf(Process.myUserHandle())
+            ?: listOf(own)
         val scanned = profiles.flatMap { user ->
-            val serial = runCatching { userManager?.getSerialNumberForUser(user) }.getOrNull() ?: 0L
-            runCatching { launcherApps.getActivityList(null, user) }
-                .getOrElse { emptyList() }
-                .map { ScannedApp(it, user, serial) }
+            val reportedSerial = runCatching {
+                userManager?.getSerialNumberForUser(user)
+            }.getOrNull()
+            if (!shouldListProfileApps(
+                    isOwnUser = user == own,
+                    serial = reportedSerial,
+                    kinds = profileKinds,
+                    sdkInt = Build.VERSION.SDK_INT,
+                )
+            ) {
+                emptyList()
+            } else {
+                val serial = reportedSerial ?: 0L
+                runCatching { launcherApps.getActivityList(null, user) }
+                    .getOrElse { emptyList() }
+                    .map { ScannedApp(it, user, serial) }
+            }
         }
 
         fun toItems(labelOf: (ScannedApp) -> String): List<AppItem> =

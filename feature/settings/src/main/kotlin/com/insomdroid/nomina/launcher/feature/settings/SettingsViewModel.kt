@@ -181,7 +181,10 @@ class SettingsViewModel @Inject constructor(
     fun setDockIconScale(value: Float?) = update { repository.setDockIconScale(value) }
     fun setDrawerIconScale(value: Float?) = update { repository.setDrawerIconScale(value) }
     fun setAppLabelColor(argb: Int) = update { repository.setAppLabelColor(argb) }
+    fun setHomeLabelColorMode(mode: String) = update { repository.setHomeLabelColorMode(mode) }
     fun setDockLabelColor(argb: Int?) = update { repository.setDockLabelColor(argb) }
+    fun setDockLabelColorMode(mode: String) = update { repository.setDockLabelColorMode(mode) }
+    fun setDrawerLabelColor(argb: Int?) = update { repository.setDrawerLabelColor(argb) }
     fun setDrawerLabelColorMode(mode: String) = update { repository.setDrawerLabelColorMode(mode) }
     fun setTwoLineHomeLabels(value: Boolean) = update { repository.setTwoLineHomeLabels(value) }
     fun setTwoLineDrawerLabels(value: Boolean) = update { repository.setTwoLineDrawerLabels(value) }

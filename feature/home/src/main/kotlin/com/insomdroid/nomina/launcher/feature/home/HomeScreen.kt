@@ -1039,17 +1039,18 @@ fun HomeScreen(
                     // The copy looks like the tile it left: with its label on home, without in the dock.
                     showLabel = liftedFolderSource == DragSource.Home && settings.showHomeLabels,
                     showName = settings.showHomeFolderNames,
-                    labelColor = Color(
-                        if (liftedFolderSource == DragSource.Dock) {
-                            when (settings.dockLabelColorMode) {
-                                LauncherSettings.LABEL_COLOR_FOLLOW_HOME ->
-                                    if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) settings.appLabelColor else systemLabelColor().value.toInt()
-                                LauncherSettings.LABEL_COLOR_CUSTOM -> settings.dockLabelColor ?: settings.appLabelColor
-                                else -> systemLabelColor().value.toInt()
-                            }
-                        } else if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) settings.appLabelColor
-                        else systemLabelColor().value.toInt(),
-                    ),
+                    labelColor = if (liftedFolderSource == DragSource.Dock) {
+                        when (settings.dockLabelColorMode) {
+                            LauncherSettings.LABEL_COLOR_FOLLOW_HOME ->
+                                if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) Color(settings.appLabelColor) else systemLabelColor()
+                            LauncherSettings.LABEL_COLOR_CUSTOM -> Color(settings.dockLabelColor ?: settings.appLabelColor)
+                            else -> systemLabelColor()
+                        }
+                    } else if (settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
+                        Color(settings.appLabelColor)
+                    } else {
+                        systemLabelColor()
+                    },
                 )
             }
         }

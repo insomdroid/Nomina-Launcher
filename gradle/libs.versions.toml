@@ -80,7 +80,6 @@ androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-android-test = { id = "com.android.test", version.ref = "agp" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

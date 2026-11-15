@@ -75,7 +75,7 @@ data class LauncherSettings(
     /** Size multiplier for the notification dot/badge (1.0 = default). */
     val notificationDotScale: Float = 1.0f,
     /** Package name of the selected third-party icon pack (empty = system default). Mapped apps
-     *  use the pack drawable; unmapped apps keep their original full-colour icon. */
+     *  use the pack drawable; unmapped apps follow the Unthemed Icons settings. */
     val iconPackPackage: String = "",
     /** App key opened by a tap on the smartspace weather line (Settings > Home); blank = plain text. */
     val weatherAppKey: String = "",

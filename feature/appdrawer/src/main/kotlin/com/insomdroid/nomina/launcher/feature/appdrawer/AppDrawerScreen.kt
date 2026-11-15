@@ -71,6 +71,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -401,6 +402,11 @@ fun AppDrawerScreen(
             folder = cardFolder,
             bounds = card.second,
             columns = uiState.folderColumns,
+            folderShowLabels = uiState.folderShowLabels,
+            folderIconScale = uiState.folderIconScale,
+            folderSpacing = uiState.folderSpacing,
+            folderBackgroundColor = uiState.folderBackgroundColor,
+            folderBackgroundOpacity = uiState.folderBackgroundOpacity,
             badges = badges,
             badgeShowCount = uiState.notificationDotCount,
             badgeScale = uiState.notificationDotScale,
@@ -414,6 +420,11 @@ fun AppDrawerScreen(
             folder = openFolder,
             candidateApps = uiState.folderCandidates,
             columns = uiState.folderColumns,
+            folderShowLabels = uiState.folderShowLabels,
+            folderIconScale = uiState.folderIconScale,
+            folderSpacing = uiState.folderSpacing,
+            folderBackgroundColor = uiState.folderBackgroundColor,
+            folderBackgroundOpacity = uiState.folderBackgroundOpacity,
             badges = badges,
             badgeShowCount = uiState.notificationDotCount,
             badgeScale = uiState.notificationDotScale,
@@ -496,6 +507,11 @@ private fun AppDrawerContent(
     mixFolders: Boolean,
     query: String,
     columns: Int,
+    folderShowLabels: Boolean,
+    folderIconScale: Float,
+    folderSpacing: Float,
+    folderBackgroundColor: Int?,
+    folderBackgroundOpacity: Float,
     badges: Map<String, Int>,
     badgeShowCount: Boolean,
     badgeScale: Float,
@@ -1041,6 +1057,11 @@ private fun DrawerFolderCard(
     bounds: Rect,
     /** Icons per row (Settings > Home > Folder columns, shared with the home screen's folders). */
     columns: Int,
+    folderShowLabels: Boolean,
+    folderIconScale: Float,
+    folderSpacing: Float,
+    folderBackgroundColor: Int?,
+    folderBackgroundOpacity: Float,
     badges: Map<String, Int>,
     badgeShowCount: Boolean,
     badgeScale: Float,
@@ -1057,17 +1078,24 @@ private fun DrawerFolderCard(
     // The drawer's palette (the user's colour) for the card AND its texts: the popup is its own window, where the
     // system palette would otherwise paint a light card under this palette's light text (round 11).
     val palette = LocalExpressivePalette.current
+    val folderSurface = (folderBackgroundColor?.let { Color(it) } ?: MaterialTheme.colorScheme.surface)
+        .copy(alpha = folderBackgroundOpacity.coerceIn(0.2f, 1f))
+    val folderText = if (folderBackgroundColor == null) palette.text
+        else if (Color(folderBackgroundColor).luminance() > 0.5f) Color.Black else Color.White
+    val folderDim = folderText.copy(alpha = 0.72f)
     AnchoredPopupCard(anchor = anchor, preferAbove = preferAbove, onDismiss = onDismiss, width = width, palette = palette) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(RoundedCornerShape(ExpressiveRadius.card))
+                .background(folderSurface)
                 .padding(horizontal = 8.dp)
                 .testTag(DRAWER_FOLDER_CARD_TAG),
         ) {
             Text(
                 text = folder.name,
                 style = MaterialTheme.typography.titleMedium,
-                color = palette.text,
+                color = folderText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -1076,7 +1104,7 @@ private fun DrawerFolderCard(
                 Text(
                     text = stringResource(R.string.folder_card_empty),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = palette.dim,
+                    color = folderDim,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
@@ -1085,16 +1113,16 @@ private fun DrawerFolderCard(
                     row.forEach { app ->
                         AppIcon(
                             appItem = app,
-                            labelColor = palette.text,
-                            iconSize = iconSize,
-                            showLabel = true,
+                            labelColor = folderText,
+                            iconSize = iconSize * folderIconScale,
+                            showLabel = folderShowLabels,
                             badgeCount = badges[app.badgeKey] ?: 0,
                             badgeShowCount = badgeShowCount,
                             badgeScale = badgeScale,
                             modifier = Modifier
                                 .weight(1f)
                                 .clickable { onAppClick(app) }
-                                .padding(vertical = 10.dp, horizontal = 4.dp),
+                                .padding(vertical = 10.dp * folderSpacing, horizontal = 4.dp),
                         )
                     }
                     repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
@@ -1114,6 +1142,11 @@ private fun DrawerFolderSheet(
     candidateApps: List<AppItem>,
     /** Icons per row of the member grid (Settings > Home > Folder columns). */
     columns: Int,
+    folderShowLabels: Boolean,
+    folderIconScale: Float,
+    folderSpacing: Float,
+    folderBackgroundColor: Int?,
+    folderBackgroundOpacity: Float,
     badges: Map<String, Int>,
     badgeShowCount: Boolean,
     badgeScale: Float,
@@ -1130,6 +1163,10 @@ private fun DrawerFolderSheet(
 ) {
     var showAdd by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    val folderSurface = (folderBackgroundColor?.let { Color(it) } ?: MaterialTheme.colorScheme.surface)
+        .copy(alpha = folderBackgroundOpacity.coerceIn(0.2f, 1f))
+    val folderText = if (folderBackgroundColor == null) MaterialTheme.colorScheme.onSurface
+        else if (Color(folderBackgroundColor).luminance() > 0.5f) Color.Black else Color.White
     // The sheet is its own window: re-apply the long-press delay setting for the members' long-press.
     ModalBottomSheet(onDismissRequest = onDismiss, shape = RoundedCornerShape(ExpressiveRadius.sheet)) { LongPressDelay {
         Column(
@@ -1168,13 +1205,17 @@ private fun DrawerFolderSheet(
                     columns = GridCells.Fixed(columns),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(ExpressiveRadius.card))
+                        .background(folderSurface)
+                        .padding(horizontal = 4.dp)
                         .heightIn(max = 280.dp),
                 ) {
                     items(items = folder.apps, key = { it.key }) { app ->
                         AppIcon(
                             appItem = app,
-                            labelColor = MaterialTheme.colorScheme.onSurface,
-                            showLabel = true,
+                            labelColor = folderText,
+                            iconSize = 48.dp * LocalIconScale.current * folderIconScale,
+                            showLabel = folderShowLabels,
                             badgeCount = badges[app.badgeKey] ?: 0,
                             badgeShowCount = badgeShowCount,
                             badgeScale = badgeScale,
@@ -1183,7 +1224,7 @@ private fun DrawerFolderSheet(
                                     onClick = { onAppClick(app) },
                                     onLongClick = { onRemoveApp(app) },
                                 )
-                                .padding(vertical = 10.dp, horizontal = 4.dp),
+                                .padding(vertical = 10.dp * folderSpacing, horizontal = 4.dp),
                         )
                     }
                 }
@@ -1332,6 +1373,11 @@ private fun AddAppsDialog(apps: List<AppItem>, onConfirm: (List<String>) -> Unit
 internal fun FrequentAppsCard(
     apps: List<AppItem>,
     columns: Int,
+    folderShowLabels: Boolean,
+    folderIconScale: Float,
+    folderSpacing: Float,
+    folderBackgroundColor: Int?,
+    folderBackgroundOpacity: Float,
     badges: Map<String, Int>,
     badgeShowCount: Boolean,
     badgeScale: Float,

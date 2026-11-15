@@ -40,6 +40,51 @@ class IconPack(
     /** Dominant colour sampled from the centre of the first usable iconback asset. */
     val iconBackColor: Int? by lazy(LazyThreadSafetyMode.PUBLICATION) { readIconBackColor() }
 
+    /**
+     * True when a representative sample of mapped artwork is predominantly monochrome.
+     * Evaluated lazily by the icon fetcher, never while composing a screen.
+     */
+    val isMonochrome: Boolean by lazy(LazyThreadSafetyMode.PUBLICATION) { detectMonochrome() }
+
+    @SuppressLint("DiscouragedApi")
+    private fun detectMonochrome(): Boolean {
+        val candidates = componentMap.values.distinct().take(12)
+        if (candidates.size < 3) return false
+        var monochromeCount = 0
+        var sampledCount = 0
+        for (name in candidates) {
+            val id = res.getIdentifier(name, "drawable", packageName).takeIf { it != 0 } ?: continue
+            val drawable = runCatching { ResourcesCompat.getDrawable(res, id, null) }.getOrNull() ?: continue
+            val saturation = runCatching {
+                val bitmap = Bitmap.createBitmap(40, 40, Bitmap.Config.ARGB_8888)
+                try {
+                    drawable.setBounds(0, 0, 40, 40)
+                    drawable.draw(Canvas(bitmap))
+                    var total = 0.0
+                    var count = 0
+                    for (y in 4 until 36) for (x in 4 until 36) {
+                        val pixel = bitmap.getPixel(x, y)
+                        if (Color.alpha(pixel) < 180) continue
+                        val red = Color.red(pixel)
+                        val green = Color.green(pixel)
+                        val blue = Color.blue(pixel)
+                        val max = maxOf(red, green, blue)
+                        if (max < 24) continue
+                        val min = minOf(red, green, blue)
+                        total += (max - min).toDouble() / max.toDouble()
+                        count++
+                    }
+                    if (count == 0) 0.0 else total / count
+                } finally {
+                    bitmap.recycle()
+                }
+            }.getOrNull() ?: continue
+            sampledCount++
+            if (saturation < 0.12) monochromeCount++
+        }
+        return sampledCount >= 3 && monochromeCount.toFloat() / sampledCount >= 0.7f
+    }
+
     @SuppressLint("DiscouragedApi")
     private fun readIconBackColor(): Int? {
         val candidates = iconBackDrawables.ifEmpty { listOf("iconback") }

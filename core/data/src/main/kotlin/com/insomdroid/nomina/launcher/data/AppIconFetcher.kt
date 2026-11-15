@@ -200,7 +200,9 @@ private fun normalizeIconBitmap(source: Bitmap): Bitmap {
     }
     if (right < left || bottom < top) return source
     val bounds = Rect(left, top, right + 1, bottom + 1)
-    val target = (ICON_PX * 0.88f).toInt()
+    // Android adaptive icons use a 66dp keyline inside a 108dp canvas.
+    // Match legacy visible artwork to that same safe-zone scale instead of filling 88% of the tile.
+    val target = (ICON_PX * (66f / 108f)).roundToInt()
     val scale = minOf(target.toFloat() / bounds.width(), target.toFloat() / bounds.height())
     val width = (bounds.width() * scale).toInt().coerceAtLeast(1)
     val height = (bounds.height() * scale).toInt().coerceAtLeast(1)

@@ -50,6 +50,10 @@ import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.LocalIconShape
 import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
+import com.insomdroid.nomina.ui.component.LocalUnthemedIconMode
+import com.insomdroid.nomina.ui.component.LocalUnthemedContainerMode
+import com.insomdroid.nomina.ui.component.LocalUnthemedContainerColor
+import com.insomdroid.nomina.ui.component.LocalUnthemedContainerOpacity
 import kotlin.math.roundToInt
 
 /**
@@ -187,6 +191,10 @@ fun LauncherShell(
         LocalIconShape provides iconStyle.iconShape,
         LocalAutoResizeIcons provides iconStyle.autoResizeIcons,
         LocalIconReshapeMode provides iconStyle.reshapeLegacyIcons,
+        LocalUnthemedIconMode provides iconStyle.unthemedIconMode,
+        LocalUnthemedContainerMode provides iconStyle.unthemedContainerMode,
+        LocalUnthemedContainerColor provides iconStyle.unthemedContainerColor,
+        LocalUnthemedContainerOpacity provides iconStyle.unthemedContainerOpacity,
     ) {
         LongPressDelay(longPressScale) {
         Box(

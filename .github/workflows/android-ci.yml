@@ -83,12 +83,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          keytool -genkeypair -v \\
-            -keystore "$RUNNER_TEMP/nomina-temporary-release.jks" \\
-            -storepass "nomina-temporary-pass" \\
-            -keypass "nomina-temporary-pass" \\
-            -alias "nomina-temporary" \\
-            -keyalg RSA -keysize 2048 -validity 3650 \\
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/nomina-temporary-release.jks" \
+            -storepass "nomina-temporary-pass" \
+            -keypass "nomina-temporary-pass" \
+            -alias "nomina-temporary" \
+            -keyalg RSA -keysize 2048 -validity 3650 \
             -dname "CN=Nomina Temporary Release, OU=Interim, O=Nomina, L=Unknown, ST=Unknown, C=ID"
           cat > keystore.properties <<EOF
           storeFile=$RUNNER_TEMP/nomina-temporary-release.jks

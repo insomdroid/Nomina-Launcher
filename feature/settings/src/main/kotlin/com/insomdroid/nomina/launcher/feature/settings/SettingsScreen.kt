@@ -268,6 +268,7 @@ fun SettingsScreen(
                     "dock" -> stringResource(R.string.settings_dock)
                     "drawer" -> stringResource(R.string.settings_drawer)
                     "folders" -> stringResource(R.string.settings_folders)
+                    "capsule" -> stringResource(R.string.settings_capsule)
                     "icons" -> stringResource(R.string.settings_icons_typography)
                     "wallpaper" -> stringResource(R.string.settings_wallpaper_background)
                     "gestures" -> stringResource(R.string.settings_gestures_interaction)

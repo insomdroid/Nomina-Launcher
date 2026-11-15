@@ -1978,6 +1978,36 @@ internal fun DrawerColorRow(selected: Int?, locked: Boolean = false, onPick: (In
     }
 }
 
+/** Folder-card background colour; null restores the theme surface. */
+@Composable
+internal fun FolderBackgroundColorRow(selected: Int?, onPick: (Int?) -> Unit) {
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi.copy(alpha = 0.94f),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
+        modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs),
+    ) {
+        Column(modifier = Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = ExpressiveSpacing.md)) {
+            RowLabel(stringResource(R.string.settings_folder_color))
+            Spacer(Modifier.height(14.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            ) {
+                SettingsFilterChip(
+                    selected = selected == null,
+                    onClick = { onPick(null) },
+                    label = { Text(stringResource(R.string.settings_color_theme)) },
+                )
+                COLOR_SWATCHES.forEach { colour ->
+                    ColorSwatch(argb = colour, selected = colour == selected, onClick = { onPick(colour) })
+                }
+            }
+        }
+    }
+}
+
 /** The drawer's label colour row (the owner's 1.0.1 ask: the choice home's labels have): an "Automatic" chip for the
  *  black or white the drawer picks by its own look, then the label swatches. [selected] null = automatic. */
 @Composable

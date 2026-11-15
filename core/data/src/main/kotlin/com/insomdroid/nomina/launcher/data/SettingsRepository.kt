@@ -177,8 +177,15 @@ class SettingsRepository @Inject constructor(
             twoLineHomeLabels = p[Keys.TWO_LINE_HOME_LABELS] ?: false,
             twoLineDrawerLabels = p[Keys.TWO_LINE_DRAWER_LABELS] ?: true,
             appLabelColor = p[Keys.APP_LABEL_COLOR] ?: 0xFFFFFFFF.toInt(),
+            homeLabelColorMode = (p[Keys.HOME_LABEL_COLOR_MODE]
+                ?: if (p[Keys.APP_LABEL_COLOR] != null) LauncherSettings.LABEL_COLOR_CUSTOM else LauncherSettings.LABEL_COLOR_AUTOMATIC)
+                .let { if (it == LauncherSettings.LABEL_COLOR_CUSTOM) it else LauncherSettings.LABEL_COLOR_AUTOMATIC },
             dockLabelColor = p[Keys.DOCK_LABEL_COLOR],
-            dockLabelColorFollowsHome = p[Keys.DOCK_LABEL_COLOR] == null,
+            dockLabelColorMode = (p[Keys.DOCK_LABEL_COLOR_MODE]
+                ?: if (p[Keys.DOCK_LABEL_COLOR] != null) LauncherSettings.LABEL_COLOR_CUSTOM else LauncherSettings.LABEL_COLOR_FOLLOW_HOME)
+                .let { if (it in setOf(LauncherSettings.LABEL_COLOR_FOLLOW_HOME, LauncherSettings.LABEL_COLOR_AUTOMATIC, LauncherSettings.LABEL_COLOR_CUSTOM)) it else LauncherSettings.LABEL_COLOR_FOLLOW_HOME },
+            dockLabelColorFollowsHome = (p[Keys.DOCK_LABEL_COLOR_MODE]
+                ?: if (p[Keys.DOCK_LABEL_COLOR] != null) LauncherSettings.LABEL_COLOR_CUSTOM else LauncherSettings.LABEL_COLOR_FOLLOW_HOME) == LauncherSettings.LABEL_COLOR_FOLLOW_HOME,
             drawerLabelColor = p[Keys.DRAWER_LABEL_COLOR],
             drawerLabelColorMode = (p[Keys.DRAWER_LABEL_COLOR_MODE]
                 ?: if (p[Keys.DRAWER_LABEL_COLOR] != null) LauncherSettings.LABEL_COLOR_CUSTOM else LauncherSettings.LABEL_COLOR_AUTOMATIC)
@@ -493,8 +500,20 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setAppLabelColor(argb: Int) = edit { it[Keys.APP_LABEL_COLOR] = argb }
 
+    suspend fun setHomeLabelColorMode(mode: String) = edit {
+        it[Keys.HOME_LABEL_COLOR_MODE] = if (mode == LauncherSettings.LABEL_COLOR_CUSTOM) mode else LauncherSettings.LABEL_COLOR_AUTOMATIC
+    }
+
     suspend fun setDockLabelColor(argb: Int?) = edit {
         if (argb == null) it.remove(Keys.DOCK_LABEL_COLOR) else it[Keys.DOCK_LABEL_COLOR] = argb
+    }
+
+    suspend fun setDockLabelColorMode(mode: String) = edit {
+        it[Keys.DOCK_LABEL_COLOR_MODE] = mode.takeIf {
+            it == LauncherSettings.LABEL_COLOR_FOLLOW_HOME ||
+                it == LauncherSettings.LABEL_COLOR_AUTOMATIC ||
+                it == LauncherSettings.LABEL_COLOR_CUSTOM
+        } ?: LauncherSettings.LABEL_COLOR_FOLLOW_HOME
     }
 
     suspend fun setDrawerLabelColor(argb: Int?) = edit {
@@ -765,7 +784,9 @@ class SettingsRepository @Inject constructor(
         val DRAWER_ICON_SCALE = floatPreferencesKey("drawer_icon_scale")
         val LONG_PRESS_SCALE = floatPreferencesKey("long_press_scale")
         val APP_LABEL_COLOR = intPreferencesKey("app_label_color")
+        val HOME_LABEL_COLOR_MODE = stringPreferencesKey("home_label_color_mode")
         val DOCK_LABEL_COLOR = intPreferencesKey("dock_label_color")
+        val DOCK_LABEL_COLOR_MODE = stringPreferencesKey("dock_label_color_mode")
         val DRAWER_LABEL_COLOR = intPreferencesKey("drawer_label_color")
         val DRAWER_LABEL_COLOR_MODE = stringPreferencesKey("drawer_label_color_mode")
         val TWO_LINE_HOME_LABELS = booleanPreferencesKey("two_line_home_labels")
@@ -849,7 +870,7 @@ class SettingsRepository @Inject constructor(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
             "icon_pack_package", "weather_app_key", "mini_dock_camera_app", "mini_dock_search_app", "mini_dock_browser_app",
             "mini_dock_camera_glyph", "mini_dock_search_glyph", "mini_dock_browser_glyph", "home_page_marker",
-            "page_switch_speed", "collapsed_settings_sections", "icon_shape", "reshape_legacy_icons", "drawer_label_color_mode",
+            "page_switch_speed", "collapsed_settings_sections", "icon_shape", "reshape_legacy_icons", "home_label_color_mode", "dock_label_color_mode", "drawer_label_color_mode",
             "custom_icons", "folder_icons", "shortcut_icons", "unthemed_icon_mode", "unthemed_container_mode",
         )
 

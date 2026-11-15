@@ -342,7 +342,7 @@ fun SettingsScreen(
                             ),
                         ) { showHomeMarkerPicker = true }
                     }
-                    SettingsGroupLabel("ADVANCED")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_advanced))
                     SwitchRow(stringResource(R.string.settings_home_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
                     PageSwitchSpeedRow(selected = s.pageSwitchSpeed) { showPageSpeedPicker = true }
                     SwitchRow(
@@ -351,7 +351,7 @@ fun SettingsScreen(
                         s.infiniteScroll,
                         viewModel::setInfiniteScroll,
                     )
-                    SwitchRow("Hide status bar", s.hideStatusBar, viewModel::setHideStatusBar)
+                    SwitchRow(stringResource(R.string.settings_hide_status_bar), s.hideStatusBar, viewModel::setHideStatusBar)
                     SwitchRow(stringResource(R.string.settings_lock_desktop), s.desktopLocked, viewModel::setDesktopLocked)
                     SwitchRow(stringResource(R.string.settings_widget_tonal), s.widgetTonalBackground, viewModel::setWidgetTonalBackground)
                     SwitchRow(
@@ -416,9 +416,9 @@ fun SettingsScreen(
                     }
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
-                    SettingsGroupLabel("ADVANCED")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_advanced))
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
-                    SettingsGroupLabel("MINI DOCK")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_mini_dock))
                     SettingsGroupLabel(stringResource(R.string.settings_capsule_apps))
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_capsule_right),
@@ -491,8 +491,8 @@ fun SettingsScreen(
                     }
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
                     SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
-                    SettingsGroupLabel("ADVANCED")
-                    SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
+                    SettingsGroupLabel(stringResource(R.string.settings_group_advanced))
+                    SwitchRow(stringResource(R.string.settings_drawer_scrubber), s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
                     SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
                     SwitchRow(
                         stringResource(R.string.settings_hide_home_apps),
@@ -505,7 +505,7 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_hidden_apps),
                         description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
                     ) { showHiddenManager = true }
-                    SettingsGroupLabel("FOLDERS")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_folders))
                     SwitchRow(stringResource(R.string.settings_drawer_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
                     StepperRow(
                         stringResource(R.string.settings_folder_columns), s.folderColumns,
@@ -590,7 +590,7 @@ fun SettingsScreen(
                         description = iconPackName,
                     ) { showIconPackPicker = true }
                     IconShapeRow(selected = s.iconShape, onPick = viewModel::setIconShape)
-                    SettingsGroupLabel("ADVANCED")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_advanced))
                     SwitchRow(
                         stringResource(R.string.settings_auto_resize_icons),
                         stringResource(R.string.settings_auto_resize_icons_desc),
@@ -682,7 +682,7 @@ fun SettingsScreen(
                         s.wallpaperScrolling,
                         viewModel::setWallpaperScrolling,
                     )
-                    SettingsGroupLabel("ADVANCED")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_advanced))
                     DrawerBackdropRows(
                         settings = s,
                         wallpaper = drawerWallpaper,
@@ -712,7 +712,7 @@ fun SettingsScreen(
                     // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
                     // number is the real wait here and the default chip names it.
                     val systemLongPress = rememberSystemLongPressTimeout()
-                    SettingsGroupLabel("ADVANCED")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_advanced))
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_long_press_delay),
                         description = stringResource(R.string.settings_long_press_delay_desc),
@@ -733,7 +733,7 @@ fun SettingsScreen(
                 ) {
                     SwitchRow(stringResource(R.string.settings_notif_dots), s.showNotificationDots, viewModel::setShowNotificationDots)
                     SwitchRow(stringResource(R.string.settings_notif_count), s.notificationDotCount, viewModel::setNotificationDotCount)
-                    SettingsGroupLabel("ADVANCED")
+                    SettingsGroupLabel(stringResource(R.string.settings_group_advanced))
                     ScaleSliderRow(
                         label = stringResource(R.string.settings_notif_size),
                         value = s.notificationDotScale,

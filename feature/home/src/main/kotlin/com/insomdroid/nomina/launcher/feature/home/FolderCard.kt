@@ -152,6 +152,11 @@ internal fun FolderCard(
     showName: Boolean = true,
     /** Icons per row (Settings > Home > Folder columns). */
     columns: Int = FOLDER_COLUMNS,
+    folderShowLabels: Boolean = true,
+    folderIconScale: Float = 1f,
+    folderSpacing: Float = 1f,
+    folderBackgroundColor: Int? = null,
+    folderBackgroundOpacity: Float = 1f,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -159,6 +164,8 @@ internal fun FolderCard(
     val iconScale = LocalIconScale.current
     val labelScale = LocalAppLabelScale.current
     val windowHeightPx = LocalWindowInfo.current.containerSize.height
+    val folderCardColor = (folderBackgroundColor?.let { Color(it) } ?: MaterialTheme.colorScheme.surface)
+        .copy(alpha = folderBackgroundOpacity.coerceIn(0.2f, 1f))
 
     val currentOnAppClick by rememberUpdatedState(onAppClick)
     val currentOnDismiss by rememberUpdatedState(onDismiss)
@@ -232,7 +239,7 @@ internal fun FolderCard(
     ) {
         Surface(
             shape = RoundedCornerShape(ExpressiveRadius.card),
-            color = MaterialTheme.colorScheme.surface,
+            color = folderCardColor,
             modifier = Modifier
                 .padding(16.dp)
                 .widthIn(max = 360.dp)
@@ -313,15 +320,15 @@ internal fun FolderCard(
                 }
 
                 // The icon follows the user's icon-size setting, capped by the slot like the drawer.
-                val nominalIconSize = 56.dp * iconScale
+                val nominalIconSize = 56.dp * iconScale * folderIconScale
                 val iconSize = if (gridWidthPx > 0) {
                     iconSizeForCell(with(density) { (gridWidthPx.toFloat() / columns).toDp() }, nominalIconSize)
                 } else {
                     nominalIconSize
                 }
                 val rowHeight = iconSize +
-                    labelBlockHeight(showLabel = true, labelScale = labelScale, fontFactor = labelFontFactor(density.fontScale), lines = 2) +
-                    20.dp
+                    labelBlockHeight(showLabel = folderShowLabels, labelScale = labelScale, fontFactor = labelFontFactor(density.fontScale), lines = 2) +
+                    20.dp * folderSpacing
                 // Up to four rows without scrolling when the screen allows; taller folders scroll.
                 val gridMaxHeight: Dp = min(rowHeight * 4, with(density) { windowHeightPx.toDp() } * 0.6f)
                 val gridState = rememberLazyGridState()
@@ -470,12 +477,12 @@ internal fun FolderCard(
                                 appItem = app,
                                 labelColor = MaterialTheme.colorScheme.onSurface,
                                 iconSize = iconSize,
-                                showLabel = true,
+                                showLabel = folderShowLabels,
                                 maxLabelLines = 2,
                                 // Every slot reserves both label lines, as the home grid's do: the
                                 // rows stay one height (the one [gridMaxHeight] counts) whether or
                                 // not a name wraps, and the icons line up across rows.
-                                reserveLabelLines = true,
+                                reserveLabelLines = folderShowLabels,
                                 badgeCount = badges[app.badgeKey] ?: 0,
                                 badgeShowCount = badgeShowCount,
                                 badgeScale = badgeScale,
@@ -494,7 +501,7 @@ internal fun FolderCard(
                                             dragController.draggedApp?.key == app.key
                                         ) 0.3f else 1f
                                     }
-                                    .padding(vertical = 10.dp, horizontal = 4.dp),
+                                    .padding(vertical = 10.dp * folderSpacing, horizontal = 4.dp),
                             )
                         }
                     }

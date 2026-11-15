@@ -446,6 +446,9 @@ class LauncherAppsSource @Inject constructor(
     internal fun iconBackColor(iconPack: String): Int? =
         if (iconPack.isBlank()) null else iconPacks.get(iconPack)?.iconBackColor
 
+    internal fun isMonochromeIconPack(iconPack: String): Boolean =
+        if (iconPack.isBlank()) false else iconPacks.get(iconPack)?.isMonochrome ?: false
+
     internal fun loadIcon(appItem: AppItem, iconPack: String = ""): ResolvedAppIcon? = runCatching {
         val info = launcherApps.getActivityList(appItem.packageName, appItem.user)
             .firstOrNull { it.componentName.className == appItem.className }

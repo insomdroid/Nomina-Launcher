@@ -140,6 +140,11 @@ class SettingsRepository @Inject constructor(
             sortDrawerFolders = p[Keys.SORT_DRAWER_FOLDERS] ?: false,
             mixDrawerFolders = p[Keys.MIX_DRAWER_FOLDERS] ?: false,
             folderColumns = (p[Keys.FOLDER_COLUMNS] ?: 4).coerceIn(MIN_FOLDER_COLUMNS, MAX_FOLDER_COLUMNS),
+            folderShowLabels = p[Keys.FOLDER_SHOW_LABELS] ?: true,
+            folderIconScale = (p[Keys.FOLDER_ICON_SCALE] ?: 1f).coerceIn(MIN_FOLDER_ICON_SCALE, MAX_FOLDER_ICON_SCALE),
+            folderSpacing = (p[Keys.FOLDER_SPACING] ?: 1f).coerceIn(MIN_FOLDER_SPACING, MAX_FOLDER_SPACING),
+            folderBackgroundColor = p[Keys.FOLDER_BACKGROUND_COLOR],
+            folderBackgroundOpacity = (p[Keys.FOLDER_BACKGROUND_OPACITY] ?: 1f).coerceIn(MIN_FOLDER_BACKGROUND_OPACITY, 1f),
             collapsedSettingsSections = parseSections(p[Keys.COLLAPSED_SETTINGS_SECTIONS]),
             drawerBackgroundColor = p[Keys.DRAWER_BACKGROUND_COLOR],
             drawerPictureDim = (p[Keys.DRAWER_PICTURE_DIM] ?: LauncherSettings.DEFAULT_DRAWER_PICTURE_DIM).coerceIn(0f, 1f),
@@ -397,6 +402,17 @@ class SettingsRepository @Inject constructor(
 
     suspend fun setFolderColumns(value: Int) =
         edit { it[Keys.FOLDER_COLUMNS] = value.coerceIn(MIN_FOLDER_COLUMNS, MAX_FOLDER_COLUMNS) }
+
+    suspend fun setFolderShowLabels(value: Boolean) = edit { it[Keys.FOLDER_SHOW_LABELS] = value }
+    suspend fun setFolderIconScale(value: Float) =
+        edit { it[Keys.FOLDER_ICON_SCALE] = value.coerceIn(MIN_FOLDER_ICON_SCALE, MAX_FOLDER_ICON_SCALE) }
+    suspend fun setFolderSpacing(value: Float) =
+        edit { it[Keys.FOLDER_SPACING] = value.coerceIn(MIN_FOLDER_SPACING, MAX_FOLDER_SPACING) }
+    suspend fun setFolderBackgroundColor(argb: Int?) = edit {
+        if (argb == null) it.remove(Keys.FOLDER_BACKGROUND_COLOR) else it[Keys.FOLDER_BACKGROUND_COLOR] = argb
+    }
+    suspend fun setFolderBackgroundOpacity(value: Float) =
+        edit { it[Keys.FOLDER_BACKGROUND_OPACITY] = value.coerceIn(MIN_FOLDER_BACKGROUND_OPACITY, 1f) }
 
     /** Folds or opens the settings section [id]; the folded ids live in one comma-separated string. */
     suspend fun setSettingsSectionCollapsed(id: String, collapsed: Boolean) = edit { p ->
@@ -688,6 +704,11 @@ class SettingsRepository @Inject constructor(
         val SORT_DRAWER_FOLDERS = booleanPreferencesKey("sort_drawer_folders")
         val MIX_DRAWER_FOLDERS = booleanPreferencesKey("mix_drawer_folders")
         val FOLDER_COLUMNS = intPreferencesKey("folder_columns")
+        val FOLDER_SHOW_LABELS = booleanPreferencesKey("folder_show_labels")
+        val FOLDER_ICON_SCALE = floatPreferencesKey("folder_icon_scale")
+        val FOLDER_SPACING = floatPreferencesKey("folder_spacing")
+        val FOLDER_BACKGROUND_COLOR = intPreferencesKey("folder_background_color")
+        val FOLDER_BACKGROUND_OPACITY = floatPreferencesKey("folder_background_opacity")
         val COLLAPSED_SETTINGS_SECTIONS = stringPreferencesKey("collapsed_settings_sections")
         val BLUR_BEHIND_DRAWER = booleanPreferencesKey("blur_behind_drawer")
         val DRAWER_BLUR_STRENGTH = floatPreferencesKey("drawer_blur_strength")
@@ -725,6 +746,11 @@ class SettingsRepository @Inject constructor(
         /** Valid range for an open folder's columns (mirrors the settings stepper). */
         const val MIN_FOLDER_COLUMNS = 3
         const val MAX_FOLDER_COLUMNS = 6
+        const val MIN_FOLDER_ICON_SCALE = 0.7f
+        const val MAX_FOLDER_ICON_SCALE = 1.3f
+        const val MIN_FOLDER_SPACING = 0.5f
+        const val MAX_FOLDER_SPACING = 1.5f
+        const val MIN_FOLDER_BACKGROUND_OPACITY = 0.2f
 
         /** Valid range for the home-grid row count (mirrors the settings stepper). */
         const val MIN_ROWS = 5
@@ -755,10 +781,12 @@ class SettingsRepository @Inject constructor(
         val FLOAT_KEYS = setOf(
             "dock_opacity", "drawer_opacity", "notif_dot_scale", "app_label_scale", "dock_label_scale", "drawer_label_scale", "icon_scale", "dock_icon_scale", "drawer_icon_scale",
             "long_press_scale", "drawer_blur_strength", "drawer_picture_dim",
+            "folder_icon_scale", "folder_spacing", "folder_background_opacity",
         )
         val INT_KEYS = setOf(
             "dock_columns", "dock_bottom_spacing", "home_columns", "home_rows", "drawer_columns", "app_label_color",
             "home_page", "home_page_count", "folder_columns", "drawer_background_color", "drawer_label_color", "dock_label_color",
+            "folder_background_color",
         )
 
         /** Known boolean/string preference keys. importRaw writes a known key ONLY with its
@@ -773,6 +801,7 @@ class SettingsRepository @Inject constructor(
             "show_notif_dots", "notif_dot_count", "use_themed_icons", "auto_resize_icons",
             "desktop_locked", "double_tap_lock", "show_frequent_apps", "drawer_opens_at_top",
             "sort_drawer_folders", "show_weather", "widget_tonal_background", "infinite_scroll", "wallpaper_scrolling",
+            "folder_show_labels",
         )
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",

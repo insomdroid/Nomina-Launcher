@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
@@ -166,6 +167,8 @@ internal fun FolderCard(
     val windowHeightPx = LocalWindowInfo.current.containerSize.height
     val folderCardColor = (folderBackgroundColor?.let { Color(it) } ?: MaterialTheme.colorScheme.surface)
         .copy(alpha = folderBackgroundOpacity.coerceIn(0.2f, 1f))
+    val folderTextColor = if (folderBackgroundColor == null) MaterialTheme.colorScheme.onSurface
+        else if (Color(folderBackgroundColor).luminance() > 0.5f) Color.Black else Color.White
 
     val currentOnAppClick by rememberUpdatedState(onAppClick)
     val currentOnDismiss by rememberUpdatedState(onDismiss)
@@ -240,6 +243,7 @@ internal fun FolderCard(
         Surface(
             shape = RoundedCornerShape(ExpressiveRadius.card),
             color = folderCardColor,
+            contentColor = folderTextColor,
             modifier = Modifier
                 .padding(16.dp)
                 .widthIn(max = 360.dp)
@@ -475,7 +479,7 @@ internal fun FolderCard(
                         items(items = shown, key = { it.key }) { app ->
                             AppIcon(
                                 appItem = app,
-                                labelColor = MaterialTheme.colorScheme.onSurface,
+                                labelColor = folderTextColor,
                                 iconSize = iconSize,
                                 showLabel = folderShowLabels,
                                 maxLabelLines = 2,

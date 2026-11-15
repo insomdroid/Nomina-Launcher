@@ -34,6 +34,11 @@
     <string name="settings_two_line_labels">Two-line labels</string>
     <string name="settings_show_folder_names">Show folder names</string>
     <string name="settings_folder_columns">Folder columns</string>
+    <string name="settings_folder_show_labels">Show app names inside folders</string>
+    <string name="settings_folder_icon_size">Folder app icon size</string>
+    <string name="settings_folder_spacing">Folder row spacing</string>
+    <string name="settings_folder_color">Folder background colour</string>
+    <string name="settings_folder_opacity">Folder background opacity</string>
     <string name="settings_section_expanded">Expanded</string>
     <string name="settings_section_collapsed">Collapsed</string>
     <string name="settings_blur_behind_drawer">Blur the wallpaper behind the app drawer</string>

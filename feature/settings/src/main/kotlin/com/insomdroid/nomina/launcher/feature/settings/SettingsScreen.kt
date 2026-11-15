@@ -465,32 +465,34 @@ fun SettingsScreen(
                     collapsed = selectedSection == null,
                     onToggle = { selectedSection = "capsule" },
                 ) {
+                    SettingsGroupLabel(stringResource(R.string.settings_capsule_apps))
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_app_1),
+                        label = stringResource(R.string.settings_capsule_right),
                         description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
                             ?: stringResource(R.string.settings_capsule_default),
                     ) { miniDockPickerSlot = "browser" }
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_app_2),
+                        label = stringResource(R.string.settings_capsule_centre),
                         description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
                             ?: stringResource(R.string.settings_capsule_default),
                     ) { miniDockPickerSlot = "search" }
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_app_3),
+                        label = stringResource(R.string.settings_capsule_left),
                         description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
                             ?: stringResource(R.string.settings_capsule_default),
                     ) { miniDockPickerSlot = "camera" }
 
+                    SettingsGroupLabel(stringResource(R.string.settings_capsule_icons))
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_icon_1),
+                        label = stringResource(R.string.settings_capsule_right),
                         description = CapsuleGlyphs.label(s.miniDockBrowserGlyph),
                     ) { miniDockGlyphPickerSlot = "browser" }
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_icon_2),
+                        label = stringResource(R.string.settings_capsule_centre),
                         description = CapsuleGlyphs.label(s.miniDockSearchGlyph),
                     ) { miniDockGlyphPickerSlot = "search" }
                     ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_icon_3),
+                        label = stringResource(R.string.settings_capsule_left),
                         description = CapsuleGlyphs.label(s.miniDockCameraGlyph),
                     ) { miniDockGlyphPickerSlot = "camera" }
                 }
@@ -792,9 +794,9 @@ fun SettingsScreen(
         if (miniDockPickerSlot != null) {
             val slot = miniDockPickerSlot
             val title = when (slot) {
-                "browser" -> stringResource(R.string.settings_capsule_app_1)
-                "search" -> stringResource(R.string.settings_capsule_app_2)
-                else -> stringResource(R.string.settings_capsule_app_3)
+                "browser" -> stringResource(R.string.settings_capsule_right)
+                "search" -> stringResource(R.string.settings_capsule_centre)
+                else -> stringResource(R.string.settings_capsule_left)
             }
             SingleAppPicker(
                 apps = allApps,
@@ -814,9 +816,9 @@ fun SettingsScreen(
         if (miniDockGlyphPickerSlot != null) {
             val slot = miniDockGlyphPickerSlot
             val title = when (slot) {
-                "browser" -> stringResource(R.string.settings_capsule_icon_1)
-                "search" -> stringResource(R.string.settings_capsule_icon_2)
-                else -> stringResource(R.string.settings_capsule_icon_3)
+                "browser" -> stringResource(R.string.settings_capsule_right)
+                "search" -> stringResource(R.string.settings_capsule_centre)
+                else -> stringResource(R.string.settings_capsule_left)
             }
             CapsuleGlyphPicker(
                 title = title,

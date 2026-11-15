@@ -172,12 +172,11 @@
     <string name="settings_label_color">Label text color</string>
     <string name="settings_weather_app_none">None</string>
     <string name="settings_weather_app_pick">Choose app</string>
-    <string name="settings_capsule_app_1">Capsule app #1 (Right)</string>
-    <string name="settings_capsule_app_2">Capsule app #2 (Centre)</string>
-    <string name="settings_capsule_app_3">Capsule app #3 (Left)</string>
-    <string name="settings_capsule_icon_1">Capsule Icon #1 (Right)</string>
-    <string name="settings_capsule_icon_2">Capsule Icon #2 (Centre)</string>
-    <string name="settings_capsule_icon_3">Capsule Icon #3 (Left)</string>
+    <string name="settings_capsule_apps">Apps</string>
+    <string name="settings_capsule_icons">Icons</string>
+    <string name="settings_capsule_right">Right</string>
+    <string name="settings_capsule_centre">Centre</string>
+    <string name="settings_capsule_left">Left</string>
     <string name="settings_capsule_default">Default action</string>
     <string name="settings_close">Close</string>
     <string name="settings_lock_desktop">Lock desktop</string>

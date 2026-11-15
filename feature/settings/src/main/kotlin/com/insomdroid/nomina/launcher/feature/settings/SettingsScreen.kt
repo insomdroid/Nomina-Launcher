@@ -985,12 +985,14 @@ private fun UnthemedColorPicker(
             }
         },
         confirmButton = {
-            if (parsed != null) SettingsTextButton(onClick = { onPick(parsed) }) {
-                Text(stringResource(R.string.settings_apply))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SettingsTextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.settings_folder_cancel))
+                }
+                if (parsed != null) SettingsTextButton(onClick = { onPick(parsed) }) {
+                    Text(stringResource(R.string.settings_apply))
+                }
             }
-        },
-        dismissButton = {
-            SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_folder_cancel)) }
         },
     )
 }

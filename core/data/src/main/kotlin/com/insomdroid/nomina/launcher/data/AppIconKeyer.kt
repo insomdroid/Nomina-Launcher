@@ -9,5 +9,5 @@ class AppIconKeyer : Keyer<IconRequest> {
     // The package epoch invalidates updated app icons; the custom-icon reference invalidates picks.
     override fun key(data: IconRequest, options: Options): String =
         "appicon:${data.app.key}:p=${data.iconPack}:e=${data.epoch}:m=${data.reshapeLegacyIcons}:s=${data.iconShape}" +
-            ":c=${data.app.customIcon?.encode().orEmpty()}:r=${data.autoResize}"
+            ":c=${data.app.customIcon?.encode().orEmpty()}:r=${data.autoResize}:ua=${data.unthemedIconMode}:uc=${data.unthemedContainerMode}:ucc=${data.unthemedContainerColor}:uo=${data.unthemedContainerOpacity}"
 }

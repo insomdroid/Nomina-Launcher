@@ -171,6 +171,10 @@
     <string name="settings_label_color">Label text color</string>
     <string name="settings_weather_app_none">None</string>
     <string name="settings_weather_app_pick">Choose app</string>
+    <string name="settings_capsule_camera">Capsule camera app</string>
+    <string name="settings_capsule_search">Capsule search app</string>
+    <string name="settings_capsule_browser">Capsule browser app</string>
+    <string name="settings_capsule_default">Default action</string>
     <string name="settings_close">Close</string>
     <string name="settings_lock_desktop">Lock desktop</string>
     <string name="settings_frequent_apps">Most used at the top</string>

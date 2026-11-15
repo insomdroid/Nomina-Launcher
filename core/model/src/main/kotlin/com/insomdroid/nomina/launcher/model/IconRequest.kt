@@ -11,4 +11,8 @@ data class IconRequest(
     val reshapeLegacyIcons: String = LauncherSettings.RESHAPE_UNTHEMED,
     val iconShape: String = LauncherSettings.ICON_SHAPE_SYSTEM,
     val autoResize: Boolean = true,
+    val unthemedIconMode: String = LauncherSettings.UNTHEMED_ICON_AUTOMATIC,
+    val unthemedContainerMode: String = LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC,
+    val unthemedContainerColor: Int = 0xFF808080.toInt(),
+    val unthemedContainerOpacity: Float = LauncherSettings.DEFAULT_UNTHEMED_CONTAINER_OPACITY,
 )

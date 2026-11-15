@@ -24,6 +24,8 @@
     <string name="settings_drawer">App drawer</string>
     <string name="settings_home">Home screen</string>
     <string name="settings_folders">Folders</string>
+    <string name="settings_capsule">Capsule</string>
+    <string name="settings_capsule_desc">Choose which app each capsule symbol opens. The monochrome symbols stay consistent across all selected apps.</string>
     <string name="settings_home_folder_names">Show Home folder names</string>
     <string name="settings_drawer_folder_names">Show App Drawer folder names</string>
     <string name="settings_wallpaper_scroll">Wallpaper scrolling</string>

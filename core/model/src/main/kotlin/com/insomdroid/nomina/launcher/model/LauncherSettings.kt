@@ -53,6 +53,14 @@ data class LauncherSettings(
     val reshapeLegacyIcons: String = RESHAPE_OFF,
     /** Normalizes transparent icon padding so legacy icons have a more consistent visual size. */
     val autoResizeIcons: Boolean = false,
+    /** Colour treatment for apps not covered by the selected icon pack. */
+    val unthemedIconMode: String = UNTHEMED_ICON_AUTOMATIC,
+    /** Backplate treatment for apps not covered by the selected icon pack. */
+    val unthemedContainerMode: String = UNTHEMED_CONTAINER_AUTOMATIC,
+    /** Custom ARGB backplate colour for unthemed app icons. */
+    val unthemedContainerColor: Int = 0xFF808080.toInt(),
+    /** Backplate opacity for unthemed app icons. */
+    val unthemedContainerOpacity: Float = 0.5f,
     /** Swiping past the last home page continues to the first one, and back from the first to the
      *  last. Off keeps the bounce back from the end. */
     val infiniteScroll: Boolean = true,
@@ -164,6 +172,18 @@ data class LauncherSettings(
         const val LABEL_COLOR_FOLLOW_HOME = "follow_home"
         const val LABEL_COLOR_AUTOMATIC = "automatic"
         const val LABEL_COLOR_CUSTOM = "custom"
+
+        const val UNTHEMED_ICON_AUTOMATIC = "automatic"
+        const val UNTHEMED_ICON_ORIGINAL = "original"
+        const val UNTHEMED_ICON_MONOCHROME = "monochrome"
+        val UNTHEMED_ICON_MODES = listOf(UNTHEMED_ICON_AUTOMATIC, UNTHEMED_ICON_ORIGINAL, UNTHEMED_ICON_MONOCHROME)
+
+        const val UNTHEMED_CONTAINER_AUTOMATIC = "automatic"
+        const val UNTHEMED_CONTAINER_CUSTOM = "custom"
+        const val UNTHEMED_CONTAINER_NONE = "none"
+        val UNTHEMED_CONTAINER_MODES = listOf(UNTHEMED_CONTAINER_AUTOMATIC, UNTHEMED_CONTAINER_CUSTOM, UNTHEMED_CONTAINER_NONE)
+
+        const val DEFAULT_UNTHEMED_CONTAINER_OPACITY = 0.5f
 
         const val RESHAPE_ALWAYS = "always"
         const val RESHAPE_UNTHEMED = "unthemed"

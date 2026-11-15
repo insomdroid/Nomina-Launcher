@@ -110,6 +110,11 @@ class SettingsViewModel @Inject constructor(
     fun setAutoResizeIcons(value: Boolean) = update { repository.setAutoResizeIcons(value) }
 
     fun setFolderColumns(value: Int) = update { repository.setFolderColumns(value) }
+    fun setFolderShowLabels(value: Boolean) = update { repository.setFolderShowLabels(value) }
+    fun setFolderIconScale(value: Float) = update { repository.setFolderIconScale(value) }
+    fun setFolderSpacing(value: Float) = update { repository.setFolderSpacing(value) }
+    fun setFolderBackgroundColor(value: Int?) = update { repository.setFolderBackgroundColor(value) }
+    fun setFolderBackgroundOpacity(value: Float) = update { repository.setFolderBackgroundOpacity(value) }
     fun setSectionCollapsed(id: String, collapsed: Boolean) = update { repository.setSettingsSectionCollapsed(id, collapsed) }
     fun setHomeColumns(value: Int) = viewModelScope.launch {
         // Shrinking the grid can leave shortcuts at an out-of-range cellX; repack them back on-screen

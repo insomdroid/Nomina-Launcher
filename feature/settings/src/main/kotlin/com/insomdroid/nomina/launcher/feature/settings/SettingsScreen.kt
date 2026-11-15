@@ -152,6 +152,7 @@ fun SettingsScreen(
     var showHiddenManager by rememberSaveable { mutableStateOf(false) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
     var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
+    var miniDockPickerSlot by rememberSaveable { mutableStateOf<String?>(null) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
     var showHomeMarkerPicker by rememberSaveable { mutableStateOf(false) }
@@ -350,6 +351,21 @@ fun SettingsScreen(
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
                     DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_camera),
+                        description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "camera" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_search),
+                        description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "search" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_browser),
+                        description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "browser" }
                 }
 
                 CollapsibleSection(
@@ -743,11 +759,35 @@ fun SettingsScreen(
         if (showWeatherAppPicker) {
             SingleAppPicker(
                 apps = allApps,
+                title = stringResource(R.string.settings_weather_app_pick),
+                noneLabel = stringResource(R.string.settings_weather_app_none),
                 onPick = { key ->
                     viewModel.setWeatherAppKey(key)
                     showWeatherAppPicker = false
                 },
                 onDismiss = { showWeatherAppPicker = false },
+            )
+        }
+        if (miniDockPickerSlot != null) {
+            val slot = miniDockPickerSlot
+            val title = when (slot) {
+                "camera" -> stringResource(R.string.settings_capsule_camera)
+                "search" -> stringResource(R.string.settings_capsule_search)
+                else -> stringResource(R.string.settings_capsule_browser)
+            }
+            SingleAppPicker(
+                apps = allApps,
+                title = title,
+                noneLabel = stringResource(R.string.settings_capsule_default),
+                onPick = { key ->
+                    when (slot) {
+                        "camera" -> viewModel.setMiniDockCameraAppKey(key)
+                        "search" -> viewModel.setMiniDockSearchAppKey(key)
+                        "browser" -> viewModel.setMiniDockBrowserAppKey(key)
+                    }
+                    miniDockPickerSlot = null
+                },
+                onDismiss = { miniDockPickerSlot = null },
             )
         }
         if (showIconPackPicker) {
@@ -927,6 +967,8 @@ internal fun WeatherAppRow(appLabel: String?, onClick: () -> Unit) {
 @Composable
 private fun SingleAppPicker(
     apps: List<AppItem>,
+    title: String,
+    noneLabel: String,
     onPick: (String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -934,7 +976,7 @@ private fun SingleAppPicker(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = p.surfaceHi,
-        title = { Text(stringResource(R.string.settings_weather_app_pick), color = p.text) },
+        title = { Text(title, color = p.text) },
         text = {
             Column(
                 modifier = Modifier
@@ -948,7 +990,7 @@ private fun SingleAppPicker(
                         .padding(vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(stringResource(R.string.settings_weather_app_none), color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
+                    Text(noneLabel, color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp)
                 }
                 apps.forEach { app ->
                     Row(

@@ -310,18 +310,27 @@ fun SettingsScreen(
                     StepperRow(stringResource(R.string.settings_columns), s.homeColumns, SettingsRepository.MIN_COLUMNS, SettingsRepository.MAX_COLUMNS, viewModel::setHomeColumns)
                     StepperRow(stringResource(R.string.settings_rows), s.homeRows, SettingsRepository.MIN_ROWS, SettingsRepository.MAX_ROWS, viewModel::setHomeRows)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showHomeLabels, viewModel::setShowHomeLabels)
-                    ScaleSliderRow(
-                        label = stringResource(R.string.settings_home_label_size),
-                        value = s.appLabelTextScale,
-                        onValueChange = viewModel::setAppLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    LabelColorRow(
-                        label = stringResource(R.string.settings_home_label_color),
-                        selected = s.appLabelColor,
-                        onPick = viewModel::setAppLabelColor,
-                    )
+                    if (s.showHomeLabels) {
+                        ScaleSliderRow(
+                            label = stringResource(R.string.settings_home_label_size),
+                            value = s.appLabelTextScale,
+                            onValueChange = viewModel::setAppLabelTextScale,
+                            valueRange = 0.8f..1.6f,
+                            valueText = percentText,
+                        )
+                        LabelColorModeRow(
+                            mode = s.homeLabelColorMode,
+                            includeFollowHome = false,
+                            onPick = viewModel::setHomeLabelColorMode,
+                        )
+                        if (s.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
+                            LabelColorRow(
+                                label = stringResource(R.string.settings_custom_label_color),
+                                selected = s.appLabelColor,
+                                onPick = viewModel::setAppLabelColor,
+                            )
+                        }
+                    }
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineHomeLabels, viewModel::setTwoLineHomeLabels)
                     SwitchRow(stringResource(R.string.settings_page_indicator), s.showPageIndicator, viewModel::setShowPageIndicator)
                     if (s.showPageIndicator) {
@@ -376,24 +385,30 @@ fun SettingsScreen(
                         color = palette.dim,
                     )
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDockLabels, viewModel::setShowDockLabels)
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_dock_label_size),
-                        value = s.dockLabelTextScale,
-                        followsHome = s.dockLabelTextScaleFollowsHome,
-                        onFollowHome = { viewModel.setDockLabelTextScale(null) },
-                        onCustom = { viewModel.setDockLabelTextScale(s.dockLabelTextScale) },
-                        onValueChange = viewModel::setDockLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    FollowHomeColorRow(
-                        label = stringResource(R.string.settings_dock_label_color),
-                        followsHome = s.dockLabelColorFollowsHome,
-                        selected = s.dockLabelColor ?: s.appLabelColor,
-                        onFollowHome = { viewModel.setDockLabelColor(null) },
-                        onCustom = { viewModel.setDockLabelColor(s.dockLabelColor ?: s.appLabelColor) },
-                        onPick = viewModel::setDockLabelColor,
-                    )
+                    if (s.showDockLabels) {
+                        FollowHomeScaleRow(
+                            label = stringResource(R.string.settings_dock_label_size),
+                            value = s.dockLabelTextScale,
+                            followsHome = s.dockLabelTextScaleFollowsHome,
+                            onFollowHome = { viewModel.setDockLabelTextScale(null) },
+                            onCustom = { viewModel.setDockLabelTextScale(s.dockLabelTextScale) },
+                            onValueChange = viewModel::setDockLabelTextScale,
+                            valueRange = 0.8f..1.6f,
+                            valueText = percentText,
+                        )
+                        LabelColorModeRow(
+                            mode = s.dockLabelColorMode,
+                            includeFollowHome = true,
+                            onPick = viewModel::setDockLabelColorMode,
+                        )
+                        if (s.dockLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
+                            LabelColorRow(
+                                label = stringResource(R.string.settings_custom_label_color),
+                                selected = s.dockLabelColor ?: s.appLabelColor,
+                                onPick = { viewModel.setDockLabelColor(it) },
+                            )
+                        }
+                    }
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
                     DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
@@ -408,31 +423,29 @@ fun SettingsScreen(
                 ) {
                     StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
-                    FollowHomeScaleRow(
-                        label = stringResource(R.string.settings_drawer_label_size),
-                        value = s.drawerLabelTextScale,
-                        followsHome = s.drawerLabelTextScaleFollowsHome,
-                        onFollowHome = { viewModel.setDrawerLabelTextScale(null) },
-                        onCustom = { viewModel.setDrawerLabelTextScale(s.drawerLabelTextScale) },
-                        onValueChange = viewModel::setDrawerLabelTextScale,
-                        valueRange = 0.8f..1.6f,
-                        valueText = percentText,
-                    )
-                    DrawerLabelColorModeRow(
-                        mode = s.drawerLabelColorMode,
-                        onPick = { mode ->
-                            viewModel.setDrawerLabelColorMode(mode)
-                            if (mode == LauncherSettings.LABEL_COLOR_CUSTOM && s.drawerLabelColor == null) {
-                                viewModel.setDrawerLabelColor(s.appLabelColor)
-                            }
-                        },
-                    )
-                    if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
-                        LabelColorRow(
-                            label = stringResource(R.string.settings_drawer_label_color),
-                            selected = s.drawerLabelColor ?: s.appLabelColor,
-                            onPick = viewModel::setDrawerLabelColor,
+                    if (s.showDrawerLabels) {
+                        FollowHomeScaleRow(
+                            label = stringResource(R.string.settings_drawer_label_size),
+                            value = s.drawerLabelTextScale,
+                            followsHome = s.drawerLabelTextScaleFollowsHome,
+                            onFollowHome = { viewModel.setDrawerLabelTextScale(null) },
+                            onCustom = { viewModel.setDrawerLabelTextScale(s.drawerLabelTextScale) },
+                            onValueChange = viewModel::setDrawerLabelTextScale,
+                            valueRange = 0.8f..1.6f,
+                            valueText = percentText,
                         )
+                        LabelColorModeRow(
+                            mode = s.drawerLabelColorMode,
+                            includeFollowHome = true,
+                            onPick = viewModel::setDrawerLabelColorMode,
+                        )
+                        if (s.drawerLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM) {
+                            LabelColorRow(
+                                label = stringResource(R.string.settings_custom_label_color),
+                                selected = s.drawerLabelColor ?: s.appLabelColor,
+                                onPick = { viewModel.setDrawerLabelColor(it) },
+                            )
+                        }
                     }
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
                     SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
@@ -2001,91 +2014,30 @@ private fun FollowHomeScaleRow(
 }
 
 @Composable
-private fun FollowHomeColorRow(
-    label: String,
-    followsHome: Boolean,
-    selected: Int,
-    onFollowHome: () -> Unit,
-    onCustom: () -> Unit,
-    onPick: (Int) -> Unit,
+private fun LabelColorModeRow(
+    mode: String,
+    includeFollowHome: Boolean,
+    onPick: (String) -> Unit,
 ) {
-    FollowHomeChoiceCard(
-        label = label,
-        followsHome = followsHome,
-        onFollowHome = onFollowHome,
-        onCustom = onCustom,
+    val p = LocalExpressivePalette.current
+    Surface(
+        color = p.surfaceHi.copy(alpha = 0.94f),
+        shape = RoundedCornerShape(ExpressiveRadius.card),
         modifier = Modifier.fillMaxWidth().padding(bottom = ExpressiveSpacing.xs),
     ) {
-        if (!followsHome) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(top = 14.dp).horizontalScroll(rememberScrollState()),
-            ) {
-                COLOR_SWATCHES.forEach { color ->
-                    ColorSwatch(argb = color, selected = color == selected, onClick = { onPick(color) })
-                }
-            }
-        }
-    }
-}
-
-/** Shared surface and choice controls for settings that can follow the Home value or be customized. */
-@Composable
-private fun FollowHomeChoiceCard(
-    label: String,
-    followsHome: Boolean,
-    onFollowHome: () -> Unit,
-    onCustom: () -> Unit,
-    modifier: Modifier = Modifier,
-    customContent: @Composable () -> Unit = {},
-) {
-    val p = LocalExpressivePalette.current
-    Surface(
-        color = p.surfaceHi.copy(alpha = 0.94f),
-        shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = modifier,
-    ) {
         Column(Modifier.padding(horizontal = ExpressiveSpacing.lg, vertical = 14.dp)) {
-            RowLabel(label)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(ExpressiveSpacing.xs),
-                modifier = Modifier.padding(top = 10.dp),
-            ) {
-                SettingsFilterChip(
-                    selected = followsHome,
-                    onClick = onFollowHome,
-                    label = { Text(stringResource(R.string.settings_follow_home)) },
-                )
-                SettingsFilterChip(
-                    selected = !followsHome,
-                    onClick = onCustom,
-                    label = { Text(stringResource(R.string.settings_custom)) },
-                )
-            }
-            customContent()
-        }
-    }
-}
-
-@Composable
-private fun DrawerLabelColorModeRow(mode: String, onPick: (String) -> Unit) {
-    val p = LocalExpressivePalette.current
-    Surface(
-        color = p.surfaceHi.copy(alpha = 0.94f),
-        shape = RoundedCornerShape(ExpressiveRadius.card),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
-    ) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
-            RowLabel(stringResource(R.string.settings_drawer_label_color))
+            RowLabel(stringResource(R.string.settings_label_color))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(top = 10.dp).horizontalScroll(rememberScrollState()),
             ) {
-                SettingsFilterChip(
-                    selected = mode == LauncherSettings.LABEL_COLOR_FOLLOW_HOME,
-                    onClick = { onPick(LauncherSettings.LABEL_COLOR_FOLLOW_HOME) },
-                    label = { Text(stringResource(R.string.settings_follow_home)) },
-                )
+                if (includeFollowHome) {
+                    SettingsFilterChip(
+                        selected = mode == LauncherSettings.LABEL_COLOR_FOLLOW_HOME,
+                        onClick = { onPick(LauncherSettings.LABEL_COLOR_FOLLOW_HOME) },
+                        label = { Text(stringResource(R.string.settings_follow_home)) },
+                    )
+                }
                 SettingsFilterChip(
                     selected = mode == LauncherSettings.LABEL_COLOR_AUTOMATIC,
                     onClick = { onPick(LauncherSettings.LABEL_COLOR_AUTOMATIC) },

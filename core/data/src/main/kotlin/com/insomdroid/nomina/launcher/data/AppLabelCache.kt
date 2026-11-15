@@ -1,5 +1,6 @@
 package com.insomdroid.nomina.data
 
+import kotlinx.coroutines.CancellationException
 import com.insomdroid.nomina.data.local.AppLabelDao
 import com.insomdroid.nomina.data.local.AppLabelEntity
 import javax.inject.Inject
@@ -44,7 +45,13 @@ class AppLabelCache @Inject constructor(private val store: AppLabelStore) {
 
     suspend fun prepare(locale: String) {
         if (synchronized(lock) { this.locale == locale }) return
-        val stored = runCatching { store.read(locale) }.getOrDefault(emptyMap())
+        val stored = try {
+            store.read(locale)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emptyMap()
+        }
         synchronized(lock) {
             this.locale = locale
             labels.clear()
@@ -100,8 +107,14 @@ class AppLabelCache @Inject constructor(private val store: AppLabelStore) {
             if (labels == persisted) return
             currentLocale to labels.toMap()
         }
-        val written = runCatching { store.write(snapshot.first, snapshot.second) }.isSuccess
-        if (written) synchronized(lock) { persisted = snapshot.second }
+        try {
+            store.write(snapshot.first, snapshot.second)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return
+        }
+        synchronized(lock) { persisted = snapshot.second }
     }
 
     private fun packageOf(key: String): String = key.substringBefore('/')

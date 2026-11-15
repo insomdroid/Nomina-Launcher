@@ -56,8 +56,16 @@ class AppIconFetcher(
             resolved.iconBackColor,
             monochrome = monochrome,
             containerMode = data.unthemedContainerMode,
-            containerColor = data.unthemedContainerColor,
-            containerOpacity = data.unthemedContainerOpacity,
+            containerColor = if (data.unthemedContainerMode == com.insomdroid.nomina.model.LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC) {
+                source.unthemedSystemContainerColor()
+            } else {
+                data.unthemedContainerColor
+            },
+            containerOpacity = if (data.unthemedContainerMode == com.insomdroid.nomina.model.LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC) {
+                1f
+            } else {
+                data.unthemedContainerOpacity
+            },
             packIsMonochrome = packIsMonochrome,
             applyUnthemedContainer = !resolved.isPackMapped,
         )
@@ -96,18 +104,12 @@ internal fun iconResult(
     // or applying the legacy inset again would shrink their artwork twice.
     val normalized = if (autoResize && !isAdaptive) normalizeIconBitmap(bitmap) else bitmap
     val artworkBitmap = if (monochrome) toMonochrome(normalized) else normalized
-    val automaticBackplate = if (containerMode == com.insomdroid.nomina.model.LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC &&
-        applyUnthemedContainer && !packIsMonochrome) {
-        dominantIconColor(normalized) ?: iconBackColor ?: FALLBACK_ICON_BACKGROUND
-    } else {
-        iconBackColor ?: FALLBACK_ICON_BACKGROUND
-    }
     val selectedBackplate = if (!applyUnthemedContainer) {
         iconBackColor ?: FALLBACK_ICON_BACKGROUND
     } else when (containerMode) {
         com.insomdroid.nomina.model.LauncherSettings.UNTHEMED_CONTAINER_NONE -> android.graphics.Color.TRANSPARENT
         com.insomdroid.nomina.model.LauncherSettings.UNTHEMED_CONTAINER_CUSTOM -> containerColor
-        else -> if (packIsMonochrome) FALLBACK_ICON_BACKGROUND else automaticBackplate
+        else -> containerColor
     }
     val backplateWithOpacity = if (applyUnthemedContainer) {
         val alpha = (android.graphics.Color.alpha(selectedBackplate) * containerOpacity.coerceIn(0.2f, 1f)).roundToInt()
@@ -129,45 +131,6 @@ internal fun iconResult(
     return ImageFetchResult(image = output.asImage(), isSampled = false, dataSource = DataSource.DISK)
 }
 
-
-/** Samples the most common central colour for a subtle app-specific backplate. */
-private fun dominantIconColor(source: Bitmap): Int? {
-    val buckets = HashMap<Int, IconColorBucket>()
-    val left = source.width / 4
-    val right = source.width * 3 / 4
-    val top = source.height / 4
-    val bottom = source.height * 3 / 4
-    for (y in top until bottom) for (x in left until right) {
-        val pixel = source.getPixel(x, y)
-        if (android.graphics.Color.alpha(pixel) < 180) continue
-        val red = android.graphics.Color.red(pixel)
-        val green = android.graphics.Color.green(pixel)
-        val blue = android.graphics.Color.blue(pixel)
-        val max = maxOf(red, green, blue)
-        val min = minOf(red, green, blue)
-        if (max < 28 || (max - min).toFloat() / max < 0.12f) continue
-        val key = ((red shr 4) shl 8) or ((green shr 4) shl 4) or (blue shr 4)
-        val bucket = buckets.getOrPut(key) { IconColorBucket() }
-        bucket.red += red.toLong()
-        bucket.green += green.toLong()
-        bucket.blue += blue.toLong()
-        bucket.count++
-    }
-    val dominant = buckets.values.maxByOrNull { it.count } ?: return null
-    if (dominant.count == 0L) return null
-    return android.graphics.Color.rgb(
-        (dominant.red / dominant.count).toInt(),
-        (dominant.green / dominant.count).toInt(),
-        (dominant.blue / dominant.count).toInt(),
-    )
-}
-
-private class IconColorBucket {
-    var red = 0L
-    var green = 0L
-    var blue = 0L
-    var count = 0L
-}
 
 /** Removes hue from unthemed artwork while preserving its luminance, edges and transparency. */
 private fun toMonochrome(source: Bitmap): Bitmap {

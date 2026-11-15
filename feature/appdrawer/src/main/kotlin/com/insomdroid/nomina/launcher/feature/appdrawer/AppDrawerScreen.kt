@@ -48,6 +48,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import com.insomdroid.nomina.ui.component.DrawerWallpaperPicture
+import com.insomdroid.nomina.ui.component.systemLabelColor
 import com.insomdroid.nomina.data.DrawerWallpaper
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -270,7 +271,7 @@ fun AppDrawerScreen(
         LocalAppLabelScale provides uiState.appLabelTextScale,
         LocalIconScale provides uiState.iconScale,
         LocalAppLabelLines provides if (uiState.twoLineLabels) 2 else 1,
-        LocalDrawerLabelColor provides uiState.labelColor,
+        LocalDrawerLabelColor provides uiState.labelColor?.let(::Color) ?: systemLabelColor(),
     ) {
     // What the drawer paints over what is behind it (DrawerSurface.kt): the user's colour at its opacity, nothing for
     // "Transparent", or a black dim over the user's own picture; its text black or white to match what the drawer

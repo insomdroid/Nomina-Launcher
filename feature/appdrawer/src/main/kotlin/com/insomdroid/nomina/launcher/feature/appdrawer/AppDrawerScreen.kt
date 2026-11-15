@@ -507,11 +507,6 @@ private fun AppDrawerContent(
     mixFolders: Boolean,
     query: String,
     columns: Int,
-    folderShowLabels: Boolean,
-    folderIconScale: Float,
-    folderSpacing: Float,
-    folderBackgroundColor: Int?,
-    folderBackgroundOpacity: Float,
     badges: Map<String, Int>,
     badgeShowCount: Boolean,
     badgeScale: Float,
@@ -1074,7 +1069,7 @@ private fun DrawerFolderCard(
     val anchor = IntOffset(bounds.center.x.roundToInt(), (if (preferAbove) bounds.top else bounds.bottom).roundToInt())
     val width = with(LocalDensity.current) { minOf(FOLDER_CARD_WIDTH, windowSize.width.toDp() - 16.dp) }
     // The grid's rule: the icon shrinks to its cell when the icon-size setting would overflow it.
-    val iconSize = iconSizeForCell((width - 16.dp) / columns, 48.dp * LocalIconScale.current)
+    val iconSize = iconSizeForCell((width - 16.dp) / columns, 48.dp * LocalIconScale.current * folderIconScale)
     // The drawer's palette (the user's colour) for the card AND its texts: the popup is its own window, where the
     // system palette would otherwise paint a light card under this palette's light text (round 11).
     val palette = LocalExpressivePalette.current
@@ -1114,7 +1109,7 @@ private fun DrawerFolderCard(
                         AppIcon(
                             appItem = app,
                             labelColor = folderText,
-                            iconSize = iconSize * folderIconScale,
+                            iconSize = iconSize,
                             showLabel = folderShowLabels,
                             badgeCount = badges[app.badgeKey] ?: 0,
                             badgeShowCount = badgeShowCount,
@@ -1373,11 +1368,6 @@ private fun AddAppsDialog(apps: List<AppItem>, onConfirm: (List<String>) -> Unit
 internal fun FrequentAppsCard(
     apps: List<AppItem>,
     columns: Int,
-    folderShowLabels: Boolean,
-    folderIconScale: Float,
-    folderSpacing: Float,
-    folderBackgroundColor: Int?,
-    folderBackgroundOpacity: Float,
     badges: Map<String, Int>,
     badgeShowCount: Boolean,
     badgeScale: Float,

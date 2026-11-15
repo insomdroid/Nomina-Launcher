@@ -351,21 +351,6 @@ fun SettingsScreen(
                     DockBackgroundRow(s.dockBackgroundOpacity, viewModel::setDockBackgroundOpacity)
                     DockBottomSpacingRow(s.dockBottomSpacing, viewModel::setDockBottomSpacing)
                     DockPreview(opacity = s.dockBackgroundOpacity, icon = previewIcon)
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_camera),
-                        description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "camera" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_search),
-                        description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "search" }
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_capsule_browser),
-                        description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
-                            ?: stringResource(R.string.settings_capsule_default),
-                    ) { miniDockPickerSlot = "browser" }
                 }
 
                 CollapsibleSection(
@@ -467,6 +452,36 @@ fun SettingsScreen(
                         s.mixDrawerFolders,
                         viewModel::setMixDrawerFolders,
                     )
+                }
+
+                CollapsibleSection(
+                    title = stringResource(R.string.settings_capsule),
+                    icon = LauncherIcons.Dock,
+                    visible = selectedSection == null || selectedSection == "capsule",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "capsule" },
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_capsule_desc),
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp),
+                        style = LauncherTextStyles.settingsSupportingText,
+                        color = palette.dim,
+                    )
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_camera),
+                        description = allApps.firstOrNull { it.key == s.miniDockCameraAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "camera" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_search),
+                        description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "search" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_browser),
+                        description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
+                            ?: stringResource(R.string.settings_capsule_default),
+                    ) { miniDockPickerSlot = "browser" }
                 }
 
                 CollapsibleSection(
@@ -697,15 +712,10 @@ fun SettingsScreen(
                 CollapsibleSection(
                     title = stringResource(R.string.settings_backup_restore),
                     icon = LauncherIcons.Backup,
-                    visible = selectedSection == null || selectedSection == "backup",
-                    collapsed = selectedSection == null,
-                    onToggle = { selectedSection = "backup" },
-                ) {
-                    ExpressiveActionRow(
-                        label = stringResource(R.string.settings_backup),
-                        description = "",
-                    ) { showBackup = true }
-                }
+                    visible = selectedSection == null,
+                    collapsed = true,
+                    onToggle = { showBackup = true },
+                ) { }
 
                 CollapsibleSection(
                     title = stringResource(R.string.settings_about),

@@ -1,2 +1,3 @@
 One-shot request: record Nomina startup, App Drawer and Settings Baseline Profiles. This file is removed by the recording workflow.
 Retry with Android 16 emulator image.
+Retry using the Android 37.0 SDK package alias.

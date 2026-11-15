@@ -143,6 +143,7 @@ import com.insomdroid.nomina.ui.component.LocalIconScale
 import com.insomdroid.nomina.ui.component.LocalIconEpochs
 import com.insomdroid.nomina.ui.component.LocalIconPack
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
+import com.insomdroid.nomina.ui.component.CapsuleGlyph
 import kotlin.math.abs
 
 /** The space above and below the workspace in the home column. */
@@ -966,8 +967,8 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_mini_camera),
+                    CapsuleGlyph(
+                        glyph = settings.miniDockCameraGlyph,
                         contentDescription = miniDockCameraApp?.label ?: "Camera",
                         modifier = Modifier.size(16.dp).clickable {
                             if (miniDockCameraApp != null) {
@@ -979,18 +980,18 @@ fun HomeScreen(
                                 }
                             }
                         },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        color = if (miniDockUsesLightBackground) Color.Black else Color.White,
                     )
-                    Icon(
-                        painter = painterResource(R.drawable.ic_search),
+                    CapsuleGlyph(
+                        glyph = settings.miniDockSearchGlyph,
                         contentDescription = miniDockSearchApp?.label ?: "Search apps",
                         modifier = Modifier.size(16.dp).clickable {
                             if (miniDockSearchApp != null) viewModel.launch(miniDockSearchApp) else onOpenDrawer()
                         },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        color = if (miniDockUsesLightBackground) Color.Black else Color.White,
                     )
-                    Icon(
-                        painter = painterResource(R.drawable.ic_mini_browser),
+                    CapsuleGlyph(
+                        glyph = settings.miniDockBrowserGlyph,
                         contentDescription = miniDockBrowserApp?.label ?: "Browser",
                         modifier = Modifier.size(16.dp).clickable {
                             if (miniDockBrowserApp != null) {
@@ -1002,7 +1003,7 @@ fun HomeScreen(
                                 }
                             }
                         },
-                        tint = if (miniDockUsesLightBackground) Color.Black else Color.White,
+                        color = if (miniDockUsesLightBackground) Color.Black else Color.White,
                     )
                 }
             }

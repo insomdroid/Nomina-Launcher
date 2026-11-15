@@ -75,6 +75,9 @@ data class LauncherSettings(
     val miniDockCameraAppKey: String = "",
     val miniDockSearchAppKey: String = "",
     val miniDockBrowserAppKey: String = "",
+    val miniDockCameraGlyph: String = CapsuleGlyphs.CAMERA,
+    val miniDockSearchGlyph: String = CapsuleGlyphs.SEARCH,
+    val miniDockBrowserGlyph: String = CapsuleGlyphs.BROWSER,
     /** Lock the desktop layout: when true, home + dock items can't be moved, removed, or added. */
     val desktopLocked: Boolean = false,
     /** Show a "most used" row (top apps by decayed launch frequency) above the drawer's app list. */

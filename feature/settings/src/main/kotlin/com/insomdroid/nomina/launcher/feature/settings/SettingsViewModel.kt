@@ -93,6 +93,9 @@ class SettingsViewModel @Inject constructor(
     fun setMiniDockCameraAppKey(key: String?) = update { repository.setMiniDockCameraAppKey(key) }
     fun setMiniDockSearchAppKey(key: String?) = update { repository.setMiniDockSearchAppKey(key) }
     fun setMiniDockBrowserAppKey(key: String?) = update { repository.setMiniDockBrowserAppKey(key) }
+    fun setMiniDockCameraGlyph(glyph: String) = update { repository.setMiniDockCameraGlyph(glyph) }
+    fun setMiniDockSearchGlyph(glyph: String) = update { repository.setMiniDockSearchGlyph(glyph) }
+    fun setMiniDockBrowserGlyph(glyph: String) = update { repository.setMiniDockBrowserGlyph(glyph) }
     fun setAutoHideDock(value: Boolean) = update { repository.setAutoHideDock(value) }
     fun setDockColumns(value: Int) = update { repository.setDockColumns(value) }
     fun setDrawerColumns(value: Int) = update { repository.setDrawerColumns(value) }

@@ -176,6 +176,9 @@
     <string name="settings_capsule_search">Capsule search app</string>
     <string name="settings_capsule_browser">Capsule browser app</string>
     <string name="settings_capsule_default">Default action</string>
+    <string name="settings_capsule_camera_symbol">Camera symbol</string>
+    <string name="settings_capsule_search_symbol">Search symbol</string>
+    <string name="settings_capsule_browser_symbol">Browser symbol</string>
     <string name="settings_close">Close</string>
     <string name="settings_lock_desktop">Lock desktop</string>
     <string name="settings_frequent_apps">Most used at the top</string>

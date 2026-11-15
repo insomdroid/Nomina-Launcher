@@ -118,6 +118,8 @@ import com.insomdroid.nomina.ui.component.LocalIconShape
 import com.insomdroid.nomina.ui.component.LocalAutoResizeIcons
 import com.insomdroid.nomina.ui.component.LocalIconReshapeMode
 import com.insomdroid.nomina.ui.component.NotificationBadge
+import com.insomdroid.nomina.ui.component.CapsuleGlyph
+import com.insomdroid.nomina.model.CapsuleGlyphs
 import com.insomdroid.nomina.ui.expressive.ExpressiveSwitch
 import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
 import com.insomdroid.nomina.ui.expressive.ExpressiveActionRow
@@ -153,6 +155,7 @@ fun SettingsScreen(
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
     var showWeatherAppPicker by rememberSaveable { mutableStateOf(false) }
     var miniDockPickerSlot by rememberSaveable { mutableStateOf<String?>(null) }
+    var miniDockGlyphPickerSlot by rememberSaveable { mutableStateOf<String?>(null) }
     var showPageSpeedPicker by rememberSaveable { mutableStateOf(false) }
     var showIconPackPicker by rememberSaveable { mutableStateOf(false) }
     var showHomeMarkerPicker by rememberSaveable { mutableStateOf(false) }
@@ -468,15 +471,27 @@ fun SettingsScreen(
                             ?: stringResource(R.string.settings_capsule_default),
                     ) { miniDockPickerSlot = "camera" }
                     ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_camera_symbol),
+                        description = CapsuleGlyphs.label(s.miniDockCameraGlyph),
+                    ) { miniDockGlyphPickerSlot = "camera" }
+                    ExpressiveActionRow(
                         label = stringResource(R.string.settings_capsule_search),
                         description = allApps.firstOrNull { it.key == s.miniDockSearchAppKey }?.label
                             ?: stringResource(R.string.settings_capsule_default),
                     ) { miniDockPickerSlot = "search" }
                     ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_search_symbol),
+                        description = CapsuleGlyphs.label(s.miniDockSearchGlyph),
+                    ) { miniDockGlyphPickerSlot = "search" }
+                    ExpressiveActionRow(
                         label = stringResource(R.string.settings_capsule_browser),
                         description = allApps.firstOrNull { it.key == s.miniDockBrowserAppKey }?.label
                             ?: stringResource(R.string.settings_capsule_default),
                     ) { miniDockPickerSlot = "browser" }
+                    ExpressiveActionRow(
+                        label = stringResource(R.string.settings_capsule_browser_symbol),
+                        description = CapsuleGlyphs.label(s.miniDockBrowserGlyph),
+                    ) { miniDockGlyphPickerSlot = "browser" }
                 }
 
                 CollapsibleSection(
@@ -795,6 +810,31 @@ fun SettingsScreen(
                 onDismiss = { miniDockPickerSlot = null },
             )
         }
+        if (miniDockGlyphPickerSlot != null) {
+            val slot = miniDockGlyphPickerSlot
+            val title = when (slot) {
+                "camera" -> stringResource(R.string.settings_capsule_camera_symbol)
+                "search" -> stringResource(R.string.settings_capsule_search_symbol)
+                else -> stringResource(R.string.settings_capsule_browser_symbol)
+            }
+            CapsuleGlyphPicker(
+                title = title,
+                selected = when (slot) {
+                    "camera" -> s.miniDockCameraGlyph
+                    "search" -> s.miniDockSearchGlyph
+                    else -> s.miniDockBrowserGlyph
+                },
+                onPick = { glyph ->
+                    when (slot) {
+                        "camera" -> viewModel.setMiniDockCameraGlyph(glyph)
+                        "search" -> viewModel.setMiniDockSearchGlyph(glyph)
+                        "browser" -> viewModel.setMiniDockBrowserGlyph(glyph)
+                    }
+                    miniDockGlyphPickerSlot = null
+                },
+                onDismiss = { miniDockGlyphPickerSlot = null },
+            )
+        }
         if (showIconPackPicker) {
             IconPackPicker(
                 packs = iconPacks,
@@ -1013,6 +1053,71 @@ private fun SingleAppPicker(
         },
         confirmButton = {
             SettingsTextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface) }
+        },
+    )
+}
+
+/** Rounded-dot pixel glyph chooser for the three independently configurable capsule symbols. */
+@Composable
+private fun CapsuleGlyphPicker(
+    title: String,
+    selected: String,
+    onPick: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val palette = LocalExpressivePalette.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = palette.surfaceHi,
+        title = { Text(title, color = palette.text) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                CapsuleGlyphs.all.chunked(4).forEach { rowGlyphs ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        rowGlyphs.forEach { glyph ->
+                            val isSelected = glyph.id == selected
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(if (isSelected) palette.accent.copy(alpha = 0.16f) else Color.Transparent)
+                                    .border(
+                                        width = if (isSelected) 1.dp else 0.dp,
+                                        color = if (isSelected) palette.accent else Color.Transparent,
+                                        shape = RoundedCornerShape(14.dp),
+                                    )
+                                    .clickable { onPick(glyph.id) }
+                                    .padding(vertical = 12.dp, horizontal = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                CapsuleGlyph(glyph = glyph.id, modifier = Modifier.size(28.dp), color = palette.text)
+                                Text(
+                                    text = glyph.label,
+                                    color = palette.text,
+                                    fontSize = 10.sp,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1,
+                                )
+                            }
+                        }
+                        repeat(4 - rowGlyphs.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                    Spacer(Modifier.height(6.dp))
+                }
+            }
+        },
+        confirmButton = {
+            SettingsTextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.settings_close), color = MaterialTheme.colorScheme.onSurface)
+            }
         },
     )
 }

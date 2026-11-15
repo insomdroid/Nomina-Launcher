@@ -137,6 +137,9 @@ class SettingsRepository @Inject constructor(
             miniDockCameraAppKey = p[Keys.MINI_DOCK_CAMERA_APP] ?: "",
             miniDockSearchAppKey = p[Keys.MINI_DOCK_SEARCH_APP] ?: "",
             miniDockBrowserAppKey = p[Keys.MINI_DOCK_BROWSER_APP] ?: "",
+            miniDockCameraGlyph = p[Keys.MINI_DOCK_CAMERA_GLYPH] ?: LauncherSettings.CapsuleGlyphs.CAMERA,
+            miniDockSearchGlyph = p[Keys.MINI_DOCK_SEARCH_GLYPH] ?: LauncherSettings.CapsuleGlyphs.SEARCH,
+            miniDockBrowserGlyph = p[Keys.MINI_DOCK_BROWSER_GLYPH] ?: LauncherSettings.CapsuleGlyphs.BROWSER,
             desktopLocked = p[Keys.DESKTOP_LOCKED] ?: false,
             showFrequentApps = p[Keys.SHOW_FREQUENT_APPS] ?: false,
             drawerOpensAtTop = p[Keys.DRAWER_OPENS_AT_TOP] ?: true,
@@ -382,6 +385,9 @@ class SettingsRepository @Inject constructor(
     suspend fun setMiniDockCameraAppKey(key: String?) = edit { it[Keys.MINI_DOCK_CAMERA_APP] = key?.trim().orEmpty() }
     suspend fun setMiniDockSearchAppKey(key: String?) = edit { it[Keys.MINI_DOCK_SEARCH_APP] = key?.trim().orEmpty() }
     suspend fun setMiniDockBrowserAppKey(key: String?) = edit { it[Keys.MINI_DOCK_BROWSER_APP] = key?.trim().orEmpty() }
+    suspend fun setMiniDockCameraGlyph(glyph: String) = edit { it[Keys.MINI_DOCK_CAMERA_GLYPH] = glyph }
+    suspend fun setMiniDockSearchGlyph(glyph: String) = edit { it[Keys.MINI_DOCK_SEARCH_GLYPH] = glyph }
+    suspend fun setMiniDockBrowserGlyph(glyph: String) = edit { it[Keys.MINI_DOCK_BROWSER_GLYPH] = glyph }
 
     /** Locks/unlocks the desktop layout (blocks moving/removing/adding home + dock items). */
     suspend fun setDesktopLocked(value: Boolean) = edit { it[Keys.DESKTOP_LOCKED] = value }
@@ -708,6 +714,9 @@ class SettingsRepository @Inject constructor(
         val MINI_DOCK_CAMERA_APP = stringPreferencesKey("mini_dock_camera_app")
         val MINI_DOCK_SEARCH_APP = stringPreferencesKey("mini_dock_search_app")
         val MINI_DOCK_BROWSER_APP = stringPreferencesKey("mini_dock_browser_app")
+        val MINI_DOCK_CAMERA_GLYPH = stringPreferencesKey("mini_dock_camera_glyph")
+        val MINI_DOCK_SEARCH_GLYPH = stringPreferencesKey("mini_dock_search_glyph")
+        val MINI_DOCK_BROWSER_GLYPH = stringPreferencesKey("mini_dock_browser_glyph")
         val DESKTOP_LOCKED = booleanPreferencesKey("desktop_locked")
         val DOUBLE_TAP_LOCK = booleanPreferencesKey("double_tap_lock")
         val SHOW_FREQUENT_APPS = booleanPreferencesKey("show_frequent_apps")
@@ -816,7 +825,8 @@ class SettingsRepository @Inject constructor(
         )
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",
-            "icon_pack_package", "weather_app_key", "mini_dock_camera_app", "mini_dock_search_app", "mini_dock_browser_app", "home_page_marker",
+            "icon_pack_package", "weather_app_key", "mini_dock_camera_app", "mini_dock_search_app", "mini_dock_browser_app",
+            "mini_dock_camera_glyph", "mini_dock_search_glyph", "mini_dock_browser_glyph", "home_page_marker",
             "page_switch_speed", "collapsed_settings_sections", "icon_shape", "reshape_legacy_icons", "drawer_label_color_mode",
             "custom_icons", "folder_icons", "shortcut_icons",
         )

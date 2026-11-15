@@ -87,6 +87,8 @@ data class AppDrawerUiState(
     val backgroundColor: Int? = null,
     /** The grid labels' chosen ARGB colour, or null for the automatic black or white by the drawer's look. */
     val labelColor: Int? = null,
+    /** Active mode; null label colour means use the system/Monet automatic colour. */
+    val labelColorMode: String = LauncherSettings.LABEL_COLOR_AUTOMATIC,
     /** The user's own picture behind the drawer, or null for the system wallpaper through the window. */
     val wallpaper: DrawerWallpaper? = null,
     /** How much the own picture is darkened for legibility (0 = as it is, 1 = black); the colour is off with a picture. */
@@ -193,8 +195,10 @@ class AppDrawerViewModel @Inject constructor(
             showScrubber = settings.showDrawerScrubber,
             backgroundOpacity = settings.drawerBackgroundOpacity,
             backgroundColor = settings.drawerBackgroundColor,
+            labelColorMode = settings.drawerLabelColorMode,
             labelColor = when (settings.drawerLabelColorMode) {
-                LauncherSettings.LABEL_COLOR_FOLLOW_HOME -> settings.appLabelColor
+                LauncherSettings.LABEL_COLOR_FOLLOW_HOME ->
+                    settings.appLabelColor.takeIf { settings.homeLabelColorMode == LauncherSettings.LABEL_COLOR_CUSTOM }
                 LauncherSettings.LABEL_COLOR_CUSTOM -> settings.drawerLabelColor
                 else -> null
             },

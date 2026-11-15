@@ -51,8 +51,8 @@ class AppIconFetcher(
         }
         iconResult(
             resolved.drawable,
-            data.autoResize,
-            data.iconShape.takeIf { reshape },
+            autoResize = data.autoResize && !resolved.isPackMapped,
+            reshape = data.iconShape.takeIf { reshape },
             resolved.iconBackColor,
             monochrome = monochrome,
             containerMode = data.unthemedContainerMode,
@@ -100,9 +100,9 @@ internal fun iconResult(
     val bitmap = Bitmap.createBitmap(ICON_PX, ICON_PX, Bitmap.Config.ARGB_8888)
     artwork.setBounds(0, 0, ICON_PX, ICON_PX)
     artwork.draw(Canvas(bitmap))
-    // Adaptive foreground assets already contain the platform's safe-zone padding. Normalizing
-    // or applying the legacy inset again would shrink their artwork twice.
-    val normalized = if (autoResize && !isAdaptive) normalizeIconBitmap(bitmap) else bitmap
+    // Adaptive foregrounds and icon-pack artwork already define their own visual scale.
+    // Only normalize original, unmapped legacy app icons.
+    val normalized = if (autoResize && !isAdaptive && applyUnthemedContainer) normalizeIconBitmap(bitmap) else bitmap
     val artworkBitmap = if (monochrome) toMonochrome(normalized) else normalized
     val selectedBackplate = if (!applyUnthemedContainer) {
         iconBackColor ?: FALLBACK_ICON_BACKGROUND
@@ -122,7 +122,9 @@ internal fun iconResult(
             artworkBitmap,
             it,
             backplateWithOpacity,
-            artworkInset = if (isAdaptive) 0f else ICON_ARTWORK_INSET,
+            // Normalization already sets the visible artwork to the adaptive safe-zone size.
+            // Do not apply the legacy inset a second time after normalization.
+            artworkInset = if (isAdaptive || (autoResize && applyUnthemedContainer)) 0f else ICON_ARTWORK_INSET,
         )
     } ?: artworkBitmap
     if (output !== artworkBitmap) artworkBitmap.recycle()

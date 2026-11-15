@@ -272,7 +272,7 @@ fun AppDrawerScreen(
         LocalAppLabelScale provides uiState.appLabelTextScale,
         LocalIconScale provides uiState.iconScale,
         LocalAppLabelLines provides if (uiState.twoLineLabels) 2 else 1,
-        LocalDrawerLabelColor provides uiState.labelColor ?: systemLabelColor().toArgb(),
+        LocalDrawerLabelColor provides (uiState.labelColor ?: systemLabelColor().toArgb()),
     ) {
     // What the drawer paints over what is behind it (DrawerSurface.kt): the user's colour at its opacity, nothing for
     // "Transparent", or a black dim over the user's own picture; its text black or white to match what the drawer

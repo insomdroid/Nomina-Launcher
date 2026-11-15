@@ -71,6 +71,10 @@ data class LauncherSettings(
     val iconPackPackage: String = "",
     /** App key opened by a tap on the smartspace weather line (Settings > Home); blank = plain text. */
     val weatherAppKey: String = "",
+    /** App keys selected for the three fixed mini-dock capsule slots; blank keeps each built-in action. */
+    val miniDockCameraAppKey: String = "",
+    val miniDockSearchAppKey: String = "",
+    val miniDockBrowserAppKey: String = "",
     /** Lock the desktop layout: when true, home + dock items can't be moved, removed, or added. */
     val desktopLocked: Boolean = false,
     /** Show a "most used" row (top apps by decayed launch frequency) above the drawer's app list. */

@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,8 @@ import com.insomdroid.nomina.ui.LauncherIcons
 import com.insomdroid.nomina.ui.expressive.ExpressiveButton
 import com.insomdroid.nomina.ui.expressive.ExpressiveRadius
 import com.insomdroid.nomina.ui.expressive.ExpressiveTextButton
+import com.insomdroid.nomina.ui.expressive.DarkExpressivePalette
+import com.insomdroid.nomina.ui.expressive.LocalExpressivePalette
 
 /** Nomina monochrome setup palette with a restrained Nothing Red accent. */
 private val AURORA_BASE = Color(0xFF000000)
@@ -82,7 +85,8 @@ fun OnboardingFlow(
     // Edge to edge, behind both system bars: their glyphs follow the intro, not the hidden wallpaper.
     CoverSystemBars(light = AURORA_BASE.luminance() > 0.5f)
 
-    Box(
+    CompositionLocalProvider(LocalExpressivePalette provides DarkExpressivePalette) {
+        Box(
         modifier = modifier
             .fillMaxSize()
             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -152,6 +156,7 @@ fun OnboardingFlow(
                     onClick = { if (page < 2) page++ else onFinish() },
                 )
             }
+        }
         }
     }
 }

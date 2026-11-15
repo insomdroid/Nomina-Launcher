@@ -172,13 +172,14 @@
     <string name="settings_home_label_color">Home label color</string>
     <string name="settings_dock_label_color">Dock label color</string>
     <string name="settings_drawer_label_color">App Drawer label color</string>
+    <string name="settings_custom_label_color">Custom label color</string>
     <string name="settings_percent">%1$d%%</string>
     <string name="settings_dp">%1$d dp</string>
     <string name="settings_millis">%1$d ms</string>
     <string name="settings_reset_default">Default %1$s</string>
     <string name="settings_long_press_delay">Long-press delay</string>
     <string name="settings_long_press_delay_desc">How long to hold an icon before its menu opens or it can be moved</string>
-    <string name="settings_label_color">Label text color</string>
+    <string name="settings_label_color">Label Color</string>
     <string name="settings_weather_app_none">None</string>
     <string name="settings_weather_app_pick">Choose app</string>
     <string name="settings_capsule_apps">Apps</string>

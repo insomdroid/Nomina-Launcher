@@ -266,6 +266,7 @@ fun SettingsScreen(
                     "home" -> stringResource(R.string.settings_home)
                     "dock" -> stringResource(R.string.settings_dock)
                     "drawer" -> stringResource(R.string.settings_drawer)
+                    "folders" -> stringResource(R.string.settings_folders)
                     "icons" -> stringResource(R.string.settings_icons_typography)
                     "wallpaper" -> stringResource(R.string.settings_wallpaper_background)
                     "gestures" -> stringResource(R.string.settings_gestures_interaction)
@@ -294,11 +295,6 @@ fun SettingsScreen(
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showHomeLabels, viewModel::setShowHomeLabels)
                     SwitchRow("Hide status bar", s.hideStatusBar, viewModel::setHideStatusBar)
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineHomeLabels, viewModel::setTwoLineHomeLabels)
-                    SwitchRow(stringResource(R.string.settings_show_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
-                    StepperRow(
-                        stringResource(R.string.settings_folder_columns), s.folderColumns,
-                        SettingsRepository.MIN_FOLDER_COLUMNS, SettingsRepository.MAX_FOLDER_COLUMNS, viewModel::setFolderColumns,
-                    )
                     SwitchRow(stringResource(R.string.settings_page_indicator), s.showPageIndicator, viewModel::setShowPageIndicator)
                     if (s.showPageIndicator) {
                         ExpressiveActionRow(
@@ -366,7 +362,6 @@ fun SettingsScreen(
                     StepperRow(stringResource(R.string.settings_columns), s.drawerColumns, 3, 7, viewModel::setDrawerColumns)
                     SwitchRow(stringResource(R.string.settings_show_labels), s.showDrawerLabels, viewModel::setShowDrawerLabels)
                     SwitchRow(stringResource(R.string.settings_two_line_labels), s.twoLineDrawerLabels, viewModel::setTwoLineDrawerLabels)
-                    SwitchRow(stringResource(R.string.settings_show_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
                     SwitchRow(stringResource(R.string.settings_drawer_search), s.showDrawerSearch, viewModel::setShowDrawerSearch)
                     SwitchRow("Show fast-scroll scrubber", s.showDrawerScrubber, viewModel::setShowDrawerScrubber)
                     SwitchRow(stringResource(R.string.settings_frequent_apps), s.showFrequentApps, viewModel::setShowFrequentApps)
@@ -381,6 +376,27 @@ fun SettingsScreen(
                         label = stringResource(R.string.settings_hidden_apps),
                         description = pluralStringResource(R.plurals.settings_hidden_apps_desc, hiddenKeys.size, hiddenKeys.size),
                     ) { showHiddenManager = true }
+                }
+
+                CollapsibleSection(
+                    title = stringResource(R.string.settings_folders),
+                    icon = LauncherIcons.AppsGrid,
+                    visible = selectedSection == null || selectedSection == "folders",
+                    collapsed = selectedSection == null,
+                    onToggle = { selectedSection = "folders" },
+                ) {
+                    SwitchRow(stringResource(R.string.settings_home_folder_names), s.showHomeFolderNames, viewModel::setShowHomeFolderNames)
+                    SwitchRow(stringResource(R.string.settings_drawer_folder_names), s.showDrawerFolderNames, viewModel::setShowDrawerFolderNames)
+                    StepperRow(
+                        stringResource(R.string.settings_folder_columns), s.folderColumns,
+                        SettingsRepository.MIN_FOLDER_COLUMNS, SettingsRepository.MAX_FOLDER_COLUMNS, viewModel::setFolderColumns,
+                    )
+                    SwitchRow(
+                        stringResource(R.string.settings_folder_swipe_first_app),
+                        stringResource(R.string.settings_folder_swipe_first_app_desc),
+                        s.folderSwipeOpensFirstApp,
+                        viewModel::setFolderSwipeOpensFirstApp,
+                    )
                     ExpressiveActionRow(
                         label = stringResource(R.string.settings_drawer_folders),
                         description = pluralStringResource(
@@ -529,6 +545,12 @@ fun SettingsScreen(
                     collapsed = selectedSection == null,
                     onToggle = { selectedSection = "wallpaper" },
                 ) {
+                    SwitchRow(
+                        stringResource(R.string.settings_wallpaper_scroll),
+                        stringResource(R.string.settings_wallpaper_scroll_desc),
+                        s.wallpaperScrolling,
+                        viewModel::setWallpaperScrolling,
+                    )
                     DrawerBackdropRows(
                         settings = s,
                         wallpaper = drawerWallpaper,
@@ -554,12 +576,6 @@ fun SettingsScreen(
                 ) {
                     SwitchRow(stringResource(R.string.settings_swipe_up_drawer), s.swipeUpForDrawer, viewModel::setSwipeUp)
                     SwitchRow(stringResource(R.string.settings_swipe_down_notif), s.swipeDownForNotifications, viewModel::setSwipeDown)
-                    SwitchRow(
-                        stringResource(R.string.settings_folder_swipe_first_app),
-                        stringResource(R.string.settings_folder_swipe_first_app_desc),
-                        s.folderSwipeOpensFirstApp,
-                        viewModel::setFolderSwipeOpensFirstApp,
-                    )
                     DoubleTapLockToggle(enabled = s.doubleTapToLock, onSetEnabled = viewModel::setDoubleTapToLock)
                     // Read out in milliseconds of this phone's own long-press timeout times the setting, so the
                     // number is the real wait here and the default chip names it.

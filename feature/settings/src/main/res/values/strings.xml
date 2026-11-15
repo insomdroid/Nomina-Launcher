@@ -23,6 +23,11 @@
     <string name="settings_dock_icons_desc">Up to 10 apps can be kept here; five are visible at once and the rest are available by swiping.</string>
     <string name="settings_drawer">App drawer</string>
     <string name="settings_home">Home screen</string>
+    <string name="settings_folders">Folders</string>
+    <string name="settings_home_folder_names">Show Home folder names</string>
+    <string name="settings_drawer_folder_names">Show App Drawer folder names</string>
+    <string name="settings_wallpaper_scroll">Wallpaper scrolling</string>
+    <string name="settings_wallpaper_scroll_desc">Move the wallpaper with each Home page as you swipe between pages.</string>
     <string name="settings_columns">Columns</string>
     <string name="settings_rows">Rows</string>
     <string name="settings_show_labels">Show labels</string>

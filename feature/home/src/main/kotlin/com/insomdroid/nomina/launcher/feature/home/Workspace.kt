@@ -161,6 +161,7 @@ internal fun Workspace(
     /** Swiping on from the last page continues to the first, and back from the first to the last
      *  (see WorkspaceWrap.kt). Off: the last page bounces back from the empty drop page. */
     infiniteScroll: Boolean = false,
+    wallpaperScrolling: Boolean = true,
     locked: Boolean,
     homeSignals: Flow<Boolean>,
     /** The page HOME returns to and the launcher opens on; null until settings have been read. */
@@ -793,6 +794,7 @@ internal fun Workspace(
         newPageLatched = false
     }
     val tailCopy = tailShowsPageZero(infiniteScroll, pageCount, anyDrag, newPageLatched)
+    WallpaperScrollEffect(pagerState, pageCount, tailCopy, wallpaperScrolling)
     // Which instance of page 0 hosts its widget views (ownsWidgetViews). Follows the pager, and is set
     // ahead of each jump so the instance arriving on screen attaches them in its very first frame.
     var copyOnScreen by remember { mutableStateOf(false) }

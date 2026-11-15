@@ -127,6 +127,7 @@ class SettingsRepository @Inject constructor(
             },
             autoResizeIcons = p[Keys.AUTO_RESIZE_ICONS] ?: false,
             infiniteScroll = p[Keys.INFINITE_SCROLL] ?: true,
+            wallpaperScrolling = p[Keys.WALLPAPER_SCROLLING] ?: true,
             defaultReminderDismissed = p[Keys.DEFAULT_REMINDER_DISMISSED] ?: false,
             showNotificationDots = p[Keys.SHOW_NOTIF_DOTS] ?: true,
             notificationDotCount = p[Keys.NOTIF_DOT_COUNT] ?: true,
@@ -355,6 +356,7 @@ class SettingsRepository @Inject constructor(
         it[Keys.RESHAPE_LEGACY_ICONS] = if (value in LauncherSettings.RESHAPE_LEGACY_MODES) value else LauncherSettings.RESHAPE_OFF
     }
     suspend fun setInfiniteScroll(value: Boolean) = edit { it[Keys.INFINITE_SCROLL] = value }
+    suspend fun setWallpaperScrolling(value: Boolean) = edit { it[Keys.WALLPAPER_SCROLLING] = value }
     suspend fun setShowNotificationDots(value: Boolean) = edit { it[Keys.SHOW_NOTIF_DOTS] = value }
     suspend fun setNotificationDotCount(value: Boolean) = edit { it[Keys.NOTIF_DOT_COUNT] = value }
     suspend fun setNotificationDotScale(value: Float) =
@@ -405,7 +407,7 @@ class SettingsRepository @Inject constructor(
 
     private fun parseSections(raw: String?): Set<String> =
         if (raw == null) {
-            setOf("home", "dock", "drawer", "icons", "wallpaper", "gestures", "notifications", "permissions", "backup", "updates")
+            setOf("home", "dock", "drawer", "folders", "icons", "wallpaper", "gestures", "notifications", "permissions", "backup", "updates")
         } else {
             raw.split(',').map { it.trim() }.filterTo(LinkedHashSet()) { it.isNotEmpty() }
         }
@@ -668,6 +670,7 @@ class SettingsRepository @Inject constructor(
         val RESHAPE_LEGACY_ICONS = stringPreferencesKey("reshape_legacy_icons")
         val AUTO_RESIZE_ICONS = booleanPreferencesKey("auto_resize_icons")
         val INFINITE_SCROLL = booleanPreferencesKey("infinite_scroll")
+        val WALLPAPER_SCROLLING = booleanPreferencesKey("wallpaper_scrolling")
         val FOLDER_SWIPE_FIRST_APP = booleanPreferencesKey("folder_swipe_first_app")
         val HIDE_HOME_APPS_FROM_DRAWER = booleanPreferencesKey("hide_home_apps_from_drawer")
         val WIDGET_INSET_LIKE_ICONS = booleanPreferencesKey("widget_inset_like_icons")
@@ -769,7 +772,7 @@ class SettingsRepository @Inject constructor(
             "show_home_folder_names", "show_drawer_folder_names", "mix_drawer_folders", "blur_behind_drawer",
             "show_notif_dots", "notif_dot_count", "use_themed_icons", "auto_resize_icons",
             "desktop_locked", "double_tap_lock", "show_frequent_apps", "drawer_opens_at_top",
-            "sort_drawer_folders", "show_weather", "widget_tonal_background", "infinite_scroll",
+            "sort_drawer_folders", "show_weather", "widget_tonal_background", "infinite_scroll", "wallpaper_scrolling",
         )
         val STRING_KEYS = setOf(
             "dock_favorites", "hidden_apps", "custom_labels", "drawer_folders",

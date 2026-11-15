@@ -56,6 +56,8 @@ data class LauncherSettings(
     /** Swiping past the last home page continues to the first one, and back from the first to the
      *  last. Off keeps the bounce back from the end. */
     val infiniteScroll: Boolean = true,
+    /** Move the system wallpaper horizontally with the Home pages. */
+    val wallpaperScrolling: Boolean = true,
     /** "Not now" on the set-as-default card: it stays hidden on this device (Settings still offers
      *  the default-launcher row). Device-local, never in a backup. */
     val defaultReminderDismissed: Boolean = false,

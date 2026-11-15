@@ -749,6 +749,7 @@ fun HomeScreen(
                 widgetEdgesAlignWithIcons = settings.widgetEdgesAlignWithIcons,
                 homePageMarker = settings.homePageMarker,
                 infiniteScroll = settings.infiniteScroll,
+                wallpaperScrolling = settings.wallpaperScrolling,
                 locked = settings.desktopLocked,
                 homeSignals = homeSignals,
                 homePage = if (uiState.loaded) uiState.homePage else null,

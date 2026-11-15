@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,12 +25,14 @@ import com.insomdroid.nomina.feature.home.LocalAppWidgetHost
 import com.insomdroid.nomina.feature.home.LocalOrphanWidgetConfigResult
 import com.insomdroid.nomina.feature.home.LocalWidgetConfigLauncher
 import com.insomdroid.nomina.model.IconChoices
+import com.insomdroid.nomina.data.WorkProfileRepository
 import com.insomdroid.nomina.ui.AppLaunchSources
 import com.insomdroid.nomina.ui.LauncherShell
 import com.insomdroid.nomina.ui.LauncherShellViewModel
 import com.insomdroid.nomina.ui.LocalAppLaunchSources
 import com.insomdroid.nomina.ui.LocalIconChoices
 import com.insomdroid.nomina.ui.component.LocalIconEpochs
+import com.insomdroid.nomina.ui.component.LocalProfileMarks
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -37,6 +40,9 @@ class LauncherActivity : ComponentActivity() {
     /** The icon picker's packs and gallery import (Edit on an app, a folder's icon). */
     @Inject
     lateinit var iconChoices: IconChoices
+
+    @Inject
+    lateinit var workProfileRepository: WorkProfileRepository
 
     /** Emits on every HOME intent (onNewIntent). The payload is Launcher3's "alreadyOnHome": true
      *  when HOME was pressed while the launcher was already the foreground app (→ snap the workspace
@@ -71,8 +77,14 @@ class LauncherActivity : ComponentActivity() {
                 // a package update bumps its epoch, which re-keys and re-fetches that icon everywhere
                 // — including AsyncImages already on screen, which only re-load on a model change.
                 val iconEpochs by hiltViewModel<LauncherShellViewModel>().iconEpochs.collectAsStateWithLifecycle()
+                val workProfile by workProfileRepository.workProfile.collectAsStateWithLifecycle()
+                val workProfileName = stringResource(com.insomdroid.nomina.feature.appdrawer.R.string.drawer_tab_work)
+                val profileMarks = remember(workProfile?.userSerial, workProfileName) {
+                    workProfile?.let { mapOf(it.userSerial to workProfileName) } ?: emptyMap()
+                }
                 // The icon a tap landed on, so the app opens with a zoom from it.
                 val launchSources = remember { AppLaunchSources() }
+                CompositionLocalProvider(LocalProfileMarks provides profileMarks) {
                 CompositionLocalProvider(
                     LocalAppWidgetHost provides appWidgetHost,
                     LocalWidgetConfigLauncher provides ::startWidgetConfig,
@@ -90,6 +102,7 @@ class LauncherActivity : ComponentActivity() {
                         homeSignals = homeSignals,
                         onOpenSettings = { startActivity(Intent(this, SettingsActivity::class.java)) },
                     )
+                }
                 }
             }
         }

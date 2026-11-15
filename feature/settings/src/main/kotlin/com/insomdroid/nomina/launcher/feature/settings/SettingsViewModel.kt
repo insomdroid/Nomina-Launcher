@@ -184,7 +184,6 @@ class SettingsViewModel @Inject constructor(
     fun setHomeLabelColorMode(mode: String) = update { repository.setHomeLabelColorMode(mode) }
     fun setDockLabelColor(argb: Int?) = update { repository.setDockLabelColor(argb) }
     fun setDockLabelColorMode(mode: String) = update { repository.setDockLabelColorMode(mode) }
-    fun setDrawerLabelColor(argb: Int?) = update { repository.setDrawerLabelColor(argb) }
     fun setDrawerLabelColorMode(mode: String) = update { repository.setDrawerLabelColorMode(mode) }
     fun setTwoLineHomeLabels(value: Boolean) = update { repository.setTwoLineHomeLabels(value) }
     fun setTwoLineDrawerLabels(value: Boolean) = update { repository.setTwoLineDrawerLabels(value) }

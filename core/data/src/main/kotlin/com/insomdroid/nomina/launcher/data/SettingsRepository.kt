@@ -80,7 +80,7 @@ class SettingsRepository @Inject constructor(
                             Keys.HOME_PAGE.name, Keys.HOME_PAGE_COUNT.name ->
                                 it.toLong().coerceIn(0L, HomeLayoutRepository.MAX_PAGES.toLong()).toInt()
                             // An ARGB colour arrives as the signed Int's Long, or its unsigned form: wrap.
-                            Keys.APP_LABEL_COLOR.name, Keys.DRAWER_BACKGROUND_COLOR.name, Keys.DRAWER_LABEL_COLOR.name, Keys.DOCK_LABEL_COLOR.name -> it.toInt()
+                            Keys.APP_LABEL_COLOR.name, Keys.DRAWER_BACKGROUND_COLOR.name, Keys.DRAWER_LABEL_COLOR.name, Keys.DOCK_LABEL_COLOR.name, Keys.UNTHEMED_CONTAINER_COLOR.name -> it.toInt()
                             else -> it.toLong().coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt()
                         }
                     }
@@ -127,6 +127,12 @@ class SettingsRepository @Inject constructor(
                 if (it in LauncherSettings.RESHAPE_LEGACY_MODES) it else LauncherSettings.RESHAPE_OFF
             },
             autoResizeIcons = p[Keys.AUTO_RESIZE_ICONS] ?: false,
+            unthemedIconMode = (p[Keys.UNTHEMED_ICON_MODE] ?: LauncherSettings.UNTHEMED_ICON_AUTOMATIC)
+                .let { if (it in LauncherSettings.UNTHEMED_ICON_MODES) it else LauncherSettings.UNTHEMED_ICON_AUTOMATIC },
+            unthemedContainerMode = (p[Keys.UNTHEMED_CONTAINER_MODE] ?: LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC)
+                .let { if (it in LauncherSettings.UNTHEMED_CONTAINER_MODES) it else LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC },
+            unthemedContainerColor = p[Keys.UNTHEMED_CONTAINER_COLOR] ?: 0xFF808080.toInt(),
+            unthemedContainerOpacity = (p[Keys.UNTHEMED_CONTAINER_OPACITY] ?: LauncherSettings.DEFAULT_UNTHEMED_CONTAINER_OPACITY).coerceIn(0.2f, 1f),
             infiniteScroll = p[Keys.INFINITE_SCROLL] ?: true,
             wallpaperScrolling = p[Keys.WALLPAPER_SCROLLING] ?: true,
             defaultReminderDismissed = p[Keys.DEFAULT_REMINDER_DISMISSED] ?: false,
@@ -364,6 +370,17 @@ class SettingsRepository @Inject constructor(
         it[Keys.ICON_SHAPE] = if (shape in LauncherSettings.ICON_SHAPES) shape else LauncherSettings.ICON_SHAPE_SYSTEM
     }
     suspend fun setAutoResizeIcons(value: Boolean) = edit { it[Keys.AUTO_RESIZE_ICONS] = value }
+    suspend fun setUnthemedIconMode(value: String) = edit {
+        it[Keys.UNTHEMED_ICON_MODE] = value.takeIf { mode -> mode in LauncherSettings.UNTHEMED_ICON_MODES }
+            ?: LauncherSettings.UNTHEMED_ICON_AUTOMATIC
+    }
+    suspend fun setUnthemedContainerMode(value: String) = edit {
+        it[Keys.UNTHEMED_CONTAINER_MODE] = value.takeIf { mode -> mode in LauncherSettings.UNTHEMED_CONTAINER_MODES }
+            ?: LauncherSettings.UNTHEMED_CONTAINER_AUTOMATIC
+    }
+    suspend fun setUnthemedContainerColor(argb: Int) = edit { it[Keys.UNTHEMED_CONTAINER_COLOR] = argb }
+    suspend fun setUnthemedContainerOpacity(value: Float) =
+        edit { it[Keys.UNTHEMED_CONTAINER_OPACITY] = value.coerceIn(0.2f, 1f) }
     suspend fun setReshapeLegacyIcons(value: String) = edit {
         it[Keys.RESHAPE_LEGACY_ICONS] = if (value in LauncherSettings.RESHAPE_LEGACY_MODES) value else LauncherSettings.RESHAPE_OFF
     }
@@ -700,6 +717,10 @@ class SettingsRepository @Inject constructor(
         val ICON_SHAPE = stringPreferencesKey("icon_shape")
         val RESHAPE_LEGACY_ICONS = stringPreferencesKey("reshape_legacy_icons")
         val AUTO_RESIZE_ICONS = booleanPreferencesKey("auto_resize_icons")
+        val UNTHEMED_ICON_MODE = stringPreferencesKey("unthemed_icon_mode")
+        val UNTHEMED_CONTAINER_MODE = stringPreferencesKey("unthemed_container_mode")
+        val UNTHEMED_CONTAINER_COLOR = intPreferencesKey("unthemed_container_color")
+        val UNTHEMED_CONTAINER_OPACITY = floatPreferencesKey("unthemed_container_opacity")
         val INFINITE_SCROLL = booleanPreferencesKey("infinite_scroll")
         val WALLPAPER_SCROLLING = booleanPreferencesKey("wallpaper_scrolling")
         val FOLDER_SWIPE_FIRST_APP = booleanPreferencesKey("folder_swipe_first_app")
@@ -802,12 +823,12 @@ class SettingsRepository @Inject constructor(
         val FLOAT_KEYS = setOf(
             "dock_opacity", "drawer_opacity", "notif_dot_scale", "app_label_scale", "dock_label_scale", "drawer_label_scale", "icon_scale", "dock_icon_scale", "drawer_icon_scale",
             "long_press_scale", "drawer_blur_strength", "drawer_picture_dim",
-            "folder_icon_scale", "folder_spacing", "folder_background_opacity",
+            "folder_icon_scale", "folder_spacing", "folder_background_opacity", "unthemed_container_opacity",
         )
         val INT_KEYS = setOf(
             "dock_columns", "dock_bottom_spacing", "home_columns", "home_rows", "drawer_columns", "app_label_color",
             "home_page", "home_page_count", "folder_columns", "drawer_background_color", "drawer_label_color", "dock_label_color",
-            "folder_background_color",
+            "folder_background_color", "unthemed_container_color",
         )
 
         /** Known boolean/string preference keys. importRaw writes a known key ONLY with its
@@ -829,7 +850,7 @@ class SettingsRepository @Inject constructor(
             "icon_pack_package", "weather_app_key", "mini_dock_camera_app", "mini_dock_search_app", "mini_dock_browser_app",
             "mini_dock_camera_glyph", "mini_dock_search_glyph", "mini_dock_browser_glyph", "home_page_marker",
             "page_switch_speed", "collapsed_settings_sections", "icon_shape", "reshape_legacy_icons", "drawer_label_color_mode",
-            "custom_icons", "folder_icons", "shortcut_icons",
+            "custom_icons", "folder_icons", "shortcut_icons", "unthemed_icon_mode", "unthemed_container_mode",
         )
 
         /** Preferences holding picked icons ("key\ticon" lines, see [CustomIcon.encode]). */

@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -948,7 +949,7 @@ fun SettingsScreen(
 }
 
 
-/** HEX colour picker for the unthemed-icon backplate. */
+/** Visual hue/saturation wheel with an optional HEX field for the unthemed-icon backplate. */
 @Composable
 private fun UnthemedColorPicker(
     selected: Int,
@@ -957,31 +958,93 @@ private fun UnthemedColorPicker(
 ) {
     val p = LocalExpressivePalette.current
     var hex by rememberSaveable { mutableStateOf("%06X".format(selected and 0xFFFFFF)) }
+    var wheelColor by rememberSaveable(selected) { mutableIntStateOf(selected) }
     val parsed = remember(hex) {
         val value = hex.trim().removePrefix("#")
         if (value.length == 6 && value.all { it.digitToIntOrNull(16) != null }) {
             runCatching { (0xFF000000L or value.toLong(16)).toInt() }.getOrNull()
         } else null
     }
+    val previewColor = parsed ?: wheelColor
+    fun updateFromWheel(position: Offset, width: Float, height: Float) {
+        val cx = width / 2f
+        val cy = height / 2f
+        val dx = position.x - cx
+        val dy = position.y - cy
+        val radius = minOf(width, height) / 2f
+        val distance = kotlin.math.sqrt(dx * dx + dy * dy).coerceAtMost(radius)
+        val hue = ((Math.toDegrees(kotlin.math.atan2(dy, dx).toDouble()) + 360.0) % 360.0).toFloat()
+        val saturation = (distance / radius).coerceIn(0f, 1f)
+        wheelColor = android.graphics.Color.HSVToColor(floatArrayOf(hue, saturation, 1f))
+        hex = "%06X".format(wheelColor and 0xFFFFFF)
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = p.surfaceHi,
         title = { Text(stringResource(R.string.settings_unthemed_custom_color), color = p.text) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Canvas(
+                    modifier = Modifier.size(224.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures { updateFromWheel(it, size.width.toFloat(), size.height.toFloat()) }
+                        }
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, _ ->
+                                updateFromWheel(change.position, size.width.toFloat(), size.height.toFloat())
+                            }
+                        },
+                ) {
+                    val radius = size.minDimension / 2f
+                    val hues = listOf(
+                        Color.Red, Color.Yellow, Color.Green, Color.Cyan,
+                        Color.Blue, Color.Magenta, Color.Red,
+                    )
+                    drawCircle(
+                        brush = Brush.sweepGradient(hues),
+                        radius = radius,
+                    )
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color.White, Color.Transparent),
+                            center = center,
+                            radius = radius,
+                        ),
+                        radius = radius,
+                    )
+                    drawCircle(
+                        color = Color.Black.copy(alpha = 0.12f),
+                        radius = radius,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx()),
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
                     Box(
-                        Modifier.size(36.dp).clip(CircleShape).background(Color(parsed ?: selected))
+                        Modifier.size(36.dp).clip(CircleShape).background(Color(previewColor))
                             .border(1.dp, p.faint, CircleShape),
                     )
-                    Text("#${hex.trim().removePrefix("#")}", color = p.text)
+                    androidx.compose.material3.OutlinedTextField(
+                        value = hex,
+                        onValueChange = { next ->
+                            hex = next.filter { it.isDigit() || it.lowercaseChar() in 'a'..'f' || it == '#' }.take(7)
+                            val value = hex.trim().removePrefix("#")
+                            if (value.length == 6 && value.all { it.digitToIntOrNull(16) != null }) {
+                                wheelColor = (0xFF000000L or value.toLong(16)).toInt()
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        label = { Text(stringResource(R.string.settings_color_hex)) },
+                    )
                 }
-                androidx.compose.material3.OutlinedTextField(
-                    value = hex,
-                    onValueChange = { next -> hex = next.filter { it.isDigit() || it.lowercaseChar() in 'a'..'f' || it == '#' }.take(7) },
-                    singleLine = true,
-                    label = { Text(stringResource(R.string.settings_color_hex)) },
-                )
             }
         },
         confirmButton = {
@@ -989,7 +1052,7 @@ private fun UnthemedColorPicker(
                 SettingsTextButton(onClick = onDismiss) {
                     Text(stringResource(R.string.settings_folder_cancel))
                 }
-                if (parsed != null) SettingsTextButton(onClick = { onPick(parsed) }) {
+                SettingsTextButton(onClick = { onPick(previewColor) }) {
                     Text(stringResource(R.string.settings_apply))
                 }
             }

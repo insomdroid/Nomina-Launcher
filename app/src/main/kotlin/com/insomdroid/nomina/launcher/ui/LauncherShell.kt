@@ -89,15 +89,16 @@ fun LauncherShell(
     val progress = remember { Animatable(0f).apply { updateBounds(0f, 1f) } }
     var shellHeightPx by remember { mutableFloatStateOf(1f) }
     var shellOrigin by remember { mutableStateOf(Offset.Zero) }
-    val settleSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMediumLow)
+    val settleSpring = spring<Float>(dampingRatio = 0.9f, stiffness = Spring.StiffnessMedium)
 
     // The shared drag state. Created here so both the home screen and the app drawer feed the same
     // controller and the floating icon below can travel between them.
     val dragController = rememberHomeDragController()
     var isDraggingDrawer by remember { mutableStateOf(false) }
+    var isSettlingDrawer by remember { mutableStateOf(false) }
     var dragProgress by remember { mutableStateOf(0f) }
     val currentProgress by remember {
-        derivedStateOf { if (isDraggingDrawer) dragProgress else progress.value }
+        derivedStateOf { if (isDraggingDrawer || isSettlingDrawer) dragProgress else progress.value }
     }
 
     val drawerOpen by remember { derivedStateOf { currentProgress > 0.001f } }
@@ -125,18 +126,22 @@ fun LauncherShell(
 
     fun animateProgress(target: Float) {
         isDraggingDrawer = false
+        isSettlingDrawer = false
         dragJob?.cancel()
         dragJob = scope.launch { progress.animateTo(target, settleSpring) }
     }
 
     fun dragDrawer(dyPx: Float) {
         if (!isDraggingDrawer) {
-            isDraggingDrawer = true
-            // Stop a previous settle once, when the finger takes control. While dragging,
-            // [dragProgress] is the rendered source of truth; launching snapTo for every
-            // pointer event only schedules redundant coroutines and can make the drawer stutter.
+            // A new finger drag can interrupt the settle animation without briefly jumping back
+            // to the previous Animatable value. Keep the last rendered progress as its start.
+            val startProgress = if (isSettlingDrawer) dragProgress else progress.value
             dragJob?.cancel()
-            dragProgress = progress.value
+            isSettlingDrawer = false
+            isDraggingDrawer = true
+            // While dragging, [dragProgress] is the rendered source of truth; launching snapTo for
+            // every pointer event only schedules redundant coroutines and can make the drawer stutter.
+            dragProgress = startProgress
         }
         // Swipe up (negative dy) increases progress; clamp to [0, 1].
         val target = (dragProgress - dyPx / shellHeightPx).coerceIn(0f, 1f)
@@ -144,19 +149,24 @@ fun LauncherShell(
     }
 
     fun settleDrawer(velocityPxPerSec: Float) {
-        val currentVal = if (isDraggingDrawer) dragProgress else progress.value
+        val currentVal = if (isDraggingDrawer || isSettlingDrawer) dragProgress else progress.value
         isDraggingDrawer = false
+        isSettlingDrawer = true
+        dragProgress = currentVal
         // Launcher3-style: a fling (release speed past the threshold) snaps to the direction of the
         // fling regardless of distance; otherwise settle by how far it was dragged. Velocity is px/s.
-        val flingThreshold = 600f
+        val flingThreshold = 450f
         val target = when {
             velocityPxPerSec < -flingThreshold -> 1f // fast up → open
             velocityPxPerSec > flingThreshold -> 0f  // fast down → close
-            else -> if (currentVal > 0.4f) 1f else 0f
+            else -> if (currentVal > 0.3f) 1f else 0f
         }
         dragJob?.cancel()
         dragJob = scope.launch {
             progress.snapTo(currentVal)
+            // The rendered value remains [dragProgress] until the Animatable is synchronized,
+            // preventing a one-frame snap back to its stale pre-drag value on release.
+            isSettlingDrawer = false
             // Carry the finger's release velocity into the spring (converted to progress units/s;
             // downward px velocity = negative progress velocity). Starting the spring from rest made a
             // fling-to-close visibly hesitate before accelerating — the "drawer lags coming down" feel.
@@ -286,6 +296,8 @@ fun LauncherShell(
                 // accurate local coordinates; progress is snapped shut so it's closed after the drop.
                 onDragOutStart = {
                     isDraggingDrawer = false
+                    isSettlingDrawer = false
+                    dragJob?.cancel()
                     scope.launch { progress.snapTo(0f) }
                 },
                 modifier = Modifier
